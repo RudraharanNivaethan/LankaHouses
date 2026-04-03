@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "typescript-eslint": "^8.57.0"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:frontend": "eslint \"frontend/**/*.{ts,tsx}\"",
+    "lint:frontend:fix": "eslint \"frontend/**/*.{ts,tsx}\" --fix",
+    "lint:backend": "eslint \"backend/**/*.{js,mjs,cjs}\" --no-error-on-unmatched-pattern",
+    "lint:backend:fix": "eslint \"backend/**/*.{js,mjs,cjs}\" --no-error-on-unmatched-pattern --fix"
+  }
+}
