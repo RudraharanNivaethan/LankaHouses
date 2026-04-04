@@ -1,28 +1,30 @@
 import express from 'express';
 import helmet from 'helmet';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
-// import cors from 'cors'; Uncomment this in production
 import mongoSanitize from 'mongo-sanitize';
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Trust proxy (required for correct IP behind load balancers/Render/Heroku/etc)
 // app.set('trust proxy', true); Uncomment this in production
 
 // Security headers (Helmet 8.1.0 - no known vulnerabilities)
 // Sets: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, etc.
-//app.use(helmet());Uncomment this in production
+// app.use(helmet()); Uncomment this in production
 
-
-// Middleware
-/*const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+// CORS — active in both environments
+// Dev: allows FRONTEND_URL from .env with fallback to localhost:5173
+// Prod: requires FRONTEND_URL to be explicitly set, no fallback
+const corsOptions = {
+  origin: isProduction
+    ? process.env.FRONTEND_URL
+    : process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
-Uncomment this in production
-*/
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
