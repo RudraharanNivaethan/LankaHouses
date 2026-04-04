@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './routes/authRoutes.js';
+import { globalLimiter } from './middleware/rateLimitMiddleware.js';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -54,6 +55,7 @@ app.use((req, res, next) => {
 
 
 // Routes
+app.use('/api', globalLimiter);
 app.use('/api/auth', authRoutes);
 
 
