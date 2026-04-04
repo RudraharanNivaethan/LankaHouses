@@ -33,7 +33,7 @@ export const logout = (req, res) => {
 
 export const refreshToken = async (req, res) => {
   try {
-    const { accessToken, newRefreshToken } = authService.verifyRefreshToken(req.cookies.refreshToken);
+    const { accessToken, newRefreshToken } = await authService.verifyRefreshToken(req.cookies.refreshToken);
     setAuthCookies(res, accessToken, newRefreshToken);
     return res.status(200).json({ success: true, message: 'Token refreshed' });
   } catch (error) {

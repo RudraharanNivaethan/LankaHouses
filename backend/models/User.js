@@ -9,7 +9,8 @@ const userSchema = new mongoose.Schema(
     password:      { type: String, required: true, select: false },
     role:          { type: String, enum: ['user', 'admin'], default: 'user', immutable: true },
     loginAttempts: { type: Number, default: 0 },
-    lockUntil:     { type: Date }
+    lockUntil:     { type: Date },
+    tokenVersion:  { type: Number, default: 0 }
   },
   { timestamps: true }
 );

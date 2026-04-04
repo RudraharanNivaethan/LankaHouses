@@ -12,9 +12,19 @@ export const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, secret);
+    if (decoded.type === 'refresh') {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
     req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
+};
+
+export const authorize = (...roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  next();
 };

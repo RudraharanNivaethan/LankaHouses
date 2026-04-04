@@ -56,16 +56,14 @@ export const login = async (email, password) => {
 
   await resetLoginAttempts(user);
 
-  const accessToken = generateAccessToken(user._id, user.role);
-  const refreshToken = generateRefreshToken(user._id, user.role);
+  const accessToken  = generateAccessToken(user._id,  user.role, user.tokenVersion);
+  const refreshToken = generateRefreshToken(user._id, user.role, undefined, user.tokenVersion);
 
   return { accessToken, refreshToken };
 };
 
-export const verifyRefreshToken = (token) => {
-  if (!token) {
-    throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
-  }
+export const verifyRefreshToken = async (token) => {
+  if (!token) throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
 
   const unverified = jwt.decode(token);
   if (!unverified?.role) throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
@@ -79,15 +77,28 @@ export const verifyRefreshToken = (token) => {
     throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
   }
 
+  if (decoded.type !== 'refresh') throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
+  if (!decoded.loginTime)         throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
+
   // Enforce 6-hour absolute session limit
   const sessionDuration = (Date.now() - new Date(decoded.loginTime)) / 1000 / 3600;
   if (sessionDuration >= SESSION_LIMIT_HOURS) {
     throw new AppError('Session expired. Please login again.', HTTP_STATUS.UNAUTHORIZED);
   }
 
-  // Issue new tokens, preserving original loginTime for absolute timeout
-  const accessToken = generateAccessToken(decoded.id, decoded.role);
-  const newRefreshToken = generateRefreshToken(decoded.id, decoded.role, decoded.loginTime);
+  // Server-side version check — rejects stolen/rotated-out tokens
+  const user = await User.findById(decoded.id);
+  if (!user || decoded.tokenVersion !== user.tokenVersion) {
+    throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
+  }
+
+  // Rotate: increment version in DB then issue new tokens with the new version
+  user.tokenVersion += 1;
+  await user.save();
+
+  const newVersion      = user.tokenVersion;
+  const accessToken     = generateAccessToken(decoded.id, decoded.role, newVersion);
+  const newRefreshToken = generateRefreshToken(decoded.id, decoded.role, decoded.loginTime, newVersion);
 
   return { accessToken, newRefreshToken };
 };
