@@ -1,6 +1,7 @@
 import { formatErrorResponse } from '../utils/errorUtils.js';
 import { setAuthCookies, clearAuthCookies } from '../utils/tokenUtils.js';
 import * as authService from '../services/authService.js';
+import User from '../models/User.js';
 
 export const register = async (req, res) => {
   try {
@@ -40,3 +41,16 @@ export const refreshToken = async (req, res) => {
     return res.status(statusCode).json(response);
   }
 };
+
+export const getMe = async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id).select('-loginAttempts -lockUntil');
+      if (!user) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+      return res.status(200).json({ success: true, data: user });
+    } catch (error) {
+      const { statusCode, response } = formatErrorResponse(error);
+      return res.status(statusCode).json(response);
+    }
+  };

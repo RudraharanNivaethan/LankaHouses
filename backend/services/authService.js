@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils.js';
 import { AppError, HTTP_STATUS } from '../utils/errorUtils.js';
+import { CUSTOMER_REFRESH_JWT_SECRET, ADMIN_REFRESH_JWT_SECRET } from '../config/jwtConfig.js';
 
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
@@ -66,17 +67,16 @@ export const verifyRefreshToken = (token) => {
     throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
   }
 
-  let decoded;
+  const unverified = jwt.decode(token);
+  if (!unverified?.role) throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
 
-  // Try user secret first, then admin secret
+  const secret = unverified.role === 'admin' ? ADMIN_REFRESH_JWT_SECRET : CUSTOMER_REFRESH_JWT_SECRET;
+
+  let decoded;
   try {
-    decoded = jwt.verify(token, process.env.CUSTOMER_REFRESH_JWT_SECRET);
+    decoded = jwt.verify(token, secret);
   } catch {
-    try {
-      decoded = jwt.verify(token, process.env.ADMIN_REFRESH_JWT_SECRET);
-    } catch {
-      throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
-    }
+    throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
   }
 
   // Enforce 6-hour absolute session limit
