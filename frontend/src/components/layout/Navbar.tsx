@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Button } from '../ui/Button'
+import { ROUTES } from '../../constants/routes'
 
 const NAV_LINKS = [
-  { label: 'Browse', to: '/listings' },
-  { label: 'About', to: '/about' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Browse', to: ROUTES.LISTINGS },
+  { label: 'About', to: ROUTES.ABOUT },
+  { label: 'Contact', to: ROUTES.CONTACT },
 ]
 
 export function Navbar() {
@@ -46,12 +47,16 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
-            Sign In
-          </Button>
-          <Button variant="primary" size="sm">
-            Register
-          </Button>
+          <Link to={ROUTES.LOGIN}>
+            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+              Sign In
+            </Button>
+          </Link>
+          <Link to={ROUTES.SIGNUP}>
+            <Button variant="primary" size="sm">
+              Register
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile hamburger */}
@@ -96,12 +101,16 @@ export function Navbar() {
             ))}
           </nav>
           <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3">
-            <Button variant="outline" size="sm" className="w-full justify-center border-slate-600 text-slate-300 hover:border-brand hover:text-brand">
-              Sign In
-            </Button>
-            <Button variant="primary" size="sm" className="w-full justify-center">
-              Register
-            </Button>
+            <Link to={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
+              <Button variant="outline" size="sm" className="w-full justify-center border-slate-600 text-slate-300 hover:border-brand hover:text-brand">
+                Sign In
+              </Button>
+            </Link>
+            <Link to={ROUTES.SIGNUP} onClick={() => setMobileOpen(false)}>
+              <Button variant="primary" size="sm" className="w-full justify-center">
+                Register
+              </Button>
+            </Link>
           </div>
         </div>
       )}
