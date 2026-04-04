@@ -1,4 +1,4 @@
-import argon2 from 'argon2';
+import { comparePasswords } from '../utils/passwordUtils.js';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils.js';
@@ -47,7 +47,7 @@ export const login = async (email, password) => {
     );
   }
 
-  const isMatch = await argon2.verify(user.password, password);
+  const isMatch = await comparePasswords(password, user.password);
   if (!isMatch) {
     await handleFailedLogin(user);
     throw new AppError('Invalid credentials', HTTP_STATUS.UNAUTHORIZED);

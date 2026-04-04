@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import argon2 from 'argon2';
+import { hashPassword } from '../utils/passwordUtils.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await argon2.hash(this.password);
+  this.password = await hashPassword(this.password);
   next();
 });
 

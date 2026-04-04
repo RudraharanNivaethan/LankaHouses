@@ -1,4 +1,5 @@
 import express from 'express';
+import authRoutes from './routes/authRoutes.js';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
 
 
 // Routes
+app.use('/api/auth', authRoutes);
 
 
 // 404 handler for undefined routes
