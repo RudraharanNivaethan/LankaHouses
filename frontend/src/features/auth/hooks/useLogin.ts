@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { loginSchema } from '../schemas'
 import { loginUser } from '../services/authService'
+import { useAuth } from '../../../context/AuthContext'
 import { ROUTES } from '../../../constants/routes'
 import type { LoginFormData } from '../types'
 
@@ -13,6 +14,7 @@ export function useLogin() {
     defaultValues: { email: '', password: '' },
   })
 
+  const { refreshUser } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
@@ -22,6 +24,8 @@ export function useLogin() {
     setIsLoading(true)
     try {
       await loginUser(data)
+      // Populate context with the authenticated user from the server
+      await refreshUser()
       navigate(ROUTES.HOME)
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Login failed. Please try again.')

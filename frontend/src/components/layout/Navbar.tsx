@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Button } from '../ui/Button'
 import { ROUTES } from '../../constants/routes'
+import { useAuth } from '../../context/AuthContext'
+import { useLogout } from '../../features/auth/hooks/useLogout'
 
 const NAV_LINKS = [
   { label: 'Browse', to: ROUTES.LISTINGS },
@@ -9,14 +11,80 @@ const NAV_LINKS = [
   { label: 'Contact', to: ROUTES.CONTACT },
 ]
 
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
+function UserAvatar({ name }: { name: string }) {
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+      {getInitials(name)}
+    </span>
+  )
+}
+
+function AuthenticatedActions({ onClose }: { onClose?: () => void }) {
+  const { user } = useAuth()
+  const { logout, isLoading } = useLogout()
+
+  if (!user) return null
+
+  return (
+    <div className="flex items-center gap-3">
+      {/* Profile indicator — not clickable yet */}
+      <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-300">
+        <UserAvatar name={user.name} />
+        <span className="hidden max-w-[120px] truncate xl:inline">{user.name}</span>
+      </div>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-slate-300 hover:text-white"
+        disabled={isLoading}
+        onClick={() => {
+          onClose?.()
+          logout()
+        }}
+      >
+        {isLoading ? 'Logging out…' : 'Logout'}
+      </Button>
+    </div>
+  )
+}
+
+function UnauthenticatedActions({ onClose }: { onClose?: () => void }) {
+  return (
+    <div className="flex items-center gap-3">
+      <Link to={ROUTES.LOGIN} onClick={onClose}>
+        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+          Sign In
+        </Button>
+      </Link>
+      <Link to={ROUTES.SIGNUP} onClick={onClose}>
+        <Button variant="primary" size="sm">
+          Register
+        </Button>
+      </Link>
+    </div>
+  )
+}
+
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { isAuthenticated, isLoading } = useAuth()
+
+  const closeMobile = () => setMobileOpen(false)
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-900/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group" onClick={() => setMobileOpen(false)}>
+        <Link to={ROUTES.HOME} className="flex items-center gap-2" onClick={closeMobile}>
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white font-bold text-sm shadow">
             LH
           </span>
@@ -45,19 +113,16 @@ export function Navbar() {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Link to={ROUTES.LOGIN}>
-            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
-              Sign In
-            </Button>
-          </Link>
-          <Link to={ROUTES.SIGNUP}>
-            <Button variant="primary" size="sm">
-              Register
-            </Button>
-          </Link>
-        </div>
+        {/* Desktop CTA — hidden while session check is in flight */}
+        {!isLoading && (
+          <div className="hidden md:flex">
+            {isAuthenticated ? (
+              <AuthenticatedActions />
+            ) : (
+              <UnauthenticatedActions />
+            )}
+          </div>
+        )}
 
         {/* Mobile hamburger */}
         <button
@@ -86,7 +151,7 @@ export function Navbar() {
               <NavLink
                 key={to}
                 to={to}
-                onClick={() => setMobileOpen(false)}
+                onClick={closeMobile}
                 className={({ isActive }) =>
                   [
                     'rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
@@ -100,18 +165,27 @@ export function Navbar() {
               </NavLink>
             ))}
           </nav>
-          <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3">
-            <Link to={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" size="sm" className="w-full justify-center border-slate-600 text-slate-300 hover:border-brand hover:text-brand">
-                Sign In
-              </Button>
-            </Link>
-            <Link to={ROUTES.SIGNUP} onClick={() => setMobileOpen(false)}>
-              <Button variant="primary" size="sm" className="w-full justify-center">
-                Register
-              </Button>
-            </Link>
-          </div>
+
+          {!isLoading && (
+            <div className="mt-3 border-t border-white/10 pt-3">
+              {isAuthenticated ? (
+                <AuthenticatedActions onClose={closeMobile} />
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <Link to={ROUTES.LOGIN} onClick={closeMobile}>
+                    <Button variant="outline" size="sm" className="w-full justify-center border-slate-600 text-slate-300 hover:border-brand hover:text-brand">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to={ROUTES.SIGNUP} onClick={closeMobile}>
+                    <Button variant="primary" size="sm" className="w-full justify-center">
+                      Register
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </header>
