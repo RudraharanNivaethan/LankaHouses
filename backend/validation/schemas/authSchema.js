@@ -69,8 +69,8 @@ export const firebaseRegisterSchema = z.object({
     .refine((val) => val.length >= 2, { message: 'Name must be at least 2 characters' })
     .refine((val) => val.length <= 100, { message: 'Name must be at most 100 characters' }),
   phone: z
-    .string({ required_error: 'Phone is required' })
-    .min(1, 'Phone is required')
+    .string()
     .transform(normalizeSriLankanPhone)
-    .refine((val) => validator.isMobilePhone(val, 'si-LK'), { message: 'Invalid phone number' }),
+    .refine((val) => validator.isMobilePhone(val, 'si-LK'), { message: 'Invalid phone number' })
+    .optional(),
 });

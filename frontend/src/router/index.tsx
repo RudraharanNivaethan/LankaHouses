@@ -6,6 +6,8 @@ import { Footer } from '../components/layout/Footer'
 import { HomePage } from '../pages/Home/HomePage'
 import { LoginPage } from '../pages/Auth/LoginPage'
 import { SignupPage } from '../pages/Auth/SignupPage'
+import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
+import { ProfilePage } from '../pages/Profile/ProfilePage'
 import { ROUTES } from '../constants/routes'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
@@ -47,7 +49,15 @@ function MainLayout() {
         <Routes>
           <Route path={ROUTES.HOME} element={<HomePage />} />
 
-          {/* Protected routes — add Sprint 2+ pages here wrapped in <ProtectedRoute> */}
+          {/* Protected routes */}
+          <Route
+            path={ROUTES.PROFILE}
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Catch-all: prevents blank screen for registered-but-unbuilt routes */}
           <Route path="*" element={<NotFound />} />
@@ -79,6 +89,14 @@ export function AppRouter() {
             element={
               <RedirectIfAuthenticated>
                 <SignupPage />
+              </RedirectIfAuthenticated>
+            }
+          />
+          <Route
+            path={ROUTES.FORGOT_PASSWORD}
+            element={
+              <RedirectIfAuthenticated>
+                <ForgotPasswordPage />
               </RedirectIfAuthenticated>
             }
           />

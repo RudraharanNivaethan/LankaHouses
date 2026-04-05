@@ -81,7 +81,7 @@ export function LoginForm() {
 
       <div className="flex items-center justify-end">
         <Link
-          to={ROUTES.HOME}
+          to={ROUTES.FORGOT_PASSWORD}
           className="text-xs font-medium text-brand hover:text-brand-dark transition-colors"
         >
           Forgot your password?

@@ -46,7 +46,7 @@ export function useRegister() {
       const credential = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password)
       firebaseCreated = true
       const idToken = await credential.user.getIdToken()
-      await firebaseRegister(idToken, data.name, data.phone)
+      await firebaseRegister(idToken, data.name, data.phone || undefined)
       await refreshUser()
       navigate(ROUTES.HOME)
     } catch (err) {

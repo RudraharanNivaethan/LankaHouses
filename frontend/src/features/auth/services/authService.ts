@@ -61,7 +61,7 @@ export async function firebaseExchange(idToken: string): Promise<AuthApiResponse
 export async function firebaseRegister(
   idToken: string,
   name: string,
-  phone: string,
+  phone?: string,
 ): Promise<AuthApiResponse> {
   return post<AuthApiResponse>(`${API_BASE}/firebase-register`, { idToken, name, phone })
 }

@@ -80,11 +80,11 @@ export function RegisterForm() {
       />
 
       <Input
-        label="Phone number"
+        label="Phone number (optional)"
         type="tel"
         placeholder="0712345678"
         autoComplete="tel"
-        hint="Sri Lankan number — e.g. 0712345678 or +94712345678"
+        hint="You can add this later from your profile"
         error={errors.phone?.message}
         {...register('phone')}
       />
