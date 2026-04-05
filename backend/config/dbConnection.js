@@ -26,10 +26,10 @@ const connect = async () => {
     console.log(`✅ Connected to MongoDB [${environment}]`);
   } catch (error) {
     console.error(`❌ MongoDB connection error [${environment}]:`, error.message);
-    // In production, exit on connection failure
-    if (isProduction) {
-      process.exit(1);
-    }
+    // Rethrow in all environments — the server must not start without a DB connection.
+    // In production startServer() will catch this and process.exit(1).
+    // In development nodemon will show the real error instead of a 10s buffering timeout.
+    throw error;
   }
 };
 

@@ -2,11 +2,30 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { firebaseAuth } from '../../../config/firebase'
 import { loginSchema } from '../schemas'
-import { loginUser } from '../services/authService'
+import { firebaseExchange } from '../services/authService'
 import { useAuth } from '../../../context/AuthContext'
 import { ROUTES } from '../../../constants/routes'
 import type { LoginFormData } from '../types'
+
+function mapFirebaseLoginError(code: string): string {
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+      return 'Invalid email or password.'
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Please try again later or reset your password.'
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support.'
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your connection and try again.'
+    default:
+      return 'Login failed. Please try again.'
+  }
+}
 
 export function useLogin() {
   const form = useForm<LoginFormData>({
@@ -23,12 +42,18 @@ export function useLogin() {
     setServerError(null)
     setIsLoading(true)
     try {
-      await loginUser(data)
-      // Populate context with the authenticated user from the server
+      const credential = await signInWithEmailAndPassword(firebaseAuth, data.email, data.password)
+      const idToken = await credential.user.getIdToken()
+      await firebaseExchange(idToken)
       await refreshUser()
       navigate(ROUTES.HOME)
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+      const code = (err as { code?: string }).code ?? ''
+      if (code.startsWith('auth/')) {
+        setServerError(mapFirebaseLoginError(code))
+      } else {
+        setServerError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }

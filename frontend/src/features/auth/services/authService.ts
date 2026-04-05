@@ -1,4 +1,4 @@
-import type { LoginFormData, RegisterFormData, AuthApiResponse, MeApiResponse, User } from '../types'
+import type { AuthApiResponse, MeApiResponse, User } from '../types'
 
 const API_BASE = '/api/auth'
 
@@ -40,16 +40,30 @@ async function get<T>(url: string): Promise<T> {
   return res.json() as Promise<T>
 }
 
-export async function loginUser(payload: LoginFormData): Promise<AuthApiResponse> {
-  return post<AuthApiResponse>(`${API_BASE}/login`, payload)
-}
+// [OLD CODE] superseded by Firebase authentication.
+// export async function loginUser(payload: LoginFormData): Promise<AuthApiResponse> {
+//   return post<AuthApiResponse>(`${API_BASE}/login`, payload)
+// }
 
-export async function registerUser(payload: RegisterFormData): Promise<AuthApiResponse> {
-  return post<AuthApiResponse>(`${API_BASE}/register`, payload)
-}
+// [OLD CODE] superseded by Firebase authentication.
+// export async function registerUser(payload: RegisterFormData): Promise<AuthApiResponse> {
+//   return post<AuthApiResponse>(`${API_BASE}/register`, payload)
+// }
 
 export async function logoutUser(): Promise<AuthApiResponse> {
   return post<AuthApiResponse>(`${API_BASE}/logout`)
+}
+
+export async function firebaseExchange(idToken: string): Promise<AuthApiResponse> {
+  return post<AuthApiResponse>(`${API_BASE}/firebase-exchange`, { idToken })
+}
+
+export async function firebaseRegister(
+  idToken: string,
+  name: string,
+  phone: string,
+): Promise<AuthApiResponse> {
+  return post<AuthApiResponse>(`${API_BASE}/firebase-register`, { idToken, name, phone })
 }
 
 export async function getMe(): Promise<User> {
