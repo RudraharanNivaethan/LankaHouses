@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { globalLimiter } from './middleware/rateLimitMiddleware.js';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api', globalLimiter);
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 
 // 404 handler for undefined routes

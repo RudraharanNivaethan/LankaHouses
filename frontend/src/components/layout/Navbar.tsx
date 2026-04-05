@@ -35,11 +35,14 @@ function AuthenticatedActions({ onClose }: { onClose?: () => void }) {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Profile indicator — not clickable yet */}
-      <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-300">
+      {/* Profile link */}
+      <Link
+        to={ROUTES.PROFILE}
+        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-300 hover:bg-white/10 transition-colors"
+      >
         <UserAvatar name={user.name} />
         <span className="hidden max-w-[120px] truncate xl:inline">{user.name}</span>
-      </div>
+      </Link>
 
       <Button
         variant="ghost"

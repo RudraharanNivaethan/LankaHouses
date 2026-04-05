@@ -22,11 +22,12 @@ export const registerSchema = z.object({
     .email('Invalid email format'),
   phone: z
     .string()
-    .min(1, 'Phone is required')
     .regex(
       /^(?:\+94|0)[0-9]{9}$/,
       'Enter a valid Sri Lankan number (e.g. 0712345678 or +94712345678)',
-    ),
+    )
+    .optional()
+    .or(z.literal('')),
   password: z
     .string()
     .min(12, 'Password must be at least 12 characters')
@@ -38,3 +39,29 @@ export const registerSchema = z.object({
 
 export type LoginSchema = z.infer<typeof loginSchema>
 export type RegisterSchema = z.infer<typeof registerSchema>
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Invalid email format'),
+})
+
+export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>
+
+export const updateProfileSchema = z.object({
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must be at most 100 characters'),
+  phone: z
+    .string()
+    .regex(
+      /^(?:\+94|0)[0-9]{9}$/,
+      'Enter a valid Sri Lankan number (e.g. 0712345678 or +94712345678)',
+    )
+    .optional()
+    .or(z.literal('')),
+})
+
+export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>

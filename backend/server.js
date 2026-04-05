@@ -9,10 +9,15 @@ const PORT = isProduction ? process.env.PORT_PROD : process.env.PORT_DEV;
 let server;
 
 const startServer = async () => {
-  await connect(); // Connect to DB first
-  server = app.listen(PORT, HOST, () => {
-    console.log(`🚀 Server running on ${HOST}:${PORT}`);
-  });
+  try {
+    await connect(); // Must succeed before accepting HTTP traffic
+    server = app.listen(PORT, HOST, () => {
+      console.log(`🚀 Server running on ${HOST}:${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Server failed to start:', error.message);
+    process.exit(1);
+  }
 };
 
 // =============================================================================
