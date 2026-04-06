@@ -8,7 +8,7 @@ interface AuthContextValue {
   isLoading: boolean
   isAuthenticated: boolean
   setUser: (user: User | null) => void
-  refreshUser: () => Promise<void>
+  refreshUser: () => Promise<User | null>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -17,12 +17,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<User | null> => {
     try {
       const me = await getMe()
       setUser(me)
+      return me
     } catch {
       setUser(null)
+      return null
     }
   }
 

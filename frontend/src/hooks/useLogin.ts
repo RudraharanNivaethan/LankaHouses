@@ -45,8 +45,8 @@ export function useLogin() {
       const credential = await signInWithEmailAndPassword(firebaseAuth, data.email, data.password)
       const idToken = await credential.user.getIdToken()
       await firebaseExchange(idToken)
-      await refreshUser()
-      navigate(ROUTES.HOME)
+      const me = await refreshUser()
+      navigate(me?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME, { replace: true })
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {

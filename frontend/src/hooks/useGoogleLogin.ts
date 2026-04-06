@@ -20,8 +20,8 @@ export function useGoogleLogin() {
       const result = await signInWithPopup(firebaseAuth, provider)
       const idToken = await result.user.getIdToken()
       await firebaseExchange(idToken)
-      await refreshUser()
-      navigate(ROUTES.HOME)
+      const me = await refreshUser()
+      navigate(me?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME, { replace: true })
     } catch (err) {
       // auth/popup-closed-by-user is not an error worth surfacing
       if ((err as { code?: string }).code === 'auth/popup-closed-by-user') {
