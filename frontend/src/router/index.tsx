@@ -30,12 +30,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-// Requires authentication AND admin role; regular users are silently sent home
+// Requires authentication AND admin role; non-admins see the 404 page so
+// the route's existence is not leaked (indistinguishable from an invalid URL)
 function AdminRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
-  if (user?.role !== 'admin') return <Navigate to={ROUTES.HOME} replace />
+  if (!isAuthenticated || user?.role !== 'admin') return <NotFound />
   return <>{children}</>
 }
 
