@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Input } from '../../../components/ui/Input'
-import { Button } from '../../../components/ui/Button'
-import { Spinner } from '../../../components/ui/Spinner'
-import { AlertBanner } from '../../../components/ui/AlertBanner'
-import { ROUTES } from '../../../constants/routes'
-import { useForgotPassword } from '../hooks/useForgotPassword'
+import { Input } from '../ui/Input'
+import { BaseAuthForm } from './BaseAuthForm'
+import { ROUTES } from '../../constants/routes'
+import { useForgotPassword } from '../../hooks/useForgotPassword'
 
 export function ForgotPasswordForm() {
   const { form, onSubmit, serverError, isSuccess, isLoading } = useForgotPassword()
@@ -32,14 +30,18 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Reset your password</h1>
-        <p className="text-sm text-slate-500">Enter your email and we'll send you a reset link.</p>
-      </div>
-
-      <AlertBanner message={serverError} />
-
+    <BaseAuthForm
+      onSubmit={onSubmit}
+      title="Reset your password"
+      subtitle="Enter your email and we'll send you a reset link."
+      submitLabel="Send reset link"
+      submitLoadingLabel="Sending…"
+      isLoading={isLoading}
+      error={serverError}
+      footerText="Remember your password?"
+      footerLinkTo={ROUTES.LOGIN}
+      footerLinkLabel="Sign in"
+    >
       <Input
         label="Email address"
         type="email"
@@ -48,23 +50,6 @@ export function ForgotPasswordForm() {
         error={errors.email?.message}
         {...register('email')}
       />
-
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        className="w-full justify-center"
-        disabled={isLoading}
-      >
-        {isLoading ? <><Spinner /> Sending…</> : 'Send reset link'}
-      </Button>
-
-      <p className="text-center text-sm text-slate-600">
-        Remember your password?{' '}
-        <Link to={ROUTES.LOGIN} className="font-semibold text-brand hover:text-brand-dark transition-colors">
-          Sign in
-        </Link>
-      </p>
-    </form>
+    </BaseAuthForm>
   )
 }

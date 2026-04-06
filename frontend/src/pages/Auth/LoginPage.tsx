@@ -1,5 +1,5 @@
 import { AuthLayout } from '../../components/layout/AuthLayout'
-import { LoginForm } from '../../features/auth/components/LoginForm'
+import { LoginForm } from '../../components/auth/LoginForm'
 
 const PANEL_IMAGE = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80'
 

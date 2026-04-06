@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
-import { firebaseAuth } from '../../../config/firebase'
+import { firebaseAuth } from '../config/firebase'
 import { firebaseExchange } from '../services/authService'
-import { useAuth } from '../../../context/AuthContext'
-import { ROUTES } from '../../../constants/routes'
+import { useAuth } from '../context/AuthContext'
+import { ROUTES } from '../constants/routes'
 
 export function useGoogleLogin() {
   const { refreshUser } = useAuth()

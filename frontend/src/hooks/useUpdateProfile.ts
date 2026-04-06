@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { updateProfileSchema } from '../schemas'
+import { updateProfileSchema } from '../schemas/auth'
 import { updateProfile } from '../services/userService'
-import { useAuth } from '../../../context/AuthContext'
-import type { UpdateProfileSchema } from '../schemas'
+import { useAuth } from '../context/AuthContext'
+import type { UpdateProfileSchema } from '../schemas/auth'
 
 export function useUpdateProfile() {
   const { user, refreshUser } = useAuth()

@@ -3,12 +3,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { firebaseAuth } from '../../../config/firebase'
-import { registerSchema } from '../schemas'
+import { firebaseAuth } from '../config/firebase'
+import { registerSchema } from '../schemas/auth'
 import { firebaseRegister } from '../services/authService'
-import { useAuth } from '../../../context/AuthContext'
-import { ROUTES } from '../../../constants/routes'
-import type { RegisterFormData } from '../types'
+import { useAuth } from '../context/AuthContext'
+import { ROUTES } from '../constants/routes'
+import type { RegisterFormData } from '../types/auth'
 
 function mapFirebaseRegisterError(code: string): string {
   switch (code) {

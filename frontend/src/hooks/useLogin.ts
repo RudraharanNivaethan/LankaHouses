@@ -3,12 +3,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { firebaseAuth } from '../../../config/firebase'
-import { loginSchema } from '../schemas'
+import { firebaseAuth } from '../config/firebase'
+import { loginSchema } from '../schemas/auth'
 import { firebaseExchange } from '../services/authService'
-import { useAuth } from '../../../context/AuthContext'
-import { ROUTES } from '../../../constants/routes'
-import type { LoginFormData } from '../types'
+import { useAuth } from '../context/AuthContext'
+import { ROUTES } from '../constants/routes'
+import type { LoginFormData } from '../types/auth'
 
 function mapFirebaseLoginError(code: string): string {
   switch (code) {

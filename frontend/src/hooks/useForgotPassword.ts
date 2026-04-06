@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { sendPasswordResetEmail } from 'firebase/auth'
-import { firebaseAuth } from '../../../config/firebase'
-import { forgotPasswordSchema } from '../schemas'
-import type { ForgotPasswordSchema } from '../schemas'
+import { firebaseAuth } from '../config/firebase'
+import { forgotPasswordSchema } from '../schemas/auth'
+import type { ForgotPasswordSchema } from '../schemas/auth'
 
 function mapFirebaseForgotError(code: string): string {
   switch (code) {

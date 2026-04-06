@@ -1,4 +1,4 @@
-import type { AuthApiResponse, MeApiResponse, User } from '../types'
+import type { AuthApiResponse, MeApiResponse, User } from '../types/auth'
 
 const API_BASE = '/api/auth'
 

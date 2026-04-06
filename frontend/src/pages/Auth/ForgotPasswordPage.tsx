@@ -1,5 +1,5 @@
 import { AuthLayout } from '../../components/layout/AuthLayout'
-import { ForgotPasswordForm } from '../../features/auth/components/ForgotPasswordForm'
+import { ForgotPasswordForm } from '../../components/auth/ForgotPasswordForm'
 
 const PANEL_IMAGE = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80'
 

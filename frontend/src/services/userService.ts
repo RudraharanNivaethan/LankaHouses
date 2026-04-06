@@ -1,4 +1,4 @@
-import type { User } from '../types'
+import type { User } from '../types/auth'
 
 const API_BASE = '/api/user'
 

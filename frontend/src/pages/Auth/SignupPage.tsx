@@ -1,5 +1,5 @@
 import { AuthLayout } from '../../components/layout/AuthLayout'
-import { RegisterForm } from '../../features/auth/components/RegisterForm'
+import { RegisterForm } from '../../components/auth/RegisterForm'
 
 const PANEL_IMAGE = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80'
 
