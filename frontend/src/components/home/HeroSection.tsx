@@ -8,8 +8,8 @@ const HERO_IMAGE =
   'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1920&q=80'
 
 const STATS = [
-  { value: '200+', label: 'Properties Listed' },
-  { value: '9', label: 'Districts Covered' },
+  { value: '250+', label: 'Properties Listed' },
+  { value: '25', label: 'Districts Covered' },
   { value: '100%', label: 'Verified Listings' },
 ]
 
@@ -40,7 +40,7 @@ export function HeroSection() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl">
-          Browse verified properties across the island — from coastal villas to city apartments.
+          Browse verified properties across the island, from coastal villas to city apartments.
           Express your interest directly with the seller, no intermediaries.
         </p>
 

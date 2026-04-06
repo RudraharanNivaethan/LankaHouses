@@ -21,7 +21,7 @@ const PILLARS = [
     ),
     title: 'Direct from Seller',
     description:
-      'We are the sole seller — no third-party agents or hidden fees. Your inquiry goes straight to the source.',
+      'We are the sole seller, no third-party agents or hidden fees. Your inquiry goes straight to the source.',
   },
   {
     icon: (
@@ -31,7 +31,7 @@ const PILLARS = [
     ),
     title: 'Simple Inquiry Process',
     description:
-      'Submit your interest in seconds. Fill out a short form and our team will get back to you promptly — no sign-up required for browsing.',
+      'Submit your interest in seconds. Create an account and fill out a short form and our team will get back to you promptly.',
   },
   {
     icon: (
@@ -41,7 +41,7 @@ const PILLARS = [
     ),
     title: 'Island-Wide Coverage',
     description:
-      'Properties in Colombo, Galle, Kandy, Nuwara Eliya and beyond — we cover every major district in Sri Lanka.',
+      'Properties in Colombo, Jaffna, Galle, Kandy, Nuwara Eliya and beyond, we cover every major district in Sri Lanka.',
   },
 ]
 

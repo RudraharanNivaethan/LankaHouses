@@ -14,7 +14,7 @@ export function CtaSection() {
       className="py-24"
     >
       <SectionContainer className="text-center">
-        <Badge variant="ghost">No account needed to inquire</Badge>
+        <Badge variant="ghost">Sign in to inquire</Badge>
 
         <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
           Ready to Find Your
@@ -28,10 +28,10 @@ export function CtaSection() {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button
+        <Button
             size="lg"
-            variant="primary"
-            className="w-full bg-white text-brand-dark hover:bg-slate-100 sm:w-auto"
+            variant="outline"
+            className="w-full border-white/50 text-white hover:border-white hover:bg-white/10 sm:w-auto"
           >
             Browse All Properties
           </Button>
