@@ -1,4 +1,4 @@
-import { ProfileForm } from '../../features/auth/components/ProfileForm'
+import { ProfileForm } from '../../components/auth/ProfileForm'
 
 export function ProfilePage() {
   return (

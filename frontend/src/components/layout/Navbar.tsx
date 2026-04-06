@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { Button } from '../ui/Button'
 import { ROUTES } from '../../constants/routes'
 import { useAuth } from '../../context/AuthContext'
-import { useLogout } from '../../features/auth/hooks/useLogout'
+import { useLogout } from '../../hooks/useLogout'
 
 const NAV_LINKS = [
   { label: 'Browse', to: ROUTES.LISTINGS },
