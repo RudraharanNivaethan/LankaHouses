@@ -1,3 +1,7 @@
+import { SectionHeader } from '../ui/SectionHeader'
+import { FeatureCard } from '../ui/FeatureCard'
+import { SectionContainer } from '../layout/SectionContainer'
+
 const PILLARS = [
   {
     icon: (
@@ -44,34 +48,21 @@ const PILLARS = [
 export function WhyUsSection() {
   return (
     <section className="bg-slate-50 py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 text-center">
-          <span className="text-sm font-semibold uppercase tracking-wider text-brand">
-            Why choose us
-          </span>
-          <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            The LankaHouses Difference
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-            We built this platform to make property discovery in Sri Lanka straightforward, honest, and accessible to everyone.
-          </p>
+      <SectionContainer>
+        <div className="mb-14">
+          <SectionHeader
+            eyebrow="Why choose us"
+            title="The LankaHouses Difference"
+            description="We built this platform to make property discovery in Sri Lanka straightforward, honest, and accessible to everyone."
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {PILLARS.map(({ icon, title, description }) => (
-            <div
-              key={title}
-              className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-13 w-13 items-center justify-center rounded-xl bg-brand/10 text-brand transition-colors group-hover:bg-brand group-hover:text-white">
-                {icon}
-              </div>
-              <h3 className="mb-2 text-base font-bold text-slate-800">{title}</h3>
-              <p className="text-sm leading-relaxed text-slate-600">{description}</p>
-            </div>
+            <FeatureCard key={title} icon={icon} title={title} description={description} />
           ))}
         </div>
-      </div>
+      </SectionContainer>
     </section>
   )
 }
