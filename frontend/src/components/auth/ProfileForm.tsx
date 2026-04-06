@@ -37,9 +37,6 @@ export function ProfileForm() {
             <p className="text-xs text-slate-500">Email address</p>
             <p className="mt-0.5 text-sm font-medium text-slate-700">{user.email}</p>
           </div>
-          <p className="text-xs text-slate-400">
-            Email is managed by Firebase and cannot be changed here.
-          </p>
         </div>
       </div>
 
