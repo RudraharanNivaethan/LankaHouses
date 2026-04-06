@@ -8,6 +8,7 @@ export const ROUTES = {
   ABOUT: '/about',
   CONTACT: '/contact',
   INQUIRY: '/inquiry',
+  ADMIN_DASHBOARD: '/admin',
 } as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]

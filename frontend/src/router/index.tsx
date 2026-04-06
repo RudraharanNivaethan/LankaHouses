@@ -8,13 +8,17 @@ import { LoginPage } from '../pages/Auth/LoginPage'
 import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/Profile/ProfilePage'
+import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
 import { ROUTES } from '../constants/routes'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (isAuthenticated) return <Navigate to={ROUTES.HOME} replace />
+  if (isAuthenticated) {
+    const target = user?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
+    return <Navigate to={target} replace />
+  }
   return <>{children}</>
 }
 
@@ -23,6 +27,15 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
+  return <>{children}</>
+}
+
+// Requires authentication AND admin role; regular users are silently sent home
+function AdminRoute({ children }: { children: ReactNode }) {
+  const { user, isAuthenticated, isLoading } = useAuth()
+  if (isLoading) return null
+  if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
+  if (user?.role !== 'admin') return <Navigate to={ROUTES.HOME} replace />
   return <>{children}</>
 }
 
@@ -56,6 +69,16 @@ function MainLayout() {
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path={ROUTES.ADMIN_DASHBOARD}
+            element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
             }
           />
 
