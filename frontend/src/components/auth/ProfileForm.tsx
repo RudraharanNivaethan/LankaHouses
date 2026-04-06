@@ -1,8 +1,7 @@
 import { Input } from '../ui/Input'
-import { Button } from '../ui/Button'
-import { Spinner } from '../ui/Spinner'
 import { AlertBanner } from '../ui/AlertBanner'
 import { SuccessBanner } from '../ui/SuccessBanner'
+import { FormLayout } from '../layout/FormLayout'
 import { useUpdateProfile } from '../../hooks/useUpdateProfile'
 import { useAuth } from '../../context/AuthContext'
 
@@ -45,15 +44,23 @@ export function ProfileForm() {
       </div>
 
       {/* Editable form */}
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
-        <div>
-          <h2 className="text-base font-semibold text-slate-900">Edit profile</h2>
-          <p className="text-sm text-slate-500">Update your display name or phone number.</p>
-        </div>
-
-        <AlertBanner message={serverError} />
-        <SuccessBanner message={isSuccess ? 'Profile saved successfully.' : null} />
-
+      <FormLayout
+        onSubmit={onSubmit}
+        title="Edit profile"
+        subtitle="Update your display name or phone number."
+        level={2}
+        submitLabel="Save changes"
+        submitLoadingLabel="Saving…"
+        isLoading={isLoading}
+        submitSize="md"
+        submitClassName="w-full justify-center sm:w-auto"
+        alerts={
+          <>
+            <AlertBanner message={serverError} />
+            <SuccessBanner message={isSuccess ? 'Profile saved successfully.' : null} />
+          </>
+        }
+      >
         <Input
           label="Display name"
           type="text"
@@ -72,17 +79,7 @@ export function ProfileForm() {
           error={errors.phone?.message}
           {...register('phone')}
         />
-
-        <Button
-          type="submit"
-          variant="primary"
-          size="md"
-          className="w-full justify-center sm:w-auto"
-          disabled={isLoading}
-        >
-          {isLoading ? <><Spinner /> Saving…</> : 'Save changes'}
-        </Button>
-      </form>
+      </FormLayout>
     </div>
   )
 }
