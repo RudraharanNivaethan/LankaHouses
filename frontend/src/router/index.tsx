@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import { Navbar } from '../components/layout/Navbar'
@@ -9,7 +9,12 @@ import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/Profile/ProfilePage'
 import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
-import { ROUTES } from '../constants/routes'
+import { AdminHousesPage } from '../pages/Admin/AdminHousesPage'
+import { AdminAddHousePage } from '../pages/Admin/AdminAddHousePage'
+import { AdminEditHousePage } from '../pages/Admin/AdminEditHousePage'
+import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
+import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
+import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
@@ -55,6 +60,17 @@ function NotFound() {
 }
 
 function MainLayout() {
+  const { user, isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
+
+  if (isLoading) return null
+
+  if (isAuthenticated && user?.role === 'admin') {
+    if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
+      return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -69,16 +85,6 @@ function MainLayout() {
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
-            }
-          />
-
-          {/* Admin routes */}
-          <Route
-            path={ROUTES.ADMIN_DASHBOARD}
-            element={
-              <AdminRoute>
-                <AdminDashboardPage />
-              </AdminRoute>
             }
           />
 
@@ -121,6 +127,64 @@ export function AppRouter() {
               <RedirectIfAuthenticated>
                 <ForgotPasswordPage />
               </RedirectIfAuthenticated>
+            }
+          />
+
+          {/* Admin routes — own layout with sidebar, no public Navbar/Footer */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_DASHBOARD}
+            element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_HOUSES}
+            element={
+              <AdminRoute>
+                <AdminHousesPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_ADD_HOUSE}
+            element={
+              <AdminRoute>
+                <AdminAddHousePage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_EDIT_HOUSE}
+            element={
+              <AdminRoute>
+                <AdminEditHousePage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_INQUIRIES}
+            element={
+              <AdminRoute>
+                <AdminInquiriesPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_INQUIRY_DETAIL}
+            element={
+              <AdminRoute>
+                <AdminInquiryDetailPage />
+              </AdminRoute>
             }
           />
 
