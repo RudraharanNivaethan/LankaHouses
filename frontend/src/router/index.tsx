@@ -9,6 +9,11 @@ import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/Profile/ProfilePage'
 import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
+import { AdminHousesPage } from '../pages/Admin/AdminHousesPage'
+import { AdminAddHousePage } from '../pages/Admin/AdminAddHousePage'
+import { AdminEditHousePage } from '../pages/Admin/AdminEditHousePage'
+import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
+import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
@@ -139,6 +144,46 @@ export function AppRouter() {
             element={
               <AdminRoute>
                 <AdminDashboardPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_HOUSES}
+            element={
+              <AdminRoute>
+                <AdminHousesPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_ADD_HOUSE}
+            element={
+              <AdminRoute>
+                <AdminAddHousePage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_EDIT_HOUSE}
+            element={
+              <AdminRoute>
+                <AdminEditHousePage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_INQUIRIES}
+            element={
+              <AdminRoute>
+                <AdminInquiriesPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_INQUIRY_DETAIL}
+            element={
+              <AdminRoute>
+                <AdminInquiryDetailPage />
               </AdminRoute>
             }
           />

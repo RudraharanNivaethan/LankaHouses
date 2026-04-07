@@ -11,7 +11,9 @@ export const ROUTES = {
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_HOUSES: '/admin/houses',
   ADMIN_ADD_HOUSE: '/admin/houses/new',
+  ADMIN_EDIT_HOUSE: '/admin/houses/:id/edit',
   ADMIN_INQUIRIES: '/admin/inquiries',
+  ADMIN_INQUIRY_DETAIL: '/admin/inquiries/:id',
 } as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
