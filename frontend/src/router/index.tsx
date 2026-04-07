@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import { Navbar } from '../components/layout/Navbar'
@@ -9,7 +9,7 @@ import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/Profile/ProfilePage'
 import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
-import { ROUTES } from '../constants/routes'
+import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
@@ -55,6 +55,17 @@ function NotFound() {
 }
 
 function MainLayout() {
+  const { user, isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
+
+  if (isLoading) return null
+
+  if (isAuthenticated && user?.role === 'admin') {
+    if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
+      return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

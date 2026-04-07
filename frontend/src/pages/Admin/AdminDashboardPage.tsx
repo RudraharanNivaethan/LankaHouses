@@ -1,22 +1,21 @@
 import { AdminLayout } from '../../components/layout/AdminLayout'
-import { PageHeader } from '../../components/layout/PageHeader'
 import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
 import { DashboardStats } from '../../components/admin_dashboard/DashboardStats'
 import { QuickActions } from '../../components/admin_dashboard/QuickActions'
+import { WelcomeBanner } from '../../components/admin_dashboard/WelcomeBanner'
 import { Spinner } from '../../components/ui/Spinner'
 import { AlertBanner } from '../../components/ui/AlertBanner'
 import { useDashboardStats } from '../../hooks/useDashboardStats'
+import { useAuth } from '../../context/AuthContext'
 
 export function AdminDashboardPage() {
   const { stats, isLoading, error } = useDashboardStats()
+  const { user } = useAuth()
 
   return (
-    <AdminLayout sidebar={<AdminSidebar />}>
-      <div className="flex flex-col gap-8">
-        <PageHeader
-          title="Dashboard"
-          description="Overview of your property listings and inquiries."
-        />
+    <AdminLayout sidebar={<AdminSidebar pendingInquiries={stats?.pendingInquiries} />}>
+      <div className="flex flex-col gap-7">
+        {user && <WelcomeBanner name={user.name} />}
 
         <AlertBanner message={error} />
 
