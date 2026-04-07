@@ -13,8 +13,8 @@ const PANEL_CONTENT = (
     </p>
     <div className="mt-8 flex items-center gap-6">
       {[
-        { value: '200+', label: 'Listings' },
-        { value: '9', label: 'Districts' },
+        { value: '250+', label: 'Listings' },
+        { value: '25', label: 'Districts' },
         { value: '100%', label: 'Verified' },
       ].map(({ value, label }) => (
         <div key={label}>
