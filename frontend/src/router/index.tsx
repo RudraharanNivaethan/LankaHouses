@@ -72,16 +72,6 @@ function MainLayout() {
             }
           />
 
-          {/* Admin routes */}
-          <Route
-            path={ROUTES.ADMIN_DASHBOARD}
-            element={
-              <AdminRoute>
-                <AdminDashboardPage />
-              </AdminRoute>
-            }
-          />
-
           {/* Catch-all: prevents blank screen for registered-but-unbuilt routes */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -121,6 +111,24 @@ export function AppRouter() {
               <RedirectIfAuthenticated>
                 <ForgotPasswordPage />
               </RedirectIfAuthenticated>
+            }
+          />
+
+          {/* Admin routes — own layout with sidebar, no public Navbar/Footer */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_DASHBOARD}
+            element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
             }
           />
 
