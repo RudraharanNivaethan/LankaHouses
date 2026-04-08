@@ -35,6 +35,22 @@ const SAMPLE_HOUSES: HouseCard[] = [
     bedrooms: 3,
     bathrooms: 2,
   },
+  {
+    id: 'T-Villa',
+    title: 'T-Villa',
+    location: 'Colombo',
+    priceLkr: '18,500,000',
+    bedrooms: 5,
+    bathrooms: 2,
+  },
+  {
+    id: 'S-Villa',
+    title: 'S-Villa',
+    location: 'Jaffna',
+    priceLkr: '14,500,000',
+    bedrooms: 3,
+    bathrooms: 3,
+  },
 ]
 
 function ImagePlaceholder({ title }: { title: string }) {

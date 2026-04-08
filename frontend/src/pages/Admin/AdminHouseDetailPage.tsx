@@ -17,10 +17,55 @@ function ImagePlaceholder({ title }: { title: string }) {
     </div>
   )
 }
+
 const SAMPLE_HOUSES = [
-  { id: "1", title: "Luxury Villa", location: "Colombo", priceLkr: "25000000", bedrooms: 4, bathrooms: 3 },
-  { id: "2", title: "Modern Apartment", location: "Kandy", priceLkr: "12500000", bedrooms: 2, bathrooms: 2 }
+  {
+    id: 'luxury-villa',
+    title: 'Luxury Villa',
+    location: 'Colombo',
+    priceLkr: '25,000,000',
+    bedrooms: 4,
+    bathrooms: 3,
+    description: 'A luxurious villa in Colombo with modern amenities.',
+  },
+  {
+    id: 'modern-apartment',
+    title: 'Modern Apartment',
+    location: 'Kandy',
+    priceLkr: '12,500,000',
+    bedrooms: 2,
+    bathrooms: 2,
+    description: 'A modern apartment in the heart of Kandy city.',
+  },
+  {
+    id: 'cozy-cottage',
+    title: 'Cozy Cottage',
+    location: 'Galle',
+    priceLkr: '8,500,000',
+    bedrooms: 3,
+    bathrooms: 2,
+    description: 'A cozy cottage near the beach in Galle.',
+  },
+  {
+    id: 'T-Villa',
+    title: 'T-Villa',
+    location: 'Colombo',
+    priceLkr: '18,500,000',
+    bedrooms: 5,
+    bathrooms: 2,
+    description: 'A spacious villa with garden in Colombo.',
+  },
+  {
+    id: 'S-Villa',
+    title: 'S-Villa',
+    location: 'Jaffna',
+    priceLkr: '14,500,000',
+    bedrooms: 3,
+    bathrooms: 3,
+    description: 'A modern villa in Jaffna city.',
+  },
 ]
+
 
 
 export function AdminHouseDetailPage() {
