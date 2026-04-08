@@ -10,6 +10,7 @@ export const ROUTES = {
   INQUIRY: '/inquiry',
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_HOUSES: '/admin/houses',
+  ADMIN_HOUSE_DETAIL: '/admin/houses/:id',
   ADMIN_ADD_HOUSE: '/admin/houses/new',
   ADMIN_EDIT_HOUSE: '/admin/houses/:id/edit',
   ADMIN_INQUIRIES: '/admin/inquiries',
