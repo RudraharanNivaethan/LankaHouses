@@ -2,7 +2,6 @@ import { Link, useParams } from 'react-router-dom'
 import { AdminLayout } from '../../components/layout/AdminLayout'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
-import { SAMPLE_HOUSES } from '../../components/admin_dashboard/sampleHouses'
 import { ROUTES } from '../../constants/routes'
 
 function ImagePlaceholder({ title }: { title: string }) {
@@ -18,10 +17,14 @@ function ImagePlaceholder({ title }: { title: string }) {
     </div>
   )
 }
+const SAMPLE_HOUSES = [
+  { id: "1", title: "Luxury Villa", location: "Colombo", priceLkr: "25000000", bedrooms: 4, bathrooms: 3 },
+  { id: "2", title: "Modern Apartment", location: "Kandy", priceLkr: "12500000", bedrooms: 2, bathrooms: 2 }
+]
+
 
 export function AdminHouseDetailPage() {
   const { id } = useParams<{ id: string }>()
-
   const house = SAMPLE_HOUSES.find((h) => h.id === id)
 
   if (!house) {
