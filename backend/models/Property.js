@@ -18,7 +18,7 @@ const propertySchema = new mongoose.Schema(
     district:      { type: String, index: true, required: true },
     province:      { type: String, index: true, required: true },
     description:   { type: String, required: true },
-    images: { type: [String], default: []},
+    images: { type: [String], required: true},
     contactNumber: { type: String, required: true },
     status:        { type: String, enum: ['active', 'sold', 'removed'], default: 'active', required: true },
   },

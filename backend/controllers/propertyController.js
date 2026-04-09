@@ -9,8 +9,7 @@ import {
 
 export const createProperty = async (req, res) => {
   try {
-    const images   = req.uploadedImages ?? [];
-    const property = await createPropertyRecord({ ...req.body, images });
+    const property = await createPropertyRecord(req.body, req.processedImages);
     return res.status(201).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
@@ -49,11 +48,11 @@ export const getPropertyById = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
   try {
-    const updates = { ...req.body };
-    if (req.uploadedImages && req.uploadedImages.length > 0) {
-      updates.images = req.uploadedImages;
-    }
-    const property = await updatePropertyRecord(req.validatedParams.id, updates);
+    const property = await updatePropertyRecord(
+      req.validatedParams.id,
+      req.body,
+      req.processedImages ?? []
+    );
     return res.status(200).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);

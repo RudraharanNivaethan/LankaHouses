@@ -272,6 +272,13 @@ export { UPLOAD_CONFIG };
 
 // ─── Property multi-image upload ─────────────────────────────────────────────
 
+export const requireImages = (req, res, next) => {
+  if (!req.files || req.files.length === 0) {
+    return sendUploadError(res, 'NO_FILES_PROVIDED', 'At least one property image is required');
+  }
+  next();
+};
+
 export const validateImages = async (req, res, next) => {
   if (!req.files || req.files.length === 0) return next();
 
@@ -292,14 +299,14 @@ export const validateImages = async (req, res, next) => {
   }
 };
 
-export const processImages = async (req, res, next) => {
+export const resizeImages = async (req, res, next) => {
   if (!req.files || req.files.length === 0) {
-    req.uploadedImages = [];
+    req.processedImages = [];
     return next();
   }
 
   try {
-    const urls = await Promise.all(
+    req.processedImages = await Promise.all(
       req.files.map(async (file) => {
         if (!Buffer.isBuffer(file.buffer) || file.buffer.length === 0) {
           throw new Error('Invalid or empty file buffer');
@@ -317,16 +324,14 @@ export const processImages = async (req, res, next) => {
           .withMetadata(!UPLOAD_CONFIG.IMAGE_RESIZE.STRIP_METADATA)
           .toBuffer();
 
-        const publicId  = `property_${crypto.randomBytes(16).toString('hex')}`;
-        const uploaded  = await uploadImageBuffer(processedBuffer, { public_id: publicId });
-        return uploaded.secure_url;
+        const publicId = `property_${crypto.randomBytes(16).toString('hex')}`;
+        return { buffer: processedBuffer, publicId };
       })
     );
 
-    req.uploadedImages = urls;
     next();
   } catch (error) {
-    console.error('Image processing error:', {
+    console.error('Image resize error:', {
       message: error.message,
       stack:   error.stack,
     });
@@ -354,7 +359,7 @@ export const propertyUploadBundle = [
   uploadPropertyImages,
   handleUploadError,
   validateImages,
-  processImages,
+  resizeImages,
 ];
 
 // ─── Generic factory (kept for future scalability) ────────────────────────────
