@@ -6,13 +6,14 @@ export const createPropertyRecord = async (data) => {
   return property;
 };
 
-export const listProperties = async ({ district, province, type, listingType, status, minPrice, maxPrice, page, limit }) => {
+export const listProperties = async ({ district, province, type, listingType, status, furnished, minPrice, maxPrice, page, limit }) => {
   const filter = {};
 
   if (district)    filter.district    = district;
   if (province)    filter.province    = province;
   if (type)        filter.type        = type;
   if (listingType) filter.listingType = listingType;
+  if (furnished !== undefined) filter.furnished = furnished;
   filter.status = status ?? 'active';
 
   if (minPrice !== undefined || maxPrice !== undefined) {
