@@ -7,7 +7,7 @@ import {
   propertyQuerySchema,
   propertyIdParamsSchema,
 } from '../validation/schemas/propertySchema.js';
-import { propertyUploadBundle } from '../middleware/uploadMiddleware.js';
+import { propertyUploadBundle, requireImages } from '../middleware/uploadMiddleware.js';
 import {
   createProperty,
   getProperties,
@@ -23,6 +23,7 @@ router.post(
   authenticate,
   authorize('admin'),
   ...propertyUploadBundle,
+  requireImages,
   validateBody(createPropertySchema),
   createProperty
 );

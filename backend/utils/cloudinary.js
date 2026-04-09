@@ -17,3 +17,11 @@ export const uploadImageBuffer = (buffer, options = {}) =>
     );
     stream.end(buffer);
   });
+
+export const deleteImageByPublicId = (publicId) =>
+  new Promise((resolve, reject) => {
+    cloudinary.uploader.destroy(publicId, (err, result) => {
+      if (err) reject(err);
+      else     resolve(result);
+    });
+  });
