@@ -47,7 +47,7 @@ const SAMPLE_HOUSES = [
     description: 'A cozy cottage near the beach in Galle.',
   },
   {
-    id: 'T-Villa',
+    id: 't-villa',   
     title: 'T-Villa',
     location: 'Colombo',
     priceLkr: '18,500,000',
@@ -56,7 +56,7 @@ const SAMPLE_HOUSES = [
     description: 'A spacious villa with garden in Colombo.',
   },
   {
-    id: 'S-Villa',
+    id: 's-villa',   
     title: 'S-Villa',
     location: 'Jaffna',
     priceLkr: '14,500,000',
@@ -66,11 +66,13 @@ const SAMPLE_HOUSES = [
   },
 ]
 
-
-
 export function AdminHouseDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const house = SAMPLE_HOUSES.find((h) => h.id === id)
+  const { id } = useParams()
+
+
+  const house = SAMPLE_HOUSES.find(
+    (h) => h.id.toLowerCase() === id?.toLowerCase()
+  )
 
   if (!house) {
     return (
@@ -113,33 +115,29 @@ export function AdminHouseDetailPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-xs font-semibold text-brand">Price</p>
-                <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">LKR {house.priceLkr}</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">
+                  LKR {house.priceLkr}
+                </p>
               </div>
               <div className="text-sm text-slate-600">
-                <div>
-                  <span className="font-semibold text-brand">Location:</span> {house.location}
-                </div>
-                <div>
-                  <span className="font-semibold text-brand">Bedrooms:</span> {house.bedrooms}
-                </div>
-                <div>
-                  <span className="font-semibold text-brand">Bathrooms:</span> {house.bathrooms}
-                </div>
+                <div><span className="font-semibold text-brand">Location:</span> {house.location}</div>
+                <div><span className="font-semibold text-brand">Bedrooms:</span> {house.bedrooms}</div>
+                <div><span className="font-semibold text-brand">Bathrooms:</span> {house.bathrooms}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700">
+        <div className="rounded-2xl border bg-slate-50 p-5 text-sm text-slate-700">
           <div className="font-semibold text-slate-900">Listing overview</div>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2">
             {house.title} in {house.location} with {house.bedrooms} bedrooms and {house.bathrooms} bathrooms.
           </p>
         </div>
 
         <Link
           to={ROUTES.ADMIN_HOUSES}
-          className="inline-flex w-fit items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-brand ring-1 ring-brand/20 hover:bg-brand/5 transition-colors"
+          className="inline-flex w-fit items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-brand ring-1 ring-brand/20 hover:bg-brand/5"
         >
           ← Back to Houses
         </Link>
@@ -147,4 +145,3 @@ export function AdminHouseDetailPage() {
     </AdminLayout>
   )
 }
-

@@ -73,7 +73,7 @@ export function AdminHouseListView() {
       {SAMPLE_HOUSES.map((house) => (
         <Link
           key={house.id}
-          to={ROUTES.ADMIN_HOUSES}
+          to={`${ROUTES.ADMIN_HOUSES}/${house.id}`}   // ✅ FIXED HERE
           className="group overflow-hidden rounded-2xl border border-brand/30 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
         >
           <ImagePlaceholder title={house.title} />
