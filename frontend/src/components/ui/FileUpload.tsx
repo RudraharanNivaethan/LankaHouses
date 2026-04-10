@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import type { DragEvent, ChangeEvent } from 'react'
 
 interface FileUploadProps {
@@ -33,6 +33,18 @@ export function FileUpload({
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
+  const [previewUrls, setPreviewUrls] = useState<Map<number, string>>(new Map())
+
+  useEffect(() => {
+    const urls = new Map<number, string>()
+    files.forEach((file, i) => {
+      if (file.type.startsWith('image/')) {
+        urls.set(i, URL.createObjectURL(file))
+      }
+    })
+    setPreviewUrls(urls)
+    return () => urls.forEach((url) => URL.revokeObjectURL(url))
+  }, [files])
 
   const displayError = error ?? localError
 
@@ -140,9 +152,9 @@ export function FileUpload({
               key={`${file.name}-${file.size}-${index}`}
               className="group relative flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm"
             >
-              {file.type.startsWith('image/') && (
+              {previewUrls.has(index) && (
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={previewUrls.get(index)}
                   alt={file.name}
                   className="h-10 w-10 rounded object-cover"
                 />
