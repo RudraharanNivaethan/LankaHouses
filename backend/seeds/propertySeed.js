@@ -81,16 +81,11 @@ async function prefetchImages() {
   return cache;
 }
 
-function extractPublicId(url) {
-  const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
-  return match ? match[1] : null;
-}
-
 async function clearProperties() {
   const properties = await Property.find({}, { images: 1 }).lean();
   const publicIds = properties
     .flatMap((p) => p.images || [])
-    .map(extractPublicId)
+    .map((img) => img.publicId)
     .filter(Boolean);
 
   if (publicIds.length > 0) {

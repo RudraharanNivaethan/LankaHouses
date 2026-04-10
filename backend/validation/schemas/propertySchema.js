@@ -11,7 +11,17 @@ const listingTypeField    = z.enum(LISTING_TYPES,  { message: `Listing type must
 const bedroomsField       = z.coerce.number({ invalid_type_error: 'Bedrooms must be a number' }).int().min(0, 'Bedrooms cannot be negative');
 const bathroomsField      = z.coerce.number({ invalid_type_error: 'Bathrooms must be a number' }).int().min(0, 'Bathrooms cannot be negative');
 const parkingSpacesField  = z.coerce.number({ invalid_type_error: 'Parking spaces must be a number' }).int().min(0, 'Parking spaces cannot be negative');
-const furnishedField      = z.coerce.boolean({ invalid_type_error: 'Furnished must be a boolean' });
+const furnishedField      = z.preprocess(
+  (val) => {
+    if (typeof val === 'boolean') return val;
+    if (typeof val === 'string') {
+      const lower = val.trim().toLowerCase();
+      return lower !== 'false' && lower !== '0' && lower !== '';
+    }
+    return Boolean(val);
+  },
+  z.boolean({ invalid_type_error: 'Furnished must be a boolean' }),
+);
 const yearBuiltField      = z.coerce.number({ invalid_type_error: 'Year built must be a number' }).int().min(1800, 'Year built must be after 1800');
 const noOfFloorsField     = z.coerce.number({ invalid_type_error: 'Number of floors must be a number' }).int().min(1, 'Must have at least 1 floor');
 const areaField           = z.coerce.number({ invalid_type_error: 'Area must be a number' }).positive('Area must be a positive number');
@@ -71,7 +81,7 @@ export const propertyQuerySchema = z.object({
   type:        typeField.optional(),
   listingType: listingTypeField.optional(),
   status:      statusField.optional(),
-  furnished:   z.coerce.boolean().optional(),
+  furnished:   furnishedField.optional(),
   minPrice:    z.coerce.number().positive('minPrice must be a positive number').optional(),
   maxPrice:    z.coerce.number().positive('maxPrice must be a positive number').optional(),
   page:        z.coerce.number().int().min(1, 'Page must be at least 1').optional().default(1),
@@ -80,4 +90,9 @@ export const propertyQuerySchema = z.object({
 
 export const propertyIdParamsSchema = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid property ID'),
+});
+
+export const propertyImageIndexSchema = z.object({
+  id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid property ID'),
+  imageIndex: z.coerce.number({ invalid_type_error: 'Image index must be a number' }).int('Image index must be an integer').min(0, 'Image index cannot be negative'),
 });
