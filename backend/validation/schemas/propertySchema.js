@@ -81,3 +81,8 @@ export const propertyQuerySchema = z.object({
 export const propertyIdParamsSchema = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid property ID'),
 });
+
+export const propertyImageIndexSchema = z.object({
+  id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid property ID'),
+  imageIndex: z.coerce.number({ invalid_type_error: 'Image index must be a number' }).int('Image index must be an integer').min(0, 'Image index cannot be negative'),
+});

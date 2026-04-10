@@ -6,6 +6,7 @@ import {
   updatePropertySchema,
   propertyQuerySchema,
   propertyIdParamsSchema,
+  propertyImageIndexSchema,
 } from '../validation/schemas/propertySchema.js';
 import { propertyUploadBundle, requireImages } from '../middleware/uploadMiddleware.js';
 import {
@@ -14,6 +15,8 @@ import {
   getPropertyById,
   updateProperty,
   deleteProperty,
+  addImages,
+  deleteImage,
 } from '../controllers/propertyController.js';
 
 const router = Router();
@@ -56,6 +59,24 @@ router.delete(
   authorize('admin'),
   validateParams(propertyIdParamsSchema),
   deleteProperty
+);
+
+router.post(
+  '/:id/images',
+  authenticate,
+  authorize('admin'),
+  validateParams(propertyIdParamsSchema),
+  ...propertyUploadBundle,
+  requireImages,
+  addImages
+);
+
+router.delete(
+  '/:id/images/:imageIndex',
+  authenticate,
+  authorize('admin'),
+  validateParams(propertyImageIndexSchema),
+  deleteImage
 );
 
 export default router;
