@@ -54,3 +54,33 @@ export interface PropertyApiResponse {
   success: boolean
   data: PropertyRecord
 }
+
+export interface PaginationInfo {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface PropertiesListApiResponse {
+  success: boolean
+  data: PropertyRecord[]
+  pagination: PaginationInfo
+}
+
+export interface PropertyQueryParams {
+  district?: string
+  province?: string
+  type?: BackendPropertyType
+  listingType?: ListingType
+  status?: PropertyStatus
+  minPrice?: number
+  maxPrice?: number
+  page?: number
+  limit?: number
+}
+
+export interface DeletePropertyApiResponse {
+  success: boolean
+  message: string
+}

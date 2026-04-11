@@ -102,7 +102,7 @@ export const updatePropertyRecord = async (id, updates, processedImages = []) =>
     const property = await Property.findByIdAndUpdate(
       id,
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!property) {
       throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
@@ -125,7 +125,7 @@ export const removeProperty = async (id) => {
   const property = await Property.findByIdAndUpdate(
     id,
     { $set: { status: 'removed' } },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!property) {
     throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
@@ -154,7 +154,7 @@ export const addPropertyImages = async (id, processedImages = []) => {
     const updated = await Property.findByIdAndUpdate(
       id,
       { $push: { images: { $each: newImages } } },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     return updated;
   } catch (error) {

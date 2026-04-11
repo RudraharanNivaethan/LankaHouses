@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { AdminLayout } from '../../components/layout/AdminLayout'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
-import { AdminHouseListView } from '../../components/admin_dashboard/AdminHouseListView'
+import { PropertyListView } from '../../components/admin-houses/PropertyListView'
 import { Button } from '../../components/ui/Button'
 import { ROUTES } from '../../constants/routes'
 
@@ -25,7 +25,7 @@ export function AdminHousesPage() {
           }
         />
 
-        <AdminHouseListView />
+        <PropertyListView />
       </div>
     </AdminLayout>
   )

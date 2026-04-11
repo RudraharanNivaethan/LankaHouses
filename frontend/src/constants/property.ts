@@ -1,5 +1,22 @@
+import type { PropertyStatus } from '../types/property'
+
 export const PROPERTY_TYPES = ['Apartment', 'House', 'Villa'] as const
 export const LISTING_TYPES = ['sale', 'rent'] as const
+export const PROPERTY_STATUSES = ['active', 'sold', 'removed'] as const
+
+export const STATUS_LABELS: Record<PropertyStatus, string> = {
+  active: 'Active',
+  sold: 'Sold',
+  removed: 'Removed',
+}
+
+export const STATUS_COLORS: Record<PropertyStatus, { bg: string; text: string; dot: string }> = {
+  active:  { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  sold:    { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500'   },
+  removed: { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500'     },
+}
+
+export const DEFAULT_PAGE_LIMIT = 20
 
 export const MAX_IMAGES = 10
 export const MAX_IMAGE_SIZE_MB = 5
