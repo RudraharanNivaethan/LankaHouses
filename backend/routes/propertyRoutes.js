@@ -48,7 +48,6 @@ router.patch(
   authenticate,
   authorize('admin'),
   validateParams(propertyIdParamsSchema),
-  ...propertyUploadBundle,
   validateBody(updatePropertySchema),
   updateProperty
 );

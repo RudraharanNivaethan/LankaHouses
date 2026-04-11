@@ -53,6 +53,10 @@ export interface PropertyRecord {
 export interface PropertyApiResponse {
   success: boolean
   data: PropertyRecord
+  /** Present on PATCH /property/:id — whether MongoDB applied a change */
+  meta?: {
+    modified?: boolean
+  }
 }
 
 export interface PaginationInfo {

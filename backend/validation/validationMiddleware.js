@@ -14,7 +14,8 @@ export const validateBody = (schema) => (req, res, next) => {
     const result = schema.safeParse(req.body);
   
     if (!result.success) {
-      const errors = result.error.errors.map((err) => err.message);
+      const issues = result.error.issues ?? [];
+      const errors = issues.map((err) => err.message);
       return res.status(400).json({
         success: false,
         error: errors.length === 1 ? errors[0] : 'Validation failed',
@@ -36,7 +37,8 @@ export const validateBody = (schema) => (req, res, next) => {
     const result = schema.safeParse(req.params);
   
     if (!result.success) {
-      const errors = result.error.errors.map((err) => err.message);
+      const issues = result.error.issues ?? [];
+      const errors = issues.map((err) => err.message);
       return res.status(400).json({
         success: false,
         error: errors[0]
@@ -57,7 +59,8 @@ export const validateBody = (schema) => (req, res, next) => {
     const result = schema.safeParse(req.query);
   
     if (!result.success) {
-      const errors = result.error.errors.map((err) => err.message);
+      const issues = result.error.issues ?? [];
+      const errors = issues.map((err) => err.message);
       return res.status(400).json({
         success: false,
         error: errors[0]

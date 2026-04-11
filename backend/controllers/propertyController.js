@@ -50,12 +50,15 @@ export const getPropertyById = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
   try {
-    const property = await updatePropertyRecord(
+    const { property, modified } = await updatePropertyRecord(
       req.validatedParams.id,
       req.body,
-      req.processedImages ?? []
     );
-    return res.status(200).json({ success: true, data: property });
+    return res.status(200).json({
+      success: true,
+      data:    property,
+      meta:    { modified },
+    });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);
