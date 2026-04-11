@@ -5,12 +5,13 @@ import {
   findPropertyById,
   updatePropertyRecord,
   removeProperty,
+  addPropertyImages,
+  deletePropertyImage,
 } from '../services/propertyService.js';
 
 export const createProperty = async (req, res) => {
   try {
-    const images   = req.uploadedImages ?? [];
-    const property = await createPropertyRecord({ ...req.body, images });
+    const property = await createPropertyRecord(req.body, req.processedImages);
     return res.status(201).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
@@ -49,11 +50,11 @@ export const getPropertyById = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
   try {
-    const updates = { ...req.body };
-    if (req.uploadedImages && req.uploadedImages.length > 0) {
-      updates.images = req.uploadedImages;
-    }
-    const property = await updatePropertyRecord(req.validatedParams.id, updates);
+    const property = await updatePropertyRecord(
+      req.validatedParams.id,
+      req.body,
+      req.processedImages ?? []
+    );
     return res.status(200).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
@@ -65,6 +66,26 @@ export const deleteProperty = async (req, res) => {
   try {
     await removeProperty(req.validatedParams.id);
     return res.status(200).json({ success: true, message: 'Property removed successfully' });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const addImages = async (req, res) => {
+  try {
+    const property = await addPropertyImages(req.validatedParams.id, req.processedImages);
+    return res.status(200).json({ success: true, data: property });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const deleteImage = async (req, res) => {
+  try {
+    const property = await deletePropertyImage(req.validatedParams.id, req.validatedParams.imageIndex);
+    return res.status(200).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);
