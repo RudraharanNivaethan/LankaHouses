@@ -10,17 +10,32 @@ interface ImageUploadSectionProps {
   files: File[]
   onFilesChange: (files: File[]) => void
   error?: string | null
+  /** Defaults to "Images" */
+  sectionTitle?: string
+  /** Defaults to create-property copy */
+  sectionDescription?: string
+  /** Cap on how many files can be selected in this control (e.g. remaining slots when appending) */
+  maxFilesOverride?: number
 }
 
-export function ImageUploadSection({ files, onFilesChange, error }: ImageUploadSectionProps) {
+export function ImageUploadSection({
+  files,
+  onFilesChange,
+  error,
+  sectionTitle = 'Images',
+  sectionDescription = 'Upload property photos. At least one image is required.',
+  maxFilesOverride,
+}: ImageUploadSectionProps) {
+  const maxFiles = maxFilesOverride ?? MAX_IMAGES
+
   return (
-    <FormSection title="Images" description="Upload property photos. At least one image is required.">
+    <FormSection title={sectionTitle} description={sectionDescription}>
       <div className="sm:col-span-2">
         <FileUpload
           label="Property Images"
           accept={ACCEPTED_IMAGE_TYPES}
           multiple
-          maxFiles={MAX_IMAGES}
+          maxFiles={maxFiles}
           maxSizeMB={MAX_IMAGE_SIZE_MB}
           files={files}
           onFilesChange={onFilesChange}

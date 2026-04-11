@@ -4,6 +4,28 @@ import { uploadImageBuffer, deleteImageByPublicId } from '../utils/cloudinary.js
 
 const MAX_IMAGES = 10;
 
+/** Must match `updatePropertySchema` + Property model — only these keys are applied from the request body */
+const UPDATABLE_PROPERTY_FIELDS = [
+  'title',
+  'price',
+  'type',
+  'listingType',
+  'bedrooms',
+  'bathrooms',
+  'parkingSpaces',
+  'furnished',
+  'yearBuilt',
+  'noOfFloors',
+  'area',
+  'landSize',
+  'address',
+  'district',
+  'province',
+  'description',
+  'contactNumber',
+  'status',
+];
+
 const uploadImagesToCloudinary = async (processedImages) => {
   const uploaded = [];
   try {
@@ -26,6 +48,24 @@ const rollbackUploadedImages = async (uploaded) => {
       uploaded.map((img) => deleteImageByPublicId(img.publicId))
     );
   }
+};
+
+/** Compare current Mongoose value to validated incoming value (handles number/string drift). */
+const fieldValueUnchanged = (current, incoming) => {
+  if (incoming === current) return true;
+  if (current == null && incoming == null) return true;
+  if (typeof current === 'number' && typeof incoming === 'number') return current === incoming;
+  if (typeof current === 'boolean' && typeof incoming === 'boolean') return current === incoming;
+  if (typeof current === 'string' && typeof incoming === 'string') return current === incoming;
+  if (
+    (typeof current === 'number' || typeof current === 'string') &&
+    (typeof incoming === 'number' || typeof incoming === 'string')
+  ) {
+    const a = Number(current);
+    const b = Number(incoming);
+    return !Number.isNaN(a) && !Number.isNaN(b) && a === b;
+  }
+  return false;
 };
 
 export const createPropertyRecord = async (data, processedImages = []) => {
@@ -83,49 +123,47 @@ export const findPropertyById = async (id) => {
   return property;
 };
 
-export const updatePropertyRecord = async (id, updates, processedImages = []) => {
-  let uploaded = [];
-  let oldImages = [];
-
-  if (processedImages.length > 0) {
-    const existing = await Property.findById(id);
-    if (!existing) {
-      throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
-    }
-    oldImages = existing.images;
-
-    uploaded = await uploadImagesToCloudinary(processedImages);
-    updates.images = uploaded.map((img) => ({ url: img.url, publicId: img.publicId }));
+export const updatePropertyRecord = async (id, validatedBody) => {
+  const property = await Property.findById(id);
+  if (!property) {
+    throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
   }
 
-  try {
-    const property = await Property.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true, runValidators: true }
+  const requestedScalarUpdate = UPDATABLE_PROPERTY_FIELDS.some(
+    (key) => Object.prototype.hasOwnProperty.call(validatedBody, key) && validatedBody[key] !== undefined,
+  );
+
+  if (!requestedScalarUpdate) {
+    throw new AppError(
+      'No fields to update. Send property fields as JSON (images are added or removed via separate endpoints).',
+      HTTP_STATUS.BAD_REQUEST,
     );
-    if (!property) {
-      throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
-    }
-
-    if (oldImages.length > 0) {
-      Promise.allSettled(
-        oldImages.map((img) => deleteImageByPublicId(img.publicId))
-      ).catch(() => {});
-    }
-
-    return property;
-  } catch (error) {
-    await rollbackUploadedImages(uploaded);
-    throw error;
   }
+
+  let scalarChanged = false;
+  for (const key of UPDATABLE_PROPERTY_FIELDS) {
+    if (!Object.prototype.hasOwnProperty.call(validatedBody, key)) continue;
+    const val = validatedBody[key];
+    if (val === undefined) continue;
+    const cur = property.get(key);
+    if (!fieldValueUnchanged(cur, val)) scalarChanged = true;
+    property[key] = val;
+  }
+
+  if (!scalarChanged) {
+    return { property, modified: false };
+  }
+
+  await property.save({ validateBeforeSave: true });
+
+  return { property, modified: true };
 };
 
 export const removeProperty = async (id) => {
   const property = await Property.findByIdAndUpdate(
     id,
     { $set: { status: 'removed' } },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!property) {
     throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
@@ -154,7 +192,7 @@ export const addPropertyImages = async (id, processedImages = []) => {
     const updated = await Property.findByIdAndUpdate(
       id,
       { $push: { images: { $each: newImages } } },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     return updated;
   } catch (error) {

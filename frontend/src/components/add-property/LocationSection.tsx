@@ -29,7 +29,6 @@ export function LocationSection({ register, errors }: LocationSectionProps) {
         label="District"
         options={districtOptions}
         placeholder="Select district"
-        defaultValue=""
         error={errors.district?.message}
         {...register('district')}
       />
@@ -38,7 +37,6 @@ export function LocationSection({ register, errors }: LocationSectionProps) {
         label="Province"
         options={provinceOptions}
         placeholder="Select province"
-        defaultValue=""
         error={errors.province?.message}
         {...register('province')}
       />

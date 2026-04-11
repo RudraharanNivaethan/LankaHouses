@@ -12,6 +12,7 @@ import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
 import { AdminHousesPage } from '../pages/Admin/AdminHousesPage'
 import { AdminAddHousePage } from '../pages/Admin/AdminAddHousePage'
 import { AdminEditHousePage } from '../pages/Admin/AdminEditHousePage'
+import { AdminHouseDetailPage } from '../pages/Admin/AdminHouseDetailPage'
 import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
@@ -152,6 +153,14 @@ export function AppRouter() {
             element={
               <AdminRoute>
                 <AdminHousesPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_HOUSE_DETAIL}
+            element={
+              <AdminRoute>
+                <AdminHouseDetailPage />
               </AdminRoute>
             }
           />

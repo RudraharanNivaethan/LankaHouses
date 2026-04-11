@@ -29,16 +29,17 @@ export function PropertyDetailsSection({ register, errors }: PropertyDetailsSect
       <Input
         label="Price (LKR)"
         type="number"
+        step={1}
+        inputMode="numeric"
         placeholder="e.g. 25000000"
         error={errors.price?.message}
-        {...register('price')}
+        {...register('price', { valueAsNumber: true })}
       />
 
       <Select
         label="Property Type"
         options={propertyTypeOptions}
         placeholder="Select type"
-        defaultValue=""
         error={errors.type?.message}
         {...register('type')}
       />
@@ -47,7 +48,6 @@ export function PropertyDetailsSection({ register, errors }: PropertyDetailsSect
         label="Listing Type"
         options={listingTypeOptions}
         placeholder="Select listing type"
-        defaultValue=""
         error={errors.listingType?.message}
         {...register('listingType')}
       />

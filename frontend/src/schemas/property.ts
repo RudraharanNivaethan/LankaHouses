@@ -6,37 +6,60 @@ export const addPropertySchema = z.object({
     .string()
     .min(1, 'Title is required')
     .max(200, 'Title must be at most 200 characters'),
-  price: z.coerce
-    .number({ invalid_type_error: 'Price must be a number' })
-    .positive('Price must be a positive number'),
-  type: z.enum(PROPERTY_TYPES, { message: 'Select a property type' }),
-  listingType: z.enum(LISTING_TYPES, { message: 'Select a listing type' }),
+  price: z.preprocess(
+    (val) => {
+      if (typeof val === 'number' && Number.isFinite(val)) return Math.trunc(val)
+      if (typeof val === 'string') {
+        const s = val.replace(/,/g, '').replace(/\s/g, '').trim()
+        if (s === '') return undefined
+        const n = Number(s)
+        return Number.isFinite(n) ? Math.trunc(n) : val
+      }
+      return val
+    },
+    z
+      .number({ error: 'Price must be a number' })
+      .int('Price must be a whole LKR amount')
+      .positive('Price must be a positive number'),
+  ),
+  type: z.enum(PROPERTY_TYPES, { error: 'Select a property type' }),
+  listingType: z.enum(LISTING_TYPES, { error: 'Select a listing type' }),
   bedrooms: z.coerce
-    .number({ invalid_type_error: 'Bedrooms must be a number' })
+    .number({ error: 'Bedrooms must be a number' })
     .int('Must be a whole number')
     .min(0, 'Cannot be negative'),
   bathrooms: z.coerce
-    .number({ invalid_type_error: 'Bathrooms must be a number' })
+    .number({ error: 'Bathrooms must be a number' })
     .int('Must be a whole number')
     .min(0, 'Cannot be negative'),
   parkingSpaces: z.coerce
-    .number({ invalid_type_error: 'Parking spaces must be a number' })
+    .number({ error: 'Parking spaces must be a number' })
     .int('Must be a whole number')
     .min(0, 'Cannot be negative'),
-  furnished: z.coerce.boolean().optional().default(false),
+  furnished: z.preprocess(
+    (val) => {
+      if (typeof val === 'boolean') return val
+      if (typeof val === 'string') {
+        const lower = val.trim().toLowerCase()
+        return lower !== 'false' && lower !== '0' && lower !== ''
+      }
+      return Boolean(val)
+    },
+    z.boolean({ error: 'Furnished must be a boolean' }),
+  ).optional().default(false),
   yearBuilt: z.coerce
-    .number({ invalid_type_error: 'Year built must be a number' })
+    .number({ error: 'Year built must be a number' })
     .int('Must be a whole number')
     .min(1800, 'Year must be after 1800'),
   noOfFloors: z.coerce
-    .number({ invalid_type_error: 'Number of floors must be a number' })
+    .number({ error: 'Number of floors must be a number' })
     .int('Must be a whole number')
     .min(1, 'Must have at least 1 floor'),
   area: z.coerce
-    .number({ invalid_type_error: 'Area must be a number' })
+    .number({ error: 'Area must be a number' })
     .positive('Area must be positive'),
   landSize: z.coerce
-    .number({ invalid_type_error: 'Land size must be a number' })
+    .number({ error: 'Land size must be a number' })
     .positive('Land size must be positive'),
   address: z
     .string()
@@ -61,3 +84,7 @@ export const addPropertySchema = z.object({
 })
 
 export type AddPropertySchema = z.infer<typeof addPropertySchema>
+
+export const updatePropertySchema = addPropertySchema.partial()
+
+export type UpdatePropertySchema = z.infer<typeof updatePropertySchema>
