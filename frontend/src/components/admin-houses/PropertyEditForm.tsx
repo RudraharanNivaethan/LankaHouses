@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useProperty } from '../../hooks/useProperty'
 import { useUpdateProperty } from '../../hooks/useUpdateProperty'
 import { FormShell } from '../ui/FormShell'
@@ -12,9 +12,11 @@ import { LocationSection } from '../add-property/LocationSection'
 import { ImageUploadSection } from '../add-property/ImageUploadSection'
 import { appendPropertyImages, removePropertyImage } from '../../services/propertyService'
 import { MAX_IMAGES, MAX_IMAGE_SIZE_MB } from '../../constants/property'
+import { ROUTES } from '../../constants/routes'
 
 export function PropertyEditForm() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { property, isLoading: isFetching, error: fetchError, refetch } = useProperty(id)
 
   const {
@@ -26,7 +28,11 @@ export function PropertyEditForm() {
     apiError,
     successMessage,
     noticeMessage,
-  } = useUpdateProperty(property)
+  } = useUpdateProperty(property, {
+    onFieldsSaved: (record) => {
+      navigate(ROUTES.ADMIN_HOUSE_DETAIL.replace(':id', record._id), { replace: true })
+    },
+  })
 
   const [appendFiles, setAppendFiles] = useState<File[]>([])
   const [appendBusy, setAppendBusy] = useState(false)

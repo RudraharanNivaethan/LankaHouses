@@ -28,7 +28,15 @@ function toFormValues(record: PropertyRecord): AddPropertySchema {
   }
 }
 
-export function useUpdateProperty(existing: PropertyRecord | null) {
+export interface UseUpdatePropertyOptions {
+  /** Called after the server confirms fields were saved (`meta.modified === true`). e.g. navigate to detail view. */
+  onFieldsSaved?: (record: PropertyRecord) => void
+}
+
+export function useUpdateProperty(
+  existing: PropertyRecord | null,
+  options?: UseUpdatePropertyOptions,
+) {
   const [apiError, setApiError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null)
@@ -73,8 +81,12 @@ export function useUpdateProperty(existing: PropertyRecord | null) {
       }
 
       if (result.meta?.modified === true) {
-        setSuccessMessage('Property updated successfully!')
         reset(toFormValues(result.data))
+        if (options?.onFieldsSaved) {
+          options.onFieldsSaved(result.data)
+        } else {
+          setSuccessMessage('Property updated successfully!')
+        }
         return
       }
 
