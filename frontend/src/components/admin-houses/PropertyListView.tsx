@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useProperties } from '../../hooks/useProperties'
+import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { PropertyListCard } from './PropertyListCard'
 import { Pagination } from '../ui/Pagination'
 import { EmptyState } from '../ui/EmptyState'
@@ -7,9 +9,12 @@ import { Spinner } from '../ui/Spinner'
 import { AlertBanner } from '../ui/AlertBanner'
 import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
+import { SearchBar } from '../ui/SearchBar'
 import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
 import type { PropertyStatus } from '../../types/property'
+
+const SEARCH_DEBOUNCE_MS = 350
 
 function statusFromSearchParam(raw: string | null): PropertyStatus | undefined {
   if (!raw) return undefined
@@ -44,12 +49,46 @@ export function PropertyListView() {
     query,
   } = useProperties(initialStatus ? { status: initialStatus } : {})
 
+  const [searchInput, setSearchInput] = useState('')
+  const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS)
+
+  useEffect(() => {
+    const trimmedInput = searchInput.trim()
+    if (trimmedInput === '') {
+      if ((query.search ?? undefined) !== undefined) {
+        setFilters({ search: undefined })
+      }
+      return
+    }
+    const next = debouncedSearch.trim() || undefined
+    if (!next || next !== trimmedInput) return
+    if (next === (query.search ?? undefined)) return
+    setFilters({ search: next })
+  }, [searchInput, debouncedSearch, query.search, setFilters])
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters({ ...query, [key]: value || undefined })
   }
 
+  const handleSearchClear = () => {
+    setSearchInput('')
+    setFilters({ search: undefined })
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      <div className="w-full min-w-0">
+        <SearchBar
+          placeholder="Search by title, location, or keywords…"
+          aria-label="Search property listings"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onClear={handleSearchClear}
+          isLoading={isLoading}
+          maxLength={150}
+        />
+      </div>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Select
           label="Property Type"

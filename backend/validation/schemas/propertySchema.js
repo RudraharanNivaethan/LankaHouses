@@ -87,6 +87,15 @@ export const updatePropertySchema = z.object({
   status:        statusField.optional(),
 });
 
+const searchQueryField = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null || val === '') return undefined;
+    const s = typeof val === 'string' ? val.trim() : String(val).trim();
+    return s === '' ? undefined : s;
+  },
+  z.string().max(150, 'Search is at most 150 characters').optional(),
+);
+
 export const propertyQuerySchema = z.object({
   district:    districtField.optional(),
   province:    provinceField.optional(),
@@ -94,6 +103,7 @@ export const propertyQuerySchema = z.object({
   listingType: listingTypeField.optional(),
   status:      statusField.optional(),
   furnished:   furnishedField.optional(),
+  search:      searchQueryField,
   minPrice:    z.coerce.number().positive('minPrice must be a positive number').optional(),
   maxPrice:    z.coerce.number().positive('maxPrice must be a positive number').optional(),
   page:        z.coerce.number().int().min(1, 'Page must be at least 1').optional().default(1),

@@ -1,16 +1,13 @@
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AdminLayout } from '../../components/layout/AdminLayout'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
 import { PropertyListView } from '../../components/admin-houses/PropertyListView'
 import { Button } from '../../components/ui/Button'
-import { SearchBar } from '../../components/ui/SearchBar'
 import { ROUTES } from '../../constants/routes'
 
 export function AdminHousesPage() {
   const location = useLocation()
-  const [listingSearch, setListingSearch] = useState('')
 
   return (
     <AdminLayout sidebar={<AdminSidebar />}>
@@ -29,16 +26,6 @@ export function AdminHousesPage() {
             </Link>
           }
         />
-
-        <div className="w-full min-w-0">
-          <SearchBar
-            placeholder="Search listings…"
-            aria-label="Search property listings"
-            value={listingSearch}
-            onChange={(e) => setListingSearch(e.target.value)}
-            onClear={() => setListingSearch('')}
-          />
-        </div>
 
         <PropertyListView key={location.search} />
       </div>

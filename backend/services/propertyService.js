@@ -81,6 +81,9 @@ export const createPropertyRecord = async (data, processedImages = []) => {
   }
 };
 
+/** Escape user input for safe use inside a RegExp literal (substring search). */
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /** Counts by status for admin dashboard (no pagination). */
 export const countListingsByStatus = async () => {
   const [activeListings, soldListings, removedListings] = await Promise.all([
@@ -91,7 +94,19 @@ export const countListingsByStatus = async () => {
   return { activeListings, soldListings, removedListings };
 };
 
-export const listProperties = async ({ district, province, type, listingType, status, furnished, minPrice, maxPrice, page, limit }) => {
+export const listProperties = async ({
+  district,
+  province,
+  type,
+  listingType,
+  status,
+  furnished,
+  search,
+  minPrice,
+  maxPrice,
+  page,
+  limit,
+}) => {
   const filter = {};
 
   if (district)    filter.district    = district;
@@ -100,6 +115,18 @@ export const listProperties = async ({ district, province, type, listingType, st
   if (listingType) filter.listingType = listingType;
   if (furnished !== undefined) filter.furnished = furnished;
   filter.status = status ?? 'active';
+
+  const trimmedSearch = typeof search === 'string' ? search.trim() : '';
+  if (trimmedSearch.length > 0) {
+    const pattern = new RegExp(escapeRegex(trimmedSearch), 'i');
+    filter.$or = [
+      { title: pattern },
+      { address: pattern },
+      { district: pattern },
+      { province: pattern },
+      { description: pattern },
+    ];
+  }
 
   if (minPrice !== undefined || maxPrice !== undefined) {
     filter.price = {};

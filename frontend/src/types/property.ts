@@ -78,6 +78,8 @@ export interface PropertyQueryParams {
   type?: BackendPropertyType
   listingType?: ListingType
   status?: PropertyStatus
+  /** Case-insensitive substring match on title, address, district, province, description */
+  search?: string
   minPrice?: number
   maxPrice?: number
   page?: number
