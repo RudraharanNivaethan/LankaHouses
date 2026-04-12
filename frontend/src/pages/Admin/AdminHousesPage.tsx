@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { AdminLayout } from '../../components/layout/AdminLayout'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
@@ -7,6 +7,8 @@ import { Button } from '../../components/ui/Button'
 import { ROUTES } from '../../constants/routes'
 
 export function AdminHousesPage() {
+  const location = useLocation()
+
   return (
     <AdminLayout sidebar={<AdminSidebar />}>
       <div className="flex flex-col gap-7">
@@ -25,7 +27,7 @@ export function AdminHousesPage() {
           }
         />
 
-        <PropertyListView />
+        <PropertyListView key={location.search} />
       </div>
     </AdminLayout>
   )

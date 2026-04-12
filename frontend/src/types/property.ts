@@ -88,3 +88,14 @@ export interface DeletePropertyApiResponse {
   success: boolean
   message: string
 }
+
+export interface AdminListingStats {
+  activeListings: number
+  soldListings: number
+  removedListings: number
+}
+
+export interface AdminListingStatsApiResponse {
+  success: boolean
+  data: AdminListingStats
+}

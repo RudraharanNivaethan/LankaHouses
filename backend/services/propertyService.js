@@ -81,6 +81,16 @@ export const createPropertyRecord = async (data, processedImages = []) => {
   }
 };
 
+/** Counts by status for admin dashboard (no pagination). */
+export const countListingsByStatus = async () => {
+  const [activeListings, soldListings, removedListings] = await Promise.all([
+    Property.countDocuments({ status: 'active' }),
+    Property.countDocuments({ status: 'sold' }),
+    Property.countDocuments({ status: 'removed' }),
+  ]);
+  return { activeListings, soldListings, removedListings };
+};
+
 export const listProperties = async ({ district, province, type, listingType, status, furnished, minPrice, maxPrice, page, limit }) => {
   const filter = {};
 

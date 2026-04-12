@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useProperties } from '../../hooks/useProperties'
 import { PropertyListCard } from './PropertyListCard'
 import { Pagination } from '../ui/Pagination'
@@ -9,6 +9,12 @@ import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
 import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
+import type { PropertyStatus } from '../../types/property'
+
+function statusFromSearchParam(raw: string | null): PropertyStatus | undefined {
+  if (!raw) return undefined
+  return (PROPERTY_STATUSES as readonly string[]).includes(raw) ? (raw as PropertyStatus) : undefined
+}
 
 const typeOptions = [
   { value: '', label: 'All Types' },
@@ -26,6 +32,8 @@ const statusOptions = [
 ]
 
 export function PropertyListView() {
+  const [searchParams] = useSearchParams()
+  const initialStatus = statusFromSearchParam(searchParams.get('status'))
   const {
     properties,
     pagination,
@@ -34,7 +42,7 @@ export function PropertyListView() {
     setPage,
     setFilters,
     query,
-  } = useProperties()
+  } = useProperties(initialStatus ? { status: initialStatus } : {})
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters({ ...query, [key]: value || undefined })

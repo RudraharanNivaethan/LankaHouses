@@ -1,3 +1,5 @@
+import type { PropertyStatus } from '../types/property'
+
 export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
@@ -16,6 +18,11 @@ export const ROUTES = {
   ADMIN_INQUIRIES: '/admin/inquiries',
   ADMIN_INQUIRY_DETAIL: '/admin/inquiries/:id',
 } as const
+
+/** Admin houses list filtered by listing lifecycle status (matches API `status` query). */
+export function adminHousesListUrl(status: PropertyStatus): string {
+  return `${ROUTES.ADMIN_HOUSES}?status=${status}`
+}
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
 

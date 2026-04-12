@@ -11,6 +11,7 @@ import {
 import { propertyUploadBundle, requireImages } from '../middleware/uploadMiddleware.js';
 import {
   createProperty,
+  getAdminListingStats,
   getProperties,
   getPropertyById,
   updateProperty,
@@ -35,6 +36,13 @@ router.get(
   '/',
   validateQuery(propertyQuerySchema),
   getProperties
+);
+
+router.get(
+  '/stats/listings',
+  authenticate,
+  authorize('admin'),
+  getAdminListingStats
 );
 
 router.get(

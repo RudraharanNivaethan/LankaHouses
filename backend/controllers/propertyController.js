@@ -7,12 +7,23 @@ import {
   removeProperty,
   addPropertyImages,
   deletePropertyImage,
+  countListingsByStatus,
 } from '../services/propertyService.js';
 
 export const createProperty = async (req, res) => {
   try {
     const property = await createPropertyRecord(req.body, req.processedImages);
     return res.status(201).json({ success: true, data: property });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const getAdminListingStats = async (_req, res) => {
+  try {
+    const counts = await countListingsByStatus();
+    return res.status(200).json({ success: true, data: counts });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);
