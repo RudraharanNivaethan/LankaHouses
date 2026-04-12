@@ -1,3 +1,7 @@
 node_modules
 docs
-.vscode
+.cursor/
+.vscode/
+.env
+frontend/.env
+backend/.env
