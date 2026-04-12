@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { searchQueryField } from '../search/mongoSafeSearchQuery.js';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Villa'];
 const LISTING_TYPES  = ['sale', 'rent'];
@@ -86,15 +87,6 @@ export const updatePropertySchema = z.object({
   contactNumber: contactNumberField.optional(),
   status:        statusField.optional(),
 });
-
-const searchQueryField = z.preprocess(
-  (val) => {
-    if (val === undefined || val === null || val === '') return undefined;
-    const s = typeof val === 'string' ? val.trim() : String(val).trim();
-    return s === '' ? undefined : s;
-  },
-  z.string().max(150, 'Search is at most 150 characters').optional(),
-);
 
 export const propertyQuerySchema = z.object({
   district:    districtField.optional(),

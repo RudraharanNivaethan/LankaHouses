@@ -11,10 +11,9 @@ import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
 import { SearchBar } from '../ui/SearchBar'
 import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../../constants/property'
+import { PROPERTY_SEARCH_DEBOUNCE_MS } from '../../constants/propertySearch'
 import { ROUTES } from '../../constants/routes'
 import type { PropertyStatus } from '../../types/property'
-
-const SEARCH_DEBOUNCE_MS = 350
 
 function statusFromSearchParam(raw: string | null): PropertyStatus | undefined {
   if (!raw) return undefined
@@ -50,7 +49,7 @@ export function PropertyListView() {
   } = useProperties(initialStatus ? { status: initialStatus } : {})
 
   const [searchInput, setSearchInput] = useState('')
-  const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS)
+  const debouncedSearch = useDebouncedValue(searchInput, PROPERTY_SEARCH_DEBOUNCE_MS)
 
   useEffect(() => {
     const trimmedInput = searchInput.trim()

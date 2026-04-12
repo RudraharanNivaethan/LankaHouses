@@ -1,6 +1,7 @@
 import Property from '../models/Property.js';
 import { AppError, HTTP_STATUS } from '../utils/errorUtils.js';
 import { uploadImageBuffer, deleteImageByPublicId } from '../utils/cloudinary.js';
+import { escapeRegexLiteral } from '../validation/search/mongoSafeSearchQuery.js';
 
 const MAX_IMAGES = 10;
 
@@ -81,8 +82,20 @@ export const createPropertyRecord = async (data, processedImages = []) => {
   }
 };
 
-/** Escape user input for safe use inside a RegExp literal (substring search). */
-const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const TEXT_SEARCH_FIELDS = ['title', 'address', 'district', 'province', 'description'];
+
+/** Whitespace-separated tokens: each token must match at least one text field (AND across tokens). */
+function buildTextSearchClause(trimmedSearch) {
+  const tokens = trimmedSearch.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return undefined;
+  const perToken = tokens.map((token) => ({
+    $or: TEXT_SEARCH_FIELDS.map((field) => ({
+      [field]: new RegExp(escapeRegexLiteral(token), 'i'),
+    })),
+  }));
+  if (perToken.length === 1) return perToken[0];
+  return { $and: perToken };
+}
 
 /** Counts by status for admin dashboard (no pagination). */
 export const countListingsByStatus = async () => {
@@ -117,15 +130,10 @@ export const listProperties = async ({
   filter.status = status ?? 'active';
 
   const trimmedSearch = typeof search === 'string' ? search.trim() : '';
-  if (trimmedSearch.length > 0) {
-    const pattern = new RegExp(escapeRegex(trimmedSearch), 'i');
-    filter.$or = [
-      { title: pattern },
-      { address: pattern },
-      { district: pattern },
-      { province: pattern },
-      { description: pattern },
-    ];
+  const textClause = buildTextSearchClause(trimmedSearch);
+  if (textClause) {
+    if (textClause.$and) filter.$and = textClause.$and;
+    else filter.$or = textClause.$or;
   }
 
   if (minPrice !== undefined || maxPrice !== undefined) {
