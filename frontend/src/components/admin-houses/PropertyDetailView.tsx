@@ -78,7 +78,7 @@ export function PropertyDetailView() {
             <Button variant="outline" size="sm">Edit Property</Button>
           </Link>
           <Button variant="ghost" size="sm" onClick={requestDelete} className="text-red-600 hover:bg-red-50 hover:text-red-700">
-            Delete
+            Remove listing
           </Button>
         </div>
       </div>
@@ -135,9 +135,9 @@ export function PropertyDetailView() {
 
       <ConfirmDialog
         open={showConfirm}
-        title="Delete Property"
-        message={`Are you sure you want to remove "${property.title}"? This will mark the property as removed.`}
-        confirmLabel="Delete"
+        title="Remove listing"
+        message={`Remove "${property.title}" from the public site? The listing will stay in the database as removed (not deleted).`}
+        confirmLabel="Remove listing"
         onConfirm={() => confirmDelete(property._id)}
         onCancel={cancelDelete}
         isLoading={isDeleting}

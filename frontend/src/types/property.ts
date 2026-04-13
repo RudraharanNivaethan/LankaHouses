@@ -89,6 +89,8 @@ export interface PropertyQueryParams {
 export interface DeletePropertyApiResponse {
   success: boolean
   message: string
+  /** Present after soft-delete (status `removed`). */
+  data?: PropertyRecord
 }
 
 export interface AdminListingStats {

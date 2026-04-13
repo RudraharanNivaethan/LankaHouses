@@ -111,6 +111,7 @@ export async function removePropertyImage(id: string, imageIndex: number): Promi
   return data as unknown as PropertyApiResponse
 }
 
+/** Soft-delete: server sets `status` to `removed` (record kept). */
 export async function deleteProperty(id: string): Promise<DeletePropertyApiResponse> {
   const res = await fetch(`${API_BASE}/${id}`, {
     method: 'DELETE',

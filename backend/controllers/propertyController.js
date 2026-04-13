@@ -5,7 +5,7 @@ import {
   findPropertyById,
   assertPropertyVisibleToViewer,
   updatePropertyRecord,
-  removeProperty,
+  softRemoveProperty,
   addPropertyImages,
   deletePropertyImage,
   countListingsByStatus,
@@ -81,10 +81,15 @@ export const updateProperty = async (req, res) => {
   }
 };
 
+/** DELETE is a soft-delete: `status` → `removed` (document kept). No hard delete. */
 export const deleteProperty = async (req, res) => {
   try {
-    await removeProperty(req.validatedParams.id);
-    return res.status(200).json({ success: true, message: 'Property removed successfully' });
+    const property = await softRemoveProperty(req.validatedParams.id);
+    return res.status(200).json({
+      success: true,
+      message: 'Listing removed from the public site. The record is kept as removed.',
+      data: property,
+    });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);

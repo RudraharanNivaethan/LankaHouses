@@ -20,7 +20,7 @@ export function useDeleteProperty() {
       setShowConfirm(false)
       navigate(ROUTES.ADMIN_HOUSES)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete property.')
+      setError(err instanceof Error ? err.message : 'Failed to remove listing.')
     } finally {
       setIsDeleting(false)
     }

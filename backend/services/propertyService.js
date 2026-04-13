@@ -227,11 +227,15 @@ export const updatePropertyRecord = async (id, validatedBody) => {
   return { property, modified: true };
 };
 
-export const removeProperty = async (id) => {
+/**
+ * Soft-delete only: sets `status` to `removed`. The MongoDB document is never deleted.
+ * Public API hides removed listings; admins can still see them in the admin list.
+ */
+export const softRemoveProperty = async (id) => {
   const property = await Property.findByIdAndUpdate(
     id,
     { $set: { status: 'removed' } },
-    { returnDocument: 'after' }
+    { returnDocument: 'after', runValidators: true },
   );
   if (!property) {
     throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);

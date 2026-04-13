@@ -76,6 +76,7 @@ router.patch(
   updateProperty
 );
 
+// Soft-delete: sets status to `removed` (never deletes the document).
 router.delete(
   '/:id',
   authenticate,
