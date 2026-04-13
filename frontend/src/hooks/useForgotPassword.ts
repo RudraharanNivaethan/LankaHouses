@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { sendPasswordResetEmail } from 'firebase/auth'
-import { firebaseAuth } from '../config/firebase'
+import { firebaseAuth, FIREBASE_AUTH_UNAVAILABLE } from '../config/firebase'
 import { forgotPasswordSchema } from '../schemas/auth'
 import type { ForgotPasswordSchema } from '../schemas/auth'
 
@@ -31,6 +31,10 @@ export function useForgotPassword() {
     setServerError(null)
     setIsLoading(true)
     try {
+      if (!firebaseAuth) {
+        setServerError(FIREBASE_AUTH_UNAVAILABLE)
+        return
+      }
       await sendPasswordResetEmail(firebaseAuth, data.email)
       // Always show success — avoids leaking whether an email is registered
       setIsSuccess(true)

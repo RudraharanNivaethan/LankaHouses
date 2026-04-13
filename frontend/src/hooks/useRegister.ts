@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { firebaseAuth } from '../config/firebase'
+import { firebaseAuth, FIREBASE_AUTH_UNAVAILABLE } from '../config/firebase'
 import { registerSchema } from '../schemas/auth'
 import { firebaseRegister } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
@@ -43,6 +43,10 @@ export function useRegister() {
     setIsLoading(true)
     let firebaseCreated = false
     try {
+      if (!firebaseAuth) {
+        setServerError(FIREBASE_AUTH_UNAVAILABLE)
+        return
+      }
       const credential = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password)
       firebaseCreated = true
       const idToken = await credential.user.getIdToken()

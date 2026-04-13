@@ -5,3 +5,4 @@ docs
 .env
 frontend/.env
 backend/.env
+backend/firebase-service-account.json

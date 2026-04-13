@@ -1,8 +1,15 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import admin from '../config/firebaseAdmin.js';
+import admin, { isFirebaseAdminReady } from '../config/firebaseAdmin.js';
 import User from '../models/User.js';
 import connect from '../config/dbConnection.js';
+
+if (!isFirebaseAdminReady()) {
+  console.error(
+    '❌ Firebase Admin is not initialized. Set FIREBASE_SERVICE_ACCOUNT_PATH in backend/.env to a valid service account JSON from Firebase Console.'
+  );
+  process.exit(1);
+}
 
 if (process.env.NODE_ENV === 'production') {
   console.error('❌ Admin seed must not run in production.');

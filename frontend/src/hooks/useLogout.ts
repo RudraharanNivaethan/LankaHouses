@@ -19,7 +19,7 @@ export function useLogout() {
       // Proceed with local logout even if the server call fails
     } finally {
       // Clear Firebase local session so the account picker appears on next Google sign-in
-      await signOut(firebaseAuth).catch(() => {})
+      if (firebaseAuth) await signOut(firebaseAuth).catch(() => {})
       setUser(null)
       setIsLoading(false)
       navigate(ROUTES.HOME)

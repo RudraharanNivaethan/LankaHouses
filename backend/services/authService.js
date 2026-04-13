@@ -4,7 +4,7 @@ import User from '../models/User.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils.js';
 import { AppError, HTTP_STATUS } from '../utils/errorUtils.js';
 import { CUSTOMER_REFRESH_JWT_SECRET, ADMIN_REFRESH_JWT_SECRET } from '../config/jwtConfig.js';
-import admin from '../config/firebaseAdmin.js';
+import { verifyFirebaseIdToken } from '../config/firebaseAdmin.js';
 
 const SESSION_LIMIT_HOURS = 6;
 
@@ -106,8 +106,14 @@ export const verifyRefreshToken = async (token) => {
 export const firebaseRegister = async (idToken, name, phone) => {
   let decoded;
   try {
-    decoded = await admin.auth().verifyIdToken(idToken);
-  } catch {
+    decoded = await verifyFirebaseIdToken(idToken);
+  } catch (err) {
+    if (err.code === 'FIREBASE_NOT_CONFIGURED') {
+      throw new AppError(
+        'Server authentication is not configured. Add the Firebase service account JSON from Project settings → Service accounts → Generate new private key, and set FIREBASE_SERVICE_ACCOUNT_PATH in backend/.env.',
+        HTTP_STATUS.SERVICE_UNAVAILABLE
+      );
+    }
     throw new AppError('Invalid Firebase token', HTTP_STATUS.UNAUTHORIZED);
   }
 
@@ -135,8 +141,14 @@ export const firebaseRegister = async (idToken, name, phone) => {
 export const firebaseExchange = async (idToken) => {
   let decoded;
   try {
-    decoded = await admin.auth().verifyIdToken(idToken);
-  } catch {
+    decoded = await verifyFirebaseIdToken(idToken);
+  } catch (err) {
+    if (err.code === 'FIREBASE_NOT_CONFIGURED') {
+      throw new AppError(
+        'Server authentication is not configured. Add the Firebase service account JSON from Project settings → Service accounts → Generate new private key, and set FIREBASE_SERVICE_ACCOUNT_PATH in backend/.env.',
+        HTTP_STATUS.SERVICE_UNAVAILABLE
+      );
+    }
     throw new AppError('Invalid Firebase token', HTTP_STATUS.UNAUTHORIZED);
   }
 

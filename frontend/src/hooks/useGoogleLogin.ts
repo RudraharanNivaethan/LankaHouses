@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
-import { firebaseAuth } from '../config/firebase'
+import { firebaseAuth, FIREBASE_AUTH_UNAVAILABLE } from '../config/firebase'
 import { firebaseExchange } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
 import { ROUTES } from '../constants/routes'
@@ -16,6 +16,10 @@ export function useGoogleLogin() {
     setError(null)
     setIsLoading(true)
     try {
+      if (!firebaseAuth) {
+        setError(FIREBASE_AUTH_UNAVAILABLE)
+        return
+      }
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(firebaseAuth, provider)
       const idToken = await result.user.getIdToken()

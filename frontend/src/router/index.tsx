@@ -17,10 +17,22 @@ import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 
+function AuthLoadingScreen() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-950">
+      <div
+        className="h-9 w-9 animate-spin rounded-full border-2 border-brand border-t-transparent"
+        role="status"
+        aria-label="Loading"
+      />
+    </div>
+  )
+}
+
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
-  if (isLoading) return null
+  if (isLoading) return <AuthLoadingScreen />
   if (isAuthenticated) {
     const target = user?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
     return <Navigate to={target} replace />
@@ -31,7 +43,7 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
 // Redirects unauthenticated users to login, preserving the intended destination
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
-  if (isLoading) return null
+  if (isLoading) return <AuthLoadingScreen />
   if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
   return <>{children}</>
 }
@@ -40,7 +52,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 // the route's existence is not leaked (indistinguishable from an invalid URL)
 function AdminRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
-  if (isLoading) return null
+  if (isLoading) return <AuthLoadingScreen />
   if (!isAuthenticated || user?.role !== 'admin') return <NotFound />
   return <>{children}</>
 }
@@ -64,7 +76,7 @@ function MainLayout() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const location = useLocation()
 
-  if (isLoading) return null
+  if (isLoading) return <AuthLoadingScreen />
 
   if (isAuthenticated && user?.role === 'admin') {
     if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
