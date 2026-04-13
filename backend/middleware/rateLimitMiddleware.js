@@ -1,180 +1,219 @@
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+import { createDualLimiter } from '../lib/rate-limit/index.js';
+
+export { createDualLimiter };
+
+/**
+ * LankaHouses rate-limit policy — generic primitives live in `../lib/rate-limit/`.
+ *
+ * Every named export is a single Express middleware from `createDualLimiter`:
+ *
+ *   IP-only  (userCap: null, getUserId: () => null)
+ *     — pre-auth endpoints where no identity is known yet
+ *     — global baseline
+ *
+ *   Dual AND (userCap: N, ipCap: M)
+ *     — authenticated and optionally-authenticated endpoints
+ *     — user axis: hard per-account ceiling, follows the account across any IP
+ *     — IP axis:  flood backstop, set 2–3× the user cap to tolerate shared IPs
+ *     — both must independently pass; neither compensates for the other
+ *
+ * Routes use limiters directly — no arrays, no spread.
+ */
 
 const parsePositiveInt = (raw, fallback) => {
   const n = Number.parseInt(String(raw ?? ''), 10);
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
-/** Window for tiered GET /api/property?search=… limits (guest / user / admin). */
+/** Configurable window + cap for public property read endpoints. */
 const PROPERTY_LIST_SEARCH_WINDOW_MS = parsePositiveInt(
   process.env.PROPERTY_LIST_SEARCH_WINDOW_MS,
   60_000,
 );
+const PROPERTY_SEARCH_USER_CAP_GUEST = 10;
+const PROPERTY_SEARCH_USER_CAP_USER  = 30;
+const PROPERTY_SEARCH_USER_CAP_ADMIN = 100;
 
-const PROPERTY_SEARCH_MAX_GUEST = 10;
-const PROPERTY_SEARCH_MAX_USER = 30;
-const PROPERTY_SEARCH_MAX_ADMIN = 100;
-
-/** GET /api/property without `search` — per IP. */
 const PROPERTY_LIST_READ_WINDOW_MS = parsePositiveInt(
   process.env.PROPERTY_LIST_READ_WINDOW_MS,
   60_000,
 );
-const PROPERTY_LIST_READ_MAX = parsePositiveInt(process.env.PROPERTY_LIST_READ_MAX, 60);
+const PROPERTY_LIST_READ_USER_CAP = parsePositiveInt(process.env.PROPERTY_LIST_READ_MAX, 60);
 
-/** GET /api/property/:id — per IP (separate bucket from list read). */
 const PROPERTY_BY_ID_READ_WINDOW_MS = parsePositiveInt(
   process.env.PROPERTY_BY_ID_READ_WINDOW_MS,
   60_000,
 );
-const PROPERTY_BY_ID_READ_MAX = parsePositiveInt(process.env.PROPERTY_BY_ID_READ_MAX, 60);
+const PROPERTY_BY_ID_READ_USER_CAP = parsePositiveInt(process.env.PROPERTY_BY_ID_READ_MAX, 60);
 
-const createLimiter = (windowMs, max, error, options = {}) =>
-  rateLimit({
-    windowMs,
-    max,
-    message:         { success: false, error },
-    standardHeaders: true,
-    legacyHeaders:   false,
-    validate:        { trustProxy: false },
-    ...options
-  });
+const authUserId   = (req) => (req.user?.id != null ? String(req.user.id) : null);
+const publicUserId = (req) => (req.user?.id != null ? String(req.user.id) : null);
 
-const ipKeyForReq = (req) => {
-  const ip = req.ip ?? req.socket?.remoteAddress ?? '';
-  return ipKeyGenerator(ip || '0.0.0.0');
-};
+// ─── Global ───────────────────────────────────────────────────────────────────
 
-const rateLimitShared = (error) => ({
-  message:         { success: false, error },
-  standardHeaders: true,
-  legacyHeaders:   false,
-  validate:        { trustProxy: false },
+/** All `/api` traffic — IP-only sliding window baseline (200 / 15 min). */
+export const globalLimiter = createDualLimiter({
+  windowMs:  15 * 60 * 1000,
+  userCap:   null,
+  ipCap:     200,
+  error:     'Too many requests. Please try again later.',
+  namespace: 'global',
+  getUserId: () => null,
+});
+
+// ─── Auth routes ──────────────────────────────────────────────────────────────
+
+/** POST /api/auth/refresh — IP-only (no JWT before handler). */
+export const refreshTokenLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   null,
+  ipCap:     5,
+  error:     'Too many refresh requests. Please try again in a moment.',
+  namespace: 'authrefresh',
+  getUserId: () => null,
+});
+
+/** POST /api/auth/firebase-exchange — IP-only (10 / 15 min). All attempts count. */
+export const firebaseExchangeLimiter = createDualLimiter({
+  windowMs:  15 * 60 * 1000,
+  userCap:   null,
+  ipCap:     10,
+  error:     'Too many login attempts. Please try again after 15 minutes.',
+  namespace: 'authfbexchange',
+  getUserId: () => null,
+});
+
+/** POST /api/auth/firebase-register — IP-only (5 / 1 hour). */
+export const firebaseRegisterLimiter = createDualLimiter({
+  windowMs:  60 * 60 * 1000,
+  userCap:   null,
+  ipCap:     5,
+  error:     'Registration limit reached. Please try again after 1 hour.',
+  namespace: 'authfbregister',
+  getUserId: () => null,
 });
 
 /**
- * Guest: one IP bucket. Authenticated: same window/max on user id and on IP (shared by all accounts on that IP).
- * Returns [guestIpMw, authUserMw, authIpMw].
+ * POST /api/auth/logout — dual when authed (optionalAuthenticate runs first),
+ * IP-only when guest (publicUserId returns null).
+ * userCap 60 / ipCap 120 per minute.
  */
-const createGuestAndAuthDualLimiters = ({
-  windowMs,
-  maxGuest,
-  maxAuth,
-  error,
-  namespace,
-  skip = () => false,
-}) => {
-  const maxAuthFn = typeof maxAuth === 'function' ? maxAuth : () => maxAuth;
-  const shared = rateLimitShared(error);
+export const logoutLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     120,
+  error:     'Too many logout requests. Please try again in a moment.',
+  namespace: 'alogout',
+  getUserId: publicUserId,
+});
 
-  const guestMw = rateLimit({
-    windowMs,
-    max: maxGuest,
-    ...shared,
-    skip: (req) => skip(req) || !!req.user,
-    keyGenerator: (req) => `${namespace}:g:${ipKeyForReq(req)}`,
-  });
+/** GET /api/auth/me — dual; authenticate runs first so req.user is always set. */
+export const getMeLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many user session requests. Please try again in a moment.',
+  namespace: 'authme',
+  getUserId: authUserId,
+});
 
-  const userMw = rateLimit({
-    windowMs,
-    max: maxAuthFn,
-    ...shared,
-    skip: (req) => skip(req) || !req.user,
-    keyGenerator: (req) => `${namespace}:u:${req.user.id}`,
-  });
+// ─── User routes ──────────────────────────────────────────────────────────────
 
-  const authIpMw = rateLimit({
-    windowMs,
-    max: maxAuthFn,
-    ...shared,
-    skip: (req) => skip(req) || !req.user,
-    keyGenerator: (req) => `${namespace}:aip:${ipKeyForReq(req)}`,
-  });
+/** PATCH /api/user/profile — dual write limit (10 user / 30 IP per 15 min). */
+export const profileUpdateLimiter = createDualLimiter({
+  windowMs:  15 * 60 * 1000,
+  userCap:   10,
+  ipCap:     30,
+  error:     'Too many profile update requests. Please try again later.',
+  namespace: 'uprofile',
+  getUserId: authUserId,
+});
 
-  return [guestMw, userMw, authIpMw];
-};
+// ─── Property routes ──────────────────────────────────────────────────────────
 
-/** Authenticated routes only: user id + IP buckets (same max/window). */
-const createAuthOnlyDualLimiters = ({ windowMs, max, error, namespace }) => {
-  const maxFn = typeof max === 'function' ? max : () => max;
-  const shared = rateLimitShared(error);
+/** GET /api/property/stats/listings — dual admin read (60 user / 180 IP per min). */
+export const propertyStatsLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many listing stats requests. Please try again in a moment.',
+  namespace: 'pstatsread',
+  getUserId: authUserId,
+});
 
-  const userMw = rateLimit({
-    windowMs,
-    max: maxFn,
-    ...shared,
-    skip: (req) => !req.user,
-    keyGenerator: (req) => `${namespace}:u:${req.user.id}`,
-  });
-
-  const authIpMw = rateLimit({
-    windowMs,
-    max: maxFn,
-    ...shared,
-    skip: (req) => !req.user,
-    keyGenerator: (req) => `${namespace}:aip:${ipKeyForReq(req)}`,
-  });
-
-  return [userMw, authIpMw];
-};
-
-export const globalLimiter         = createLimiter(15 * 60 * 1000, 200, 'Too many requests. Please try again later.');
-// [OLD CODE] export const loginLimiter    = createLimiter(15 * 60 * 1000,  5, 'Too many login attempts. Please try again after 15 minutes.', { skipSuccessfulRequests: true });
-// [OLD CODE] export const registerLimiter = createLimiter(60 * 60 * 1000,  3, 'Maximum registration limit reached. Please try again after 1 hour.');
-export const refreshTokenLimiter   = createLimiter(     60 * 1000,   5, 'Too many refresh requests. Please try again in a moment.');
-export const firebaseExchangeLimiter  = createLimiter(15 * 60 * 1000, 10, 'Too many login attempts. Please try again after 15 minutes.', { skipSuccessfulRequests: true });
-export const firebaseRegisterLimiter  = createLimiter(60 * 60 * 1000,  5, 'Registration limit reached. Please try again after 1 hour.');
-export const profileUpdateLimiter     = createLimiter(15 * 60 * 1000, 10, 'Too many profile update requests. Please try again later.');
-
-/** POST /api/property — admin create; 10/min per user and per IP (authenticated). */
-export const propertyCreateDualLimiters = createAuthOnlyDualLimiters({
-  windowMs: 60 * 1000,
-  max:      10,
-  error:    'Property creation limit reached. Please slow down.',
+/** POST /api/property — dual admin write (10 user / 30 IP per min). */
+export const propertyCreateLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   10,
+  ipCap:     30,
+  error:     'Property creation limit reached. Please slow down.',
   namespace: 'pcreate',
+  getUserId: authUserId,
 });
-
-/** PATCH/DELETE property and image mutations — 30/min per user and per IP (authenticated). */
-export const propertyModifyDualLimiters = createAuthOnlyDualLimiters({
-  windowMs: 60 * 1000,
-  max:      30,
-  error:    'Too many property modifications. Please slow down.',
-  namespace: 'pmod',
-});
-
-/** GET /api/property when `search` is absent — guest IP-only; logged-in user + IP dual buckets. Skipped when `search` is set. */
-export const propertyListReadLimiters = createGuestAndAuthDualLimiters({
-  windowMs: PROPERTY_LIST_READ_WINDOW_MS,
-  maxGuest: PROPERTY_LIST_READ_MAX,
-  maxAuth:  PROPERTY_LIST_READ_MAX,
-  error:    'Too many property list requests. Please try again in a moment.',
-  namespace: 'plistread',
-  skip:     (req) => Boolean(String(req.query?.search ?? '').trim()),
-});
-
-/** GET /api/property/:id — guest IP-only; logged-in dual user + IP. Requires optionalAuthenticate before chain. */
-export const propertyByIdReadLimiters = createGuestAndAuthDualLimiters({
-  windowMs: PROPERTY_BY_ID_READ_WINDOW_MS,
-  maxGuest: PROPERTY_BY_ID_READ_MAX,
-  maxAuth:  PROPERTY_BY_ID_READ_MAX,
-  error:    'Too many property detail requests. Please try again in a moment.',
-  namespace: 'pbyid',
-});
-
-const propertySearchTierMaxAuth = (req) => {
-  if (req.user.role === 'admin') return PROPERTY_SEARCH_MAX_ADMIN;
-  return PROPERTY_SEARCH_MAX_USER;
-};
 
 /**
- * GET /api/property when `search` is set: guest 10/min IP; user 30/min and admin 100/min on both user id and IP keys.
- * Requires `optionalAuthenticate` before this middleware chain.
+ * PATCH/DELETE /api/property/:id and image mutations — shared modify bucket
+ * (30 user / 90 IP per min). All four mutation operations draw from the same
+ * namespace, so the combined total is capped at 30 per admin per minute.
  */
-export const propertyListSearchTieredLimiters = createGuestAndAuthDualLimiters({
-  windowMs: PROPERTY_LIST_SEARCH_WINDOW_MS,
-  maxGuest: PROPERTY_SEARCH_MAX_GUEST,
-  maxAuth:  propertySearchTierMaxAuth,
-  error:    'Too many property search requests. Please try again in a moment.',
+export const propertyModifyLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   30,
+  ipCap:     90,
+  error:     'Too many property modifications. Please slow down.',
+  namespace: 'pmod',
+  getUserId: authUserId,
+});
+
+/**
+ * GET /api/property without `search` — guests hit IP-only (publicUserId → null),
+ * authed users hit dual. Skipped when `search` query param is present.
+ * Requires optionalAuthenticate before.
+ */
+export const propertyListReadLimiter = createDualLimiter({
+  windowMs:  PROPERTY_LIST_READ_WINDOW_MS,
+  userCap:   PROPERTY_LIST_READ_USER_CAP,
+  ipCap:     PROPERTY_LIST_READ_USER_CAP * 2,
+  error:     'Too many property list requests. Please try again in a moment.',
+  namespace: 'plistread',
+  getUserId: publicUserId,
+  skip:      (req) => Boolean(String(req.query?.search ?? '').trim()),
+});
+
+/**
+ * GET /api/property/:id — guests IP-only, authed dual.
+ * Requires optionalAuthenticate before.
+ */
+export const propertyByIdReadLimiter = createDualLimiter({
+  windowMs:  PROPERTY_BY_ID_READ_WINDOW_MS,
+  userCap:   PROPERTY_BY_ID_READ_USER_CAP,
+  ipCap:     PROPERTY_BY_ID_READ_USER_CAP * 2,
+  error:     'Too many property detail requests. Please try again in a moment.',
+  namespace: 'pbyid',
+  getUserId: publicUserId,
+});
+
+const searchUserCapFn = (req) => {
+  if (!req.user) return PROPERTY_SEARCH_USER_CAP_GUEST;
+  if (req.user.role === 'admin') return PROPERTY_SEARCH_USER_CAP_ADMIN;
+  return PROPERTY_SEARCH_USER_CAP_USER;
+};
+
+const searchIpCapFn = (req) => searchUserCapFn(req) * 2;
+
+/**
+ * GET /api/property when `search` is set — tiered dual limiter.
+ *   Guest:  10 / window IP-only
+ *   User:   30 user / 60 IP per window, weighted dual
+ *   Admin: 100 user / 200 IP per window, weighted dual
+ * Requires optionalAuthenticate before. Skipped when `search` is absent.
+ */
+export const propertyListSearchLimiter = createDualLimiter({
+  windowMs:  PROPERTY_LIST_SEARCH_WINDOW_MS,
+  userCap:   searchUserCapFn,
+  ipCap:     searchIpCapFn,
+  error:     'Too many property search requests. Please try again in a moment.',
   namespace: 'propsearch',
-  skip:     (req) => !String(req.query?.search ?? '').trim(),
+  getUserId: publicUserId,
+  skip:      (req) => !String(req.query?.search ?? '').trim(),
 });

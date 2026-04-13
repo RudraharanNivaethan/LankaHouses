@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { authenticate, authorize, optionalAuthenticate } from '../middleware/authMiddleware.js';
 import {
-  propertyListReadLimiters,
-  propertyListSearchTieredLimiters,
-  propertyByIdReadLimiters,
-  propertyCreateDualLimiters,
-  propertyModifyDualLimiters,
+  propertyListReadLimiter,
+  propertyListSearchLimiter,
+  propertyByIdReadLimiter,
+  propertyCreateLimiter,
+  propertyModifyLimiter,
+  propertyStatsLimiter,
 } from '../middleware/rateLimitMiddleware.js';
 import { validateBody, validateParams, validateQuery } from '../validation/validationMiddleware.js';
 import {
@@ -33,7 +34,7 @@ router.post(
   '/',
   authenticate,
   authorize('admin'),
-  ...propertyCreateDualLimiters,
+  propertyCreateLimiter,
   ...propertyUploadBundle,
   requireImages,
   validateBody(createPropertySchema),
@@ -43,8 +44,8 @@ router.post(
 router.get(
   '/',
   optionalAuthenticate,
-  ...propertyListReadLimiters,
-  ...propertyListSearchTieredLimiters,
+  propertyListReadLimiter,
+  propertyListSearchLimiter,
   validateQuery(propertyQuerySchema),
   getProperties
 );
@@ -53,13 +54,14 @@ router.get(
   '/stats/listings',
   authenticate,
   authorize('admin'),
+  propertyStatsLimiter,
   getAdminListingStats
 );
 
 router.get(
   '/:id',
   optionalAuthenticate,
-  ...propertyByIdReadLimiters,
+  propertyByIdReadLimiter,
   validateParams(propertyIdParamsSchema),
   getPropertyById
 );
@@ -68,7 +70,7 @@ router.patch(
   '/:id',
   authenticate,
   authorize('admin'),
-  ...propertyModifyDualLimiters,
+  propertyModifyLimiter,
   validateParams(propertyIdParamsSchema),
   validateBody(updatePropertySchema),
   updateProperty
@@ -78,7 +80,7 @@ router.delete(
   '/:id',
   authenticate,
   authorize('admin'),
-  ...propertyModifyDualLimiters,
+  propertyModifyLimiter,
   validateParams(propertyIdParamsSchema),
   deleteProperty
 );
@@ -87,7 +89,7 @@ router.post(
   '/:id/images',
   authenticate,
   authorize('admin'),
-  ...propertyModifyDualLimiters,
+  propertyModifyLimiter,
   validateParams(propertyIdParamsSchema),
   ...propertyUploadBundle,
   requireImages,
@@ -98,7 +100,7 @@ router.delete(
   '/:id/images/:imageIndex',
   authenticate,
   authorize('admin'),
-  ...propertyModifyDualLimiters,
+  propertyModifyLimiter,
   validateParams(propertyImageIndexSchema),
   deleteImage
 );
