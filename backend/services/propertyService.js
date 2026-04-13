@@ -1,6 +1,7 @@
 import Property from '../models/Property.js';
 import { AppError, HTTP_STATUS } from '../utils/errorUtils.js';
 import { uploadImageBuffer, deleteImageByPublicId } from '../utils/cloudinary.js';
+import { escapeRegexLiteral } from '../validation/search/mongoSafeSearchQuery.js';
 
 const MAX_IMAGES = 10;
 
@@ -81,7 +82,44 @@ export const createPropertyRecord = async (data, processedImages = []) => {
   }
 };
 
-export const listProperties = async ({ district, province, type, listingType, status, furnished, minPrice, maxPrice, page, limit }) => {
+const TEXT_SEARCH_FIELDS = ['title', 'address', 'district', 'province', 'description'];
+
+/** Whitespace-separated tokens: each token must match at least one text field (AND across tokens). */
+function buildTextSearchClause(trimmedSearch) {
+  const tokens = trimmedSearch.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return undefined;
+  const perToken = tokens.map((token) => ({
+    $or: TEXT_SEARCH_FIELDS.map((field) => ({
+      [field]: new RegExp(escapeRegexLiteral(token), 'i'),
+    })),
+  }));
+  if (perToken.length === 1) return perToken[0];
+  return { $and: perToken };
+}
+
+/** Counts by status for admin dashboard (no pagination). */
+export const countListingsByStatus = async () => {
+  const [activeListings, soldListings, removedListings] = await Promise.all([
+    Property.countDocuments({ status: 'active' }),
+    Property.countDocuments({ status: 'sold' }),
+    Property.countDocuments({ status: 'removed' }),
+  ]);
+  return { activeListings, soldListings, removedListings };
+};
+
+export const listProperties = async ({
+  district,
+  province,
+  type,
+  listingType,
+  status,
+  furnished,
+  search,
+  minPrice,
+  maxPrice,
+  page,
+  limit,
+}) => {
   const filter = {};
 
   if (district)    filter.district    = district;
@@ -90,6 +128,13 @@ export const listProperties = async ({ district, province, type, listingType, st
   if (listingType) filter.listingType = listingType;
   if (furnished !== undefined) filter.furnished = furnished;
   filter.status = status ?? 'active';
+
+  const trimmedSearch = typeof search === 'string' ? search.trim() : '';
+  const textClause = buildTextSearchClause(trimmedSearch);
+  if (textClause) {
+    if (textClause.$and) filter.$and = textClause.$and;
+    else filter.$or = textClause.$or;
+  }
 
   if (minPrice !== undefined || maxPrice !== undefined) {
     filter.price = {};

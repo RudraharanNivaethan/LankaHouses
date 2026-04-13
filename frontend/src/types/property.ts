@@ -78,6 +78,8 @@ export interface PropertyQueryParams {
   type?: BackendPropertyType
   listingType?: ListingType
   status?: PropertyStatus
+  /** Case-insensitive substring match on title, address, district, province, description */
+  search?: string
   minPrice?: number
   maxPrice?: number
   page?: number
@@ -87,4 +89,15 @@ export interface PropertyQueryParams {
 export interface DeletePropertyApiResponse {
   success: boolean
   message: string
+}
+
+export interface AdminListingStats {
+  activeListings: number
+  soldListings: number
+  removedListings: number
+}
+
+export interface AdminListingStatsApiResponse {
+  success: boolean
+  data: AdminListingStats
 }

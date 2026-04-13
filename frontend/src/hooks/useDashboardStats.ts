@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
+import { getAdminListingStats } from '../services/propertyService'
 
 export interface DashboardStats {
   activeListings: number
+  soldListings: number
+  removedListings: number
   totalInquiries: number
   pendingInquiries: number
 }
 
-const MOCK_STATS: DashboardStats = {
-  activeListings: 24,
+const MOCK_INQUIRY_STATS = {
   totalInquiries: 68,
   pendingInquiries: 12,
 }
@@ -24,9 +26,15 @@ export function useDashboardStats() {
       setIsLoading(true)
       setError(null)
       try {
-        // TODO: Replace with real API call — e.g. const data = await getDashboardStats()
-        await new Promise((r) => setTimeout(r, 400))
-        if (active) setStats(MOCK_STATS)
+        const { data } = await getAdminListingStats()
+        if (active) {
+          setStats({
+            activeListings: data.activeListings,
+            soldListings: data.soldListings,
+            removedListings: data.removedListings,
+            ...MOCK_INQUIRY_STATS,
+          })
+        }
       } catch {
         if (active) setError('Failed to load dashboard stats.')
       } finally {

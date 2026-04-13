@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { searchQueryField } from '../search/mongoSafeSearchQuery.js';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Villa'];
 const LISTING_TYPES  = ['sale', 'rent'];
@@ -94,6 +95,7 @@ export const propertyQuerySchema = z.object({
   listingType: listingTypeField.optional(),
   status:      statusField.optional(),
   furnished:   furnishedField.optional(),
+  search:      searchQueryField,
   minPrice:    z.coerce.number().positive('minPrice must be a positive number').optional(),
   maxPrice:    z.coerce.number().positive('maxPrice must be a positive number').optional(),
   page:        z.coerce.number().int().min(1, 'Page must be at least 1').optional().default(1),

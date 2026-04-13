@@ -3,6 +3,7 @@ import type {
   PropertiesListApiResponse,
   PropertyQueryParams,
   DeletePropertyApiResponse,
+  AdminListingStatsApiResponse,
 } from '../types/property'
 import type { AddPropertySchema } from '../schemas/property'
 
@@ -32,6 +33,13 @@ export async function createProperty(formData: FormData): Promise<PropertyApiRes
   const data = await res.json()
   if (!res.ok) throw new Error(extractErrorMessage(data))
   return data as PropertyApiResponse
+}
+
+export async function getAdminListingStats(): Promise<AdminListingStatsApiResponse> {
+  const res = await fetch(`${API_BASE}/stats/listings`, { credentials: 'include' })
+  const data = await res.json()
+  if (!res.ok) throw new Error(extractErrorMessage(data))
+  return data as AdminListingStatsApiResponse
 }
 
 export async function getProperties(query: PropertyQueryParams = {}): Promise<PropertiesListApiResponse> {

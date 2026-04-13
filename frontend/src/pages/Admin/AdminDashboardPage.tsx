@@ -28,6 +28,8 @@ export function AdminDashboardPage() {
             <>
               <DashboardStats
                 activeListings={stats.activeListings}
+                soldListings={stats.soldListings}
+                removedListings={stats.removedListings}
                 totalInquiries={stats.totalInquiries}
                 pendingInquiries={stats.pendingInquiries}
               />

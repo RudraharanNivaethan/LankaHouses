@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
-type IconColor = 'brand' | 'emerald' | 'blue' | 'amber'
+type IconColor = 'brand' | 'emerald' | 'blue' | 'amber' | 'rose'
 
 interface TrendProps {
   value: string
@@ -35,6 +35,7 @@ const iconColorClasses: Record<IconColor, { box: string; text: string; border: s
   emerald: { box: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-t-emerald-500' },
   blue:    { box: 'bg-blue-50',    text: 'text-blue-600',    border: 'border-t-blue-500' },
   amber:   { box: 'bg-amber-50',   text: 'text-amber-600',   border: 'border-t-amber-500' },
+  rose:    { box: 'bg-rose-50',    text: 'text-rose-600',    border: 'border-t-rose-500' },
 }
 
 function CardContent({ icon, value, label, trend, iconColor = 'brand' }: Omit<StatCardProps, 'href' | 'className'>) {
