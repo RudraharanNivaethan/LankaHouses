@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from '../context/AuthContext'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
 import { HomePage } from '../pages/Home/HomePage'
+import { ListingsPage } from '../pages/Listings/ListingsPage'
+import { PublicPropertyDetailPage } from '../pages/Listings/PublicPropertyDetailPage'
 import { LoginPage } from '../pages/Auth/LoginPage'
 import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
@@ -15,7 +17,7 @@ import { AdminEditHousePage } from '../pages/Admin/AdminEditHousePage'
 import { AdminHouseDetailPage } from '../pages/Admin/AdminHouseDetailPage'
 import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
-import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
+import { ROUTES, isAdminAllowedPublicPath } from '../constants/routes'
 
 function AuthLoadingScreen() {
   return (
@@ -79,7 +81,7 @@ function MainLayout() {
   if (isLoading) return <AuthLoadingScreen />
 
   if (isAuthenticated && user?.role === 'admin') {
-    if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
+    if (!isAdminAllowedPublicPath(location.pathname)) {
       return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
     }
   }
@@ -90,6 +92,8 @@ function MainLayout() {
       <main className="flex flex-1 flex-col">
         <Routes>
           <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route path={ROUTES.LISTINGS} element={<ListingsPage />} />
+          <Route path={ROUTES.LISTING_DETAIL} element={<PublicPropertyDetailPage />} />
 
           {/* Protected routes */}
           <Route

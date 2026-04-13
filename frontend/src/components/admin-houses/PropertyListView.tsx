@@ -46,6 +46,7 @@ export function PropertyListView() {
     setPage,
     setFilters,
     query,
+    refetch,
   } = useProperties(initialStatus ? { status: initialStatus } : {})
 
   const [searchInput, setSearchInput] = useState('')
@@ -134,7 +135,7 @@ export function PropertyListView() {
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {properties.map((property) => (
-              <PropertyListCard key={property._id} property={property} />
+              <PropertyListCard key={property._id} property={property} onStatusUpdated={refetch} />
             ))}
           </div>
 

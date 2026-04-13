@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PROPERTY_TYPES, LISTING_TYPES } from '../constants/property'
+import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../constants/property'
 
 export const addPropertySchema = z.object({
   title: z
@@ -81,6 +81,7 @@ export const addPropertySchema = z.object({
     .string()
     .min(1, 'Contact number is required')
     .max(20, 'Contact number must be at most 20 characters'),
+  status: z.enum(PROPERTY_STATUSES).optional(),
 })
 
 export type AddPropertySchema = z.infer<typeof addPropertySchema>

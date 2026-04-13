@@ -3,6 +3,7 @@ import {
   createPropertyRecord,
   listProperties,
   findPropertyById,
+  assertPropertyVisibleToViewer,
   updatePropertyRecord,
   removeProperty,
   addPropertyImages,
@@ -32,7 +33,10 @@ export const getAdminListingStats = async (_req, res) => {
 
 export const getProperties = async (req, res) => {
   try {
-    const result = await listProperties(req.validatedQuery);
+    const result = await listProperties({
+      ...req.validatedQuery,
+      viewerIsAdmin: req.user?.role === 'admin',
+    });
     return res.status(200).json({
       success: true,
       data:       result.properties,
@@ -52,6 +56,7 @@ export const getProperties = async (req, res) => {
 export const getPropertyById = async (req, res) => {
   try {
     const property = await findPropertyById(req.validatedParams.id);
+    assertPropertyVisibleToViewer(property, req.user?.role);
     return res.status(200).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);

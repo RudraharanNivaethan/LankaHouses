@@ -11,7 +11,8 @@ import { PropertyDetailsSection } from '../add-property/PropertyDetailsSection'
 import { LocationSection } from '../add-property/LocationSection'
 import { ImageUploadSection } from '../add-property/ImageUploadSection'
 import { appendPropertyImages, removePropertyImage } from '../../services/propertyService'
-import { MAX_IMAGES, MAX_IMAGE_SIZE_MB } from '../../constants/property'
+import { MAX_IMAGES, MAX_IMAGE_SIZE_MB, PROPERTY_STATUSES, STATUS_LABELS } from '../../constants/property'
+import { Select } from '../ui/Select'
 import { ROUTES } from '../../constants/routes'
 
 export function PropertyEditForm() {
@@ -117,6 +118,24 @@ export function PropertyEditForm() {
           {noticeMessage}
         </div>
       ) : null}
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+        <h2 className="mb-4 text-base font-semibold text-slate-800">Listing status</h2>
+        <Select
+          label="Status"
+          options={PROPERTY_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+          {...register('status')}
+        />
+        {errors.status ? (
+          <p id="status-error" className="mt-1.5 text-sm text-red-600">
+            {errors.status.message}
+          </p>
+        ) : null}
+        <p className="mt-3 text-xs text-slate-500">
+          <strong>Active</strong> — visible and inquiries open. <strong>Sold</strong> — still visible; inquire is disabled.{' '}
+          <strong>Removed</strong> — hidden from the public site.
+        </p>
+      </section>
 
       <PropertyDetailsSection register={register} errors={errors} />
       <LocationSection register={register} errors={errors} />

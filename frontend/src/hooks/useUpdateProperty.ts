@@ -25,6 +25,7 @@ function toFormValues(record: PropertyRecord): AddPropertySchema {
     province:      record.province,
     description:   record.description,
     contactNumber: record.contactNumber,
+    status:        record.status,
   }
 }
 

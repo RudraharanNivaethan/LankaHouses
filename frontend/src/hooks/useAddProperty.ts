@@ -50,6 +50,7 @@ export function useAddProperty() {
     const formData = new FormData()
 
     for (const [key, value] of Object.entries(data)) {
+      if (value === undefined || value === null) continue
       formData.append(key, String(value))
     }
 

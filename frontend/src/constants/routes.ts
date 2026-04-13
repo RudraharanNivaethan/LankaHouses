@@ -7,6 +7,8 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   PROFILE: '/profile',
   LISTINGS: '/listings',
+  /** Public property detail (not admin `/admin/houses/:id`). */
+  LISTING_DETAIL: '/listings/:id',
   ABOUT: '/about',
   CONTACT: '/contact',
   INQUIRY: '/inquiry',
@@ -33,5 +35,12 @@ export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
  *
  * Add a ROUTES.XXX value here to grant admin access to that public page.
  */
-export const ADMIN_PERMITTED_PATHS: readonly string[] = []
+/** Exact paths; listing detail uses `isAdminAllowedPublicPath`. */
+export const ADMIN_PERMITTED_PATHS: readonly string[] = [ROUTES.LISTINGS]
+
+/** Admins may preview public listing + detail without being redirected to the dashboard. */
+export function isAdminAllowedPublicPath(pathname: string): boolean {
+  if (pathname === ROUTES.LISTINGS) return true
+  return /^\/listings\/[^/]+$/.test(pathname)
+}
 

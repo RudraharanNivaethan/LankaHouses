@@ -107,6 +107,7 @@ export const countListingsByStatus = async () => {
   return { activeListings, soldListings, removedListings };
 };
 
+/** Non-admins never see `removed`; default list is active + sold (sold still visible, inquire disabled in UI). */
 export const listProperties = async ({
   district,
   province,
@@ -119,6 +120,7 @@ export const listProperties = async ({
   maxPrice,
   page,
   limit,
+  viewerIsAdmin = false,
 }) => {
   const filter = {};
 
@@ -127,7 +129,21 @@ export const listProperties = async ({
   if (type)        filter.type        = type;
   if (listingType) filter.listingType = listingType;
   if (furnished !== undefined) filter.furnished = furnished;
-  filter.status = status ?? 'active';
+
+  const statusUnset = status === undefined || status === null || status === '';
+  if (statusUnset) {
+    if (viewerIsAdmin) {
+      // all lifecycle states
+    } else {
+      filter.status = { $in: ['active', 'sold'] };
+    }
+  } else if (!viewerIsAdmin && status === 'removed') {
+    filter._id = { $in: [] };
+  } else if (!viewerIsAdmin && (status === 'active' || status === 'sold')) {
+    filter.status = status;
+  } else {
+    filter.status = status;
+  }
 
   const trimmedSearch = typeof search === 'string' ? search.trim() : '';
   const textClause = buildTextSearchClause(trimmedSearch);
@@ -166,6 +182,13 @@ export const findPropertyById = async (id) => {
     throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
   }
   return property;
+};
+
+/** Removed listings are not visible to guests or customers (404), but admins can still open them. */
+export const assertPropertyVisibleToViewer = (property, viewerRole) => {
+  if (property.status === 'removed' && viewerRole !== 'admin') {
+    throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
+  }
 };
 
 export const updatePropertyRecord = async (id, validatedBody) => {

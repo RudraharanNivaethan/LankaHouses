@@ -5,7 +5,7 @@ import type {
   DeletePropertyApiResponse,
   AdminListingStatsApiResponse,
 } from '../types/property'
-import type { AddPropertySchema } from '../schemas/property'
+import type { UpdatePropertySchema } from '../schemas/property'
 
 const API_BASE = '/api/property'
 
@@ -62,8 +62,8 @@ export async function getPropertyById(id: string): Promise<PropertyApiResponse> 
   return data as PropertyApiResponse
 }
 
-/** Text fields only — images use `appendPropertyImages` / `removePropertyImage`. */
-export async function updateProperty(id: string, payload: AddPropertySchema): Promise<PropertyApiResponse> {
+/** Scalar fields — images use `appendPropertyImages` / `removePropertyImage`. */
+export async function updateProperty(id: string, payload: UpdatePropertySchema): Promise<PropertyApiResponse> {
   const res = await fetch(`${API_BASE}/${id}`, {
     method: 'PATCH',
     credentials: 'include',
