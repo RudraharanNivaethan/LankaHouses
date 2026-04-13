@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { authenticate, authorize, optionalAuthenticate } from '../middleware/authMiddleware.js';
 import {
-  propertyListReadLimiter,
-  propertyListSearchTieredLimiter,
-  propertyByIdReadLimiter,
-  propertyCreateLimiter,
-  propertyModifyLimiter,
+  propertyListReadLimiters,
+  propertyListSearchTieredLimiters,
+  propertyByIdReadLimiters,
+  propertyCreateDualLimiters,
+  propertyModifyDualLimiters,
 } from '../middleware/rateLimitMiddleware.js';
 import { validateBody, validateParams, validateQuery } from '../validation/validationMiddleware.js';
 import {
@@ -33,7 +33,7 @@ router.post(
   '/',
   authenticate,
   authorize('admin'),
-  propertyCreateLimiter,
+  ...propertyCreateDualLimiters,
   ...propertyUploadBundle,
   requireImages,
   validateBody(createPropertySchema),
@@ -43,8 +43,8 @@ router.post(
 router.get(
   '/',
   optionalAuthenticate,
-  propertyListReadLimiter,
-  propertyListSearchTieredLimiter,
+  ...propertyListReadLimiters,
+  ...propertyListSearchTieredLimiters,
   validateQuery(propertyQuerySchema),
   getProperties
 );
@@ -58,7 +58,8 @@ router.get(
 
 router.get(
   '/:id',
-  propertyByIdReadLimiter,
+  optionalAuthenticate,
+  ...propertyByIdReadLimiters,
   validateParams(propertyIdParamsSchema),
   getPropertyById
 );
@@ -67,7 +68,7 @@ router.patch(
   '/:id',
   authenticate,
   authorize('admin'),
-  propertyModifyLimiter,
+  ...propertyModifyDualLimiters,
   validateParams(propertyIdParamsSchema),
   validateBody(updatePropertySchema),
   updateProperty
@@ -77,7 +78,7 @@ router.delete(
   '/:id',
   authenticate,
   authorize('admin'),
-  propertyModifyLimiter,
+  ...propertyModifyDualLimiters,
   validateParams(propertyIdParamsSchema),
   deleteProperty
 );
@@ -86,7 +87,7 @@ router.post(
   '/:id/images',
   authenticate,
   authorize('admin'),
-  propertyModifyLimiter,
+  ...propertyModifyDualLimiters,
   validateParams(propertyIdParamsSchema),
   ...propertyUploadBundle,
   requireImages,
@@ -97,7 +98,7 @@ router.delete(
   '/:id/images/:imageIndex',
   authenticate,
   authorize('admin'),
-  propertyModifyLimiter,
+  ...propertyModifyDualLimiters,
   validateParams(propertyImageIndexSchema),
   deleteImage
 );
