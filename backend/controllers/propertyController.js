@@ -9,6 +9,7 @@ import {
   deletePropertyImage,
   countListingsByStatus,
 } from '../services/propertyService.js';
+import { STATUS_VALUES } from '../validation/schemas/propertySchema.js';
 
 export const createProperty = async (req, res) => {
   try {
@@ -104,4 +105,11 @@ export const deleteImage = async (req, res) => {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);
   }
+};
+
+export const getPropertyStatuses = async (_req, res) => {
+  return res.status(200).json({
+    success: true,
+    data: { statuses: STATUS_VALUES },
+  });
 };

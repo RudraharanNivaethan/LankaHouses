@@ -13,11 +13,13 @@ import { ImageUploadSection } from '../add-property/ImageUploadSection'
 import { appendPropertyImages, removePropertyImage } from '../../services/propertyService'
 import { MAX_IMAGES, MAX_IMAGE_SIZE_MB } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
+import { usePropertyStatuses } from '../../hooks/usePropertyStatuses'
 
 export function PropertyEditForm() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { property, isLoading: isFetching, error: fetchError, refetch } = useProperty(id)
+  const { options: statusOptions, isLoading: isStatusLoading, error: statusError } = usePropertyStatuses()
 
   const {
     register,
@@ -118,7 +120,20 @@ export function PropertyEditForm() {
         </div>
       ) : null}
 
-      <PropertyDetailsSection register={register} errors={errors} />
+      <PropertyDetailsSection
+        register={register}
+        errors={errors}
+        showStatus
+        statusOptions={statusOptions}
+        statusDisabled={isStatusLoading || !!statusError}
+        statusHint={
+          statusError
+            ? 'Could not load allowed statuses. Please refresh the page.'
+            : isStatusLoading
+              ? 'Loading allowed statuses…'
+              : undefined
+        }
+      />
       <LocationSection register={register} errors={errors} />
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">

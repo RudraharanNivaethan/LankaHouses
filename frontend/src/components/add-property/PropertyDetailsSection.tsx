@@ -9,12 +9,23 @@ import { PROPERTY_TYPES, LISTING_TYPES } from '../../constants/property'
 interface PropertyDetailsSectionProps {
   register: UseFormRegister<AddPropertySchema>
   errors: FieldErrors<AddPropertySchema>
+  showStatus?: boolean
+  statusOptions?: { value: string; label: string }[]
+  statusDisabled?: boolean
+  statusHint?: string
 }
 
 const propertyTypeOptions = PROPERTY_TYPES.map((t) => ({ value: t, label: t }))
 const listingTypeOptions = LISTING_TYPES.map((t) => ({ value: t, label: t.charAt(0).toUpperCase() + t.slice(1) }))
 
-export function PropertyDetailsSection({ register, errors }: PropertyDetailsSectionProps) {
+export function PropertyDetailsSection({
+  register,
+  errors,
+  showStatus,
+  statusOptions,
+  statusDisabled,
+  statusHint,
+}: PropertyDetailsSectionProps) {
   return (
     <FormSection title="Property Details" description="Basic information about the property.">
       <div className="sm:col-span-2">
@@ -51,6 +62,22 @@ export function PropertyDetailsSection({ register, errors }: PropertyDetailsSect
         error={errors.listingType?.message}
         {...register('listingType')}
       />
+
+      {/* Admin edit only (when enabled by parent) */}
+      {/*
+        Note: We intentionally keep status out of the public add-property flow by default.
+      */}
+      {showStatus ? (
+        <Select
+          label="Status"
+          options={statusOptions ?? []}
+          placeholder={statusDisabled ? 'Loading statuses…' : 'Select status'}
+          disabled={statusDisabled}
+          hint={statusHint}
+          error={errors.status?.message}
+          {...register('status')}
+        />
+      ) : null}
 
       <Input
         label="Bedrooms"

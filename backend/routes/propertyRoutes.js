@@ -7,6 +7,7 @@ import {
   propertyCreateLimiter,
   propertyModifyLimiter,
   propertyStatsLimiter,
+  propertyMetaLimiter,
 } from '../middleware/rateLimitMiddleware.js';
 import { validateBody, validateParams, validateQuery } from '../validation/validationMiddleware.js';
 import {
@@ -20,6 +21,7 @@ import { propertyUploadBundle, requireImages } from '../middleware/uploadMiddlew
 import {
   createProperty,
   getAdminListingStats,
+  getPropertyStatuses,
   getProperties,
   getPropertyById,
   updateProperty,
@@ -56,6 +58,14 @@ router.get(
   authorize('admin'),
   propertyStatsLimiter,
   getAdminListingStats
+);
+
+router.get(
+  '/meta/statuses',
+  authenticate,
+  authorize('admin'),
+  propertyMetaLimiter,
+  getPropertyStatuses
 );
 
 router.get(

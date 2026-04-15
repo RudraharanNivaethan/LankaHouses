@@ -141,6 +141,16 @@ export const propertyStatsLimiter = createDualLimiter({
   getUserId: authUserId,
 });
 
+/** GET /api/property/meta/* — dual admin meta reads (60 user / 180 IP per min). */
+export const propertyMetaLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many property meta requests. Please try again in a moment.',
+  namespace: 'pmetaread',
+  getUserId: authUserId,
+});
+
 /** POST /api/property — dual admin write (10 user / 30 IP per min). */
 export const propertyCreateLimiter = createDualLimiter({
   windowMs:  60 * 1000,
