@@ -3,7 +3,7 @@ import { searchQueryField } from '../search/mongoSafeSearchQuery.js';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Villa'];
 const LISTING_TYPES  = ['sale', 'rent'];
-const STATUS_VALUES  = ['active', 'sold', 'removed'];
+export const STATUS_VALUES  = ['active', 'sold', 'removed'];
 
 const titleField          = z.string().min(1, 'Title cannot be empty').max(200, 'Title must be at most 200 characters');
 const priceField          = z.preprocess(
