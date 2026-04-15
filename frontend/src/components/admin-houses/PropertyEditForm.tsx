@@ -10,8 +10,10 @@ import { Spinner } from '../ui/Spinner'
 import { PropertyDetailsSection } from '../add-property/PropertyDetailsSection'
 import { LocationSection } from '../add-property/LocationSection'
 import { ImageUploadSection } from '../add-property/ImageUploadSection'
+import { Select } from '../ui/Select'
+import { StatusBadge } from '../ui/StatusBadge'
 import { appendPropertyImages, removePropertyImage } from '../../services/propertyService'
-import { MAX_IMAGES, MAX_IMAGE_SIZE_MB, STATUS_LABELS } from '../../constants/property'
+import { MAX_IMAGES, MAX_IMAGE_SIZE_MB, STATUS_COLORS, STATUS_LABELS } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
 import { usePropertyStatuses } from '../../hooks/usePropertyStatuses'
 
@@ -146,19 +148,46 @@ export function PropertyEditForm() {
         </div>
       ) : null}
 
+      <section className="rounded-2xl border border-brand/30 bg-brand/5 p-5 sm:p-6">
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Listing status</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              This controls whether the property is visible and how it appears to customers.
+            </p>
+          </div>
+          <StatusBadge
+            status={property.status}
+            label={STATUS_LABELS[property.status]}
+            colors={STATUS_COLORS[property.status]}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Select
+              label="Status"
+              options={mergedStatusOptions}
+              placeholder={isStatusLoading ? 'Loading statuses…' : 'Select status'}
+              disabled={isStatusLoading || !!statusError}
+              hint={
+                statusError
+                  ? 'Could not load allowed statuses. Please refresh the page.'
+                  : isStatusLoading
+                    ? 'Loading allowed statuses…'
+                    : undefined
+              }
+              error={errors.status?.message}
+              className="text-base border-brand/40 bg-white focus:ring-brand/30 focus:border-brand"
+              {...register('status')}
+            />
+          </div>
+        </div>
+      </section>
+
       <PropertyDetailsSection
         register={register}
         errors={errors}
-        showStatus
-        statusOptions={mergedStatusOptions}
-        statusDisabled={isStatusLoading || !!statusError}
-        statusHint={
-          statusError
-            ? 'Could not load allowed statuses. Please refresh the page.'
-            : isStatusLoading
-              ? 'Loading allowed statuses…'
-              : undefined
-        }
       />
       <LocationSection register={register} errors={errors} />
 
