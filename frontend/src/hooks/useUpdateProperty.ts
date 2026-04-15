@@ -47,6 +47,8 @@ export function useUpdateProperty(
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
+    watch,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod coerce input types are `unknown`, safe at runtime
   } = useForm<AddPropertySchema>({
     resolver: zodResolver(addPropertySchema) as any,
@@ -113,5 +115,7 @@ export function useUpdateProperty(
     apiError,
     successMessage,
     noticeMessage,
+    setValue,
+    watch,
   }
 }

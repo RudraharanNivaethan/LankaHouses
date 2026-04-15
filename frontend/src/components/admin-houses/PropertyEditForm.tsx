@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useProperty } from '../../hooks/useProperty'
 import { useUpdateProperty } from '../../hooks/useUpdateProperty'
@@ -11,7 +11,7 @@ import { PropertyDetailsSection } from '../add-property/PropertyDetailsSection'
 import { LocationSection } from '../add-property/LocationSection'
 import { ImageUploadSection } from '../add-property/ImageUploadSection'
 import { appendPropertyImages, removePropertyImage } from '../../services/propertyService'
-import { MAX_IMAGES, MAX_IMAGE_SIZE_MB } from '../../constants/property'
+import { MAX_IMAGES, MAX_IMAGE_SIZE_MB, STATUS_LABELS } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
 import { usePropertyStatuses } from '../../hooks/usePropertyStatuses'
 
@@ -30,11 +30,37 @@ export function PropertyEditForm() {
     apiError,
     successMessage,
     noticeMessage,
+    setValue,
+    watch,
   } = useUpdateProperty(property, {
     onFieldsSaved: (record) => {
       navigate(ROUTES.ADMIN_HOUSE_DETAIL.replace(':id', record._id), { replace: true })
     },
   })
+
+  const mergedStatusOptions = useMemo(() => {
+    const current = property?.status
+    if (!current) return statusOptions
+    if (statusOptions.some((o) => o.value === current)) return statusOptions
+    return [{ value: current, label: STATUS_LABELS[current] ?? current }, ...statusOptions]
+  }, [property?.status, statusOptions])
+
+  // Ensure the select reflects the backend status even if meta options arrive after form reset.
+  useEffect(() => {
+    const current = property?.status
+    if (!current) return
+    if (isStatusLoading) return
+    if (statusError) return
+    if (mergedStatusOptions.length === 0) return
+
+    const formStatus = watch('status')
+    if (formStatus === current) return
+
+    // If the form is empty/invalid due to late option hydration, re-sync to backend value.
+    if (!formStatus || !mergedStatusOptions.some((o) => o.value === formStatus)) {
+      setValue('status', current, { shouldDirty: false, shouldTouch: false })
+    }
+  }, [property?.status, isStatusLoading, statusError, mergedStatusOptions, setValue, watch])
 
   const [appendFiles, setAppendFiles] = useState<File[]>([])
   const [appendBusy, setAppendBusy] = useState(false)
@@ -124,7 +150,7 @@ export function PropertyEditForm() {
         register={register}
         errors={errors}
         showStatus
-        statusOptions={statusOptions}
+        statusOptions={mergedStatusOptions}
         statusDisabled={isStatusLoading || !!statusError}
         statusHint={
           statusError
