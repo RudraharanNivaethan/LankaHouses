@@ -7,6 +7,7 @@ import {
   propertyCreateLimiter,
   propertyModifyLimiter,
   propertyStatsLimiter,
+  propertyMetaLimiter,
 } from '../middleware/rateLimitMiddleware.js';
 import { validateBody, validateParams, validateQuery } from '../validation/validationMiddleware.js';
 import {
@@ -63,7 +64,7 @@ router.get(
   '/meta/statuses',
   authenticate,
   authorize('admin'),
-  propertyStatsLimiter,
+  propertyMetaLimiter,
   getPropertyStatuses
 );
 
