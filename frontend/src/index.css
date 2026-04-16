@@ -14,9 +14,7 @@
   --color-brand-dark:  #9F1239;
   --color-brand-light: #E11D48;
 
-  /* Listings / browse layout — semantic surfaces (no hex in components) */
-  --color-surface:            #ffffff;
-  --color-surface-muted:      #f8f9fa;
-  --color-listings-banner-from: #ffffff;
-  --color-listings-banner-to:   #fdf2f4;
+  /* Semantic surface tokens (no hex in components) */
+  --color-surface:       #ffffff;
+  --color-surface-muted: #f8f9fa;
 }

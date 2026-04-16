@@ -158,6 +158,17 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
 
   return (
     <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          {variant === 'admin' ? 'All Properties' : 'All Listings'}
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          {variant === 'admin'
+            ? 'Manage, filter, and review all properties in the system.'
+            : 'Search and filter the full catalogue of verified Sri Lankan properties.'}
+        </p>
+      </div>
+
       <div className="w-full min-w-0 rounded-2xl border border-slate-200/80 bg-surface p-4 shadow-sm sm:p-5">
         <div className="w-full min-w-0">
           <SearchBar
