@@ -1,18 +1,37 @@
 import { Link } from 'react-router-dom'
+import { LISTING_TYPES, PROPERTY_TYPES } from '../../constants/property'
+import { ROUTES } from '../../constants/routes'
+import type { BackendPropertyType, ListingType } from '../../types/property'
 
 const QUICK_LINKS = [
-  { label: 'Browse Listings', to: '/listings' },
-  { label: 'About Us', to: '/about' },
-  { label: 'Contact', to: '/contact' },
-  { label: 'Submit Inquiry', to: '/inquiry' },
+  { label: 'Browse Listings', to: ROUTES.LISTINGS },
+  { label: 'About Us', to: ROUTES.ABOUT },
+  { label: 'Contact', to: ROUTES.CONTACT },
+  { label: 'Submit Inquiry', to: ROUTES.INQUIRY },
 ]
 
-const PROPERTY_TYPES = [
-  { label: 'Houses', to: '/listings?type=House' },
-  { label: 'Apartments', to: '/listings?type=Apartment' },
-  { label: 'Villas', to: '/listings?type=Villa' },
-  { label: 'Land', to: '/listings?type=Land' },
-]
+const PROPERTY_TYPE_PLURAL_LABEL: Record<BackendPropertyType, string> = {
+  Apartment: 'Apartments',
+  House: 'Houses',
+  Villa: 'Villas',
+}
+
+const FOOTER_PROPERTY_TYPE_LINKS = PROPERTY_TYPES.map((type) => ({
+  type,
+  label: PROPERTY_TYPE_PLURAL_LABEL[type],
+  to: `${ROUTES.LISTINGS}?type=${encodeURIComponent(type)}`,
+}))
+
+const LISTING_TYPE_LABEL: Record<ListingType, string> = {
+  sale: 'For sale',
+  rent: 'For rent',
+}
+
+const FOOTER_LISTING_TYPE_LINKS = LISTING_TYPES.map((listingType) => ({
+  listingType,
+  label: LISTING_TYPE_LABEL[listingType],
+  to: `${ROUTES.LISTINGS}?listingType=${encodeURIComponent(listingType)}`,
+}))
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -20,10 +39,10 @@ export function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-400">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to={ROUTES.HOME} className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white font-bold text-sm">
                 LH
               </span>
@@ -61,8 +80,27 @@ export function Footer() {
               Property Types
             </h3>
             <ul className="space-y-2.5">
-              {PROPERTY_TYPES.map(({ label, to }) => (
-                <li key={to}>
+              {FOOTER_PROPERTY_TYPE_LINKS.map(({ type, label, to }) => (
+                <li key={type}>
+                  <Link
+                    to={to}
+                    className="text-sm transition-colors hover:text-brand-light"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Listing types */}
+          <div>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-200">
+              Listing Types
+            </h3>
+            <ul className="space-y-2.5">
+              {FOOTER_LISTING_TYPE_LINKS.map(({ listingType, label, to }) => (
+                <li key={listingType}>
                   <Link
                     to={to}
                     className="text-sm transition-colors hover:text-brand-light"

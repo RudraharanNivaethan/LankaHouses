@@ -33,7 +33,8 @@ export const getAdminListingStats = async (_req, res) => {
 
 export const getProperties = async (req, res) => {
   try {
-    const result = await listProperties(req.validatedQuery);
+    const viewerIsAdmin = req.user?.role === 'admin';
+    const result = await listProperties(req.validatedQuery, { viewerIsAdmin });
     return res.status(200).json({
       success: true,
       data:       result.properties,
@@ -52,7 +53,8 @@ export const getProperties = async (req, res) => {
 
 export const getPropertyById = async (req, res) => {
   try {
-    const property = await findPropertyById(req.validatedParams.id);
+    const viewerIsAdmin = req.user?.role === 'admin';
+    const property = await findPropertyById(req.validatedParams.id, { viewerIsAdmin });
     return res.status(200).json({ success: true, data: property });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);

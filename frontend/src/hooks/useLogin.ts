@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { firebaseAuth } from '../config/firebase'
 import { loginSchema } from '../schemas/auth'
 import { firebaseExchange } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
-import { ROUTES } from '../constants/routes'
+import { getPostAuthDestination } from '../utils/authRedirect'
 import type { LoginFormData } from '../types/auth'
 
 function mapFirebaseLoginError(code: string): string {
@@ -37,6 +37,7 @@ export function useLogin() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const onSubmit = form.handleSubmit(async (data) => {
     setServerError(null)
@@ -46,7 +47,7 @@ export function useLogin() {
       const idToken = await credential.user.getIdToken()
       await firebaseExchange(idToken)
       const me = await refreshUser()
-      navigate(me?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME, { replace: true })
+      navigate(getPostAuthDestination(me, searchParams), { replace: true })
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {

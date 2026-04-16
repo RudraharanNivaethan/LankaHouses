@@ -107,19 +107,22 @@ export const countListingsByStatus = async () => {
   return { activeListings, soldListings, removedListings };
 };
 
-export const listProperties = async ({
-  district,
-  province,
-  type,
-  listingType,
-  status,
-  furnished,
-  search,
-  minPrice,
-  maxPrice,
-  page,
-  limit,
-}) => {
+export const listProperties = async (
+  {
+    district,
+    province,
+    type,
+    listingType,
+    status,
+    furnished,
+    search,
+    minPrice,
+    maxPrice,
+    page,
+    limit,
+  },
+  { viewerIsAdmin = false } = {},
+) => {
   const filter = {};
 
   if (district)    filter.district    = district;
@@ -127,7 +130,7 @@ export const listProperties = async ({
   if (type)        filter.type        = type;
   if (listingType) filter.listingType = listingType;
   if (furnished !== undefined) filter.furnished = furnished;
-  filter.status = status ?? 'active';
+  filter.status = viewerIsAdmin ? (status ?? 'active') : 'active';
 
   const trimmedSearch = typeof search === 'string' ? search.trim() : '';
   const textClause = buildTextSearchClause(trimmedSearch);
@@ -160,9 +163,12 @@ export const listProperties = async ({
   };
 };
 
-export const findPropertyById = async (id) => {
+export const findPropertyById = async (id, { viewerIsAdmin = false } = {}) => {
   const property = await Property.findById(id);
   if (!property) {
+    throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
+  }
+  if (!viewerIsAdmin && property.status !== 'active') {
     throw new AppError('Property not found', HTTP_STATUS.NOT_FOUND);
   }
   return property;

@@ -7,6 +7,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   PROFILE: '/profile',
   LISTINGS: '/listings',
+  LISTING_DETAIL: '/listings/:id',
   ABOUT: '/about',
   CONTACT: '/contact',
   INQUIRY: '/inquiry',
@@ -22,6 +23,10 @@ export const ROUTES = {
 /** Admin houses list filtered by listing lifecycle status (matches API `status` query). */
 export function adminHousesListUrl(status: PropertyStatus): string {
   return `${ROUTES.ADMIN_HOUSES}?status=${status}`
+}
+
+export function listingDetailPath(id: string): string {
+  return ROUTES.LISTING_DETAIL.replace(':id', id)
 }
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]

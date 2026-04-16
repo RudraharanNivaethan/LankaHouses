@@ -8,6 +8,8 @@ import { LoginPage } from '../pages/Auth/LoginPage'
 import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/Profile/ProfilePage'
+import { ListingsPage } from '../pages/Listings/ListingsPage'
+import { ListingDetailPage } from '../pages/Listings/ListingDetailPage'
 import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
 import { AdminHousesPage } from '../pages/Admin/AdminHousesPage'
 import { AdminAddHousePage } from '../pages/Admin/AdminAddHousePage'
@@ -31,8 +33,12 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
 // Redirects unauthenticated users to login, preserving the intended destination
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
   if (isLoading) return null
-  if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
+  if (!isAuthenticated) {
+    const loginUrl = `${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname + location.search)}`
+    return <Navigate to={loginUrl} replace />
+  }
   return <>{children}</>
 }
 
@@ -78,6 +84,8 @@ function MainLayout() {
       <main className="flex flex-1 flex-col">
         <Routes>
           <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route path={ROUTES.LISTINGS} element={<ListingsPage />} />
+          <Route path={ROUTES.LISTING_DETAIL} element={<ListingDetailPage />} />
 
           {/* Protected routes */}
           <Route

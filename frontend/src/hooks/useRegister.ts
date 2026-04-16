@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { firebaseAuth } from '../config/firebase'
 import { registerSchema } from '../schemas/auth'
 import { firebaseRegister } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
-import { ROUTES } from '../constants/routes'
+import { getPostAuthDestination } from '../utils/authRedirect'
 import type { RegisterFormData } from '../types/auth'
 
 function mapFirebaseRegisterError(code: string): string {
@@ -37,6 +37,7 @@ export function useRegister() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const onSubmit = form.handleSubmit(async (data) => {
     setServerError(null)
@@ -47,8 +48,8 @@ export function useRegister() {
       firebaseCreated = true
       const idToken = await credential.user.getIdToken()
       await firebaseRegister(idToken, data.name, data.phone || undefined)
-      await refreshUser()
-      navigate(ROUTES.HOME)
+      const me = await refreshUser()
+      navigate(getPostAuthDestination(me, searchParams), { replace: true })
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {
