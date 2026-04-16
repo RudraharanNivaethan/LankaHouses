@@ -8,6 +8,8 @@ import { LoginPage } from '../pages/Auth/LoginPage'
 import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/Profile/ProfilePage'
+import { ListingsPage } from '../pages/Listings/ListingsPage'
+import { ListingDetailPage } from '../pages/Listings/ListingDetailPage'
 import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage'
 import { AdminHousesPage } from '../pages/Admin/AdminHousesPage'
 import { AdminAddHousePage } from '../pages/Admin/AdminAddHousePage'
@@ -78,6 +80,8 @@ function MainLayout() {
       <main className="flex flex-1 flex-col">
         <Routes>
           <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route path={ROUTES.LISTINGS} element={<ListingsPage />} />
+          <Route path={ROUTES.LISTING_DETAIL} element={<ListingDetailPage />} />
 
           {/* Protected routes */}
           <Route

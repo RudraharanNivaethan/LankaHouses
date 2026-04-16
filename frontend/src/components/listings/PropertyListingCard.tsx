@@ -2,19 +2,23 @@ import { Link } from 'react-router-dom'
 import type { PropertyRecord } from '../../types/property'
 import { StatusBadge } from '../ui/StatusBadge'
 import { STATUS_LABELS, STATUS_COLORS } from '../../constants/property'
-import { ROUTES } from '../../constants/routes'
+import { ROUTES, listingDetailPath } from '../../constants/routes'
 
-interface PropertyListCardProps {
+interface PropertyListingCardProps {
   property: PropertyRecord
+  variant: 'admin' | 'public'
 }
 
 function formatPrice(price: number): string {
   return price.toLocaleString('en-LK')
 }
 
-export function PropertyListCard({ property }: PropertyListCardProps) {
+export function PropertyListingCard({ property, variant }: PropertyListingCardProps) {
   const thumbnail = property.images[0]?.url
-  const detailPath = ROUTES.ADMIN_HOUSE_DETAIL.replace(':id', property._id)
+  const detailPath =
+    variant === 'admin'
+      ? ROUTES.ADMIN_HOUSE_DETAIL.replace(':id', property._id)
+      : listingDetailPath(property._id)
 
   return (
     <Link
@@ -34,13 +38,15 @@ export function PropertyListCard({ property }: PropertyListCardProps) {
             No image
           </div>
         )}
-        <div className="absolute top-3 right-3">
-          <StatusBadge
-            status={property.status}
-            label={STATUS_LABELS[property.status]}
-            colors={STATUS_COLORS[property.status]}
-          />
-        </div>
+        {variant === 'admin' && (
+          <div className="absolute top-3 right-3">
+            <StatusBadge
+              status={property.status}
+              label={STATUS_LABELS[property.status]}
+              colors={STATUS_COLORS[property.status]}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 p-5">
