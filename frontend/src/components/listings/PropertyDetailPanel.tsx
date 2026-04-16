@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ImageGallery } from '../ui/ImageGallery'
 import { DetailSection } from '../ui/DetailSection'
@@ -6,6 +7,7 @@ import { StatusBadge } from '../ui/StatusBadge'
 import { Button } from '../ui/Button'
 import { STATUS_LABELS, STATUS_COLORS } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
+import { useRequireAuth } from '../../hooks/useRequireAuth'
 import type { PropertyRecord } from '../../types/property'
 
 function formatPrice(price: number): string {
@@ -31,6 +33,16 @@ export function PropertyDetailPanel({ variant, property, onDeleteClick }: Proper
     url: img.url,
     alt: `${property.title} - Image ${idx + 1}`,
   }))
+
+  const { requireAuth } = useRequireAuth()
+  const [inquiryNotice, setInquiryNotice] = useState(false)
+
+  const handleInquiryClick = () => {
+    requireAuth(() => {
+      setInquiryNotice(true)
+      setTimeout(() => setInquiryNotice(false), 3000)
+    })
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,7 +74,18 @@ export function PropertyDetailPanel({ variant, property, onDeleteClick }: Proper
             </Button>
           </div>
         )}
+        {variant === 'public' && (
+          <Button variant="primary" size="sm" onClick={handleInquiryClick}>
+            Inquire Now
+          </Button>
+        )}
       </div>
+
+      {inquiryNotice && (
+        <div className="rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm font-medium text-brand">
+          Inquiry feature coming soon. We&rsquo;ll notify you when it&rsquo;s available!
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">

@@ -33,8 +33,12 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
 // Redirects unauthenticated users to login, preserving the intended destination
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
   if (isLoading) return null
-  if (!isAuthenticated) return <Navigate to={ROUTES.LOGIN} replace />
+  if (!isAuthenticated) {
+    const loginUrl = `${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname + location.search)}`
+    return <Navigate to={loginUrl} replace />
+  }
   return <>{children}</>
 }
 
