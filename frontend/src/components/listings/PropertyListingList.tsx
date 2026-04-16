@@ -13,11 +13,21 @@ import { SearchBar } from '../ui/SearchBar'
 import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../../constants/property'
 import { PROPERTY_SEARCH_DEBOUNCE_MS } from '../../constants/propertySearch'
 import { ROUTES } from '../../constants/routes'
-import type { PropertyStatus } from '../../types/property'
+import type { BackendPropertyType, ListingType, PropertyStatus } from '../../types/property'
 
 function statusFromSearchParam(raw: string | null): PropertyStatus | undefined {
   if (!raw) return undefined
   return (PROPERTY_STATUSES as readonly string[]).includes(raw) ? (raw as PropertyStatus) : undefined
+}
+
+function typeFromSearchParam(raw: string | null): BackendPropertyType | undefined {
+  if (!raw) return undefined
+  return (PROPERTY_TYPES as readonly string[]).includes(raw) ? (raw as BackendPropertyType) : undefined
+}
+
+function listingTypeFromSearchParam(raw: string | null): ListingType | undefined {
+  if (!raw) return undefined
+  return (LISTING_TYPES as readonly string[]).includes(raw) ? (raw as ListingType) : undefined
 }
 
 const typeOptions = [
@@ -41,8 +51,15 @@ interface PropertyListingListProps {
 
 export function PropertyListingList({ variant }: PropertyListingListProps) {
   const [searchParams] = useSearchParams()
+  const initialType = typeFromSearchParam(searchParams.get('type'))
+  const initialListingType = listingTypeFromSearchParam(searchParams.get('listingType'))
   const initialStatus =
     variant === 'admin' ? statusFromSearchParam(searchParams.get('status')) : undefined
+  const initialQuery = {
+    ...(initialType ? { type: initialType } : {}),
+    ...(initialListingType ? { listingType: initialListingType } : {}),
+    ...(initialStatus ? { status: initialStatus } : {}),
+  }
   const {
     properties,
     pagination,
@@ -51,7 +68,7 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
     setPage,
     setFilters,
     query,
-  } = useProperties(initialStatus ? { status: initialStatus } : {})
+  } = useProperties(initialQuery)
 
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebouncedValue(searchInput, PROPERTY_SEARCH_DEBOUNCE_MS)
