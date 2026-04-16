@@ -20,12 +20,14 @@ export function PropertyListingCard({ property, variant }: PropertyListingCardPr
       ? ROUTES.ADMIN_HOUSE_DETAIL.replace(':id', property._id)
       : listingDetailPath(property._id)
 
+  const listingTypeLabel = property.listingType === 'sale' ? 'For sale' : 'For rent'
+
   return (
     <Link
       to={detailPath}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-surface shadow-sm ring-1 ring-slate-200/70 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:ring-slate-300/80"
     >
-      <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+      <div className="relative h-44 w-full overflow-hidden bg-slate-100 md:h-52">
         {thumbnail ? (
           <img
             src={thumbnail}
@@ -36,6 +38,11 @@ export function PropertyListingCard({ property, variant }: PropertyListingCardPr
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-slate-400">
             No image
+          </div>
+        )}
+        {variant === 'public' && (
+          <div className="absolute bottom-3 left-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white backdrop-blur-sm">
+            {listingTypeLabel}
           </div>
         )}
         {variant === 'admin' && (
