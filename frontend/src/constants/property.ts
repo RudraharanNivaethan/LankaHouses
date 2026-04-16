@@ -18,6 +18,9 @@ export const STATUS_COLORS: Record<PropertyStatus, { bg: string; text: string; d
 
 export const DEFAULT_PAGE_LIMIT = 20
 
+/** Home featured section: newest active listings until a dedicated `featured` API exists. */
+export const FEATURED_HOME_LIMIT = 6
+
 export const MAX_IMAGES = 10
 export const MAX_IMAGE_SIZE_MB = 5
 export const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/jpg,image/png,image/webp,image/avif'
