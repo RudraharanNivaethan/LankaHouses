@@ -3,6 +3,7 @@ import { ListingsBrowseShell } from '../../components/layout/ListingsBrowseShell
 import { SectionContainer } from '../../components/layout/SectionContainer'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { PropertyListingList } from '../../components/listings/PropertyListingList'
+import { PropertySlider } from '../../components/listings/PropertySlider'
 
 export function ListingsPage() {
   const location = useLocation()
@@ -10,6 +11,7 @@ export function ListingsPage() {
   return (
     <ListingsBrowseShell>
       <SectionContainer className="flex flex-1 flex-col gap-6 py-10 sm:py-12">
+        {/* 1. Gradient banner */}
         <div className="rounded-2xl border border-slate-200/50 bg-gradient-to-br from-listings-banner-from to-listings-banner-to px-6 py-7 shadow-sm ring-1 ring-slate-200/50 sm:px-8 sm:py-8">
           <PageHeader
             eyebrow="Explore"
@@ -17,6 +19,9 @@ export function ListingsPage() {
             description="Verified properties across Sri Lanka. Filter by type, listing, or search by location and keywords."
           />
         </div>
+        {/* 2. Quick-browse slider (white band) */}
+        <PropertySlider />
+        {/* 3. Filterable grid (muted band) */}
         <PropertyListingList key={location.search} variant="public" />
       </SectionContainer>
     </ListingsBrowseShell>

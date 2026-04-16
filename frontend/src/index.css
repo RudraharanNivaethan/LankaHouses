@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Hides scrollbar while keeping scroll functionality (used by HorizontalScroller) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 @theme {
   --color-brand:       #BE123C;
   --color-brand-dark:  #9F1239;
