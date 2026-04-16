@@ -1,4 +1,6 @@
-import { Button } from '../ui/Button'
+import { Link } from 'react-router-dom'
+import { Button, buttonClassName } from '../ui/Button'
+import { ROUTES } from '../../constants/routes'
 import { Badge } from '../ui/Badge'
 import { ImageSection } from '../layout/ImageSection'
 import { SectionContainer } from '../layout/SectionContainer'
@@ -28,13 +30,16 @@ export function CtaSection() {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-        <Button
-            size="lg"
-            variant="outline"
-            className="w-full border-white/50 text-white hover:border-white hover:bg-white/10 sm:w-auto"
+          <Link
+            to={ROUTES.LISTINGS}
+            className={buttonClassName(
+              'outline',
+              'lg',
+              'w-full border-white/50 text-white hover:border-white hover:bg-white/10 sm:w-auto',
+            )}
           >
             Browse All Properties
-          </Button>
+          </Link>
           <Button
             size="lg"
             variant="outline"

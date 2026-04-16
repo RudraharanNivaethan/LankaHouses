@@ -1,4 +1,6 @@
-import { Button } from '../ui/Button'
+import { Link } from 'react-router-dom'
+import { Button, buttonClassName } from '../ui/Button'
+import { ROUTES } from '../../constants/routes'
 import { Badge } from '../ui/Badge'
 import { StatItem } from '../ui/StatItem'
 import { ImageSection } from '../layout/ImageSection'
@@ -51,9 +53,12 @@ export function HeroSection() {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Button size="lg" variant="primary" className="w-full sm:w-auto">
+          <Link
+            to={ROUTES.LISTINGS}
+            className={buttonClassName('primary', 'lg', 'w-full sm:w-auto text-center')}
+          >
             Browse Properties
-          </Button>
+          </Link>
           <Button
             size="lg"
             variant="outline"

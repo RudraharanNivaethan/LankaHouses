@@ -1,7 +1,10 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-type Variant = 'primary' | 'outline' | 'ghost'
-type Size = 'sm' | 'md' | 'lg'
+export type ButtonVariant = 'primary' | 'outline' | 'ghost'
+export type ButtonSize = 'sm' | 'md' | 'lg'
+
+type Variant = ButtonVariant
+type Size = ButtonSize
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
@@ -24,6 +27,18 @@ const sizeClasses: Record<Size, string> = {
   lg: 'px-8 py-3.5 text-lg',
 }
 
+const baseClasses =
+  'inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand'
+
+/** Use with [`Link`](https://reactrouter.com) so navigation controls match [`Button`]. */
+export function buttonClassName(
+  variant: ButtonVariant = 'primary',
+  size: ButtonSize = 'md',
+  className = '',
+): string {
+  return [baseClasses, variantClasses[variant], sizeClasses[size], className].join(' ')
+}
+
 export function Button({
   variant = 'primary',
   size = 'md',
@@ -34,9 +49,8 @@ export function Button({
   return (
     <button
       className={[
-        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold',
-        'transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2',
-        'focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50',
+        baseClasses,
+        'disabled:cursor-not-allowed disabled:opacity-50',
         variantClasses[variant],
         sizeClasses[size],
         className,
