@@ -11,6 +11,7 @@ import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
 import { SearchBar } from '../ui/SearchBar'
 import { FilterChip } from '../ui/FilterChip'
+import { SectionContainer } from '../layout/SectionContainer'
 import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../../constants/property'
 import { PROPERTY_SEARCH_DEBOUNCE_MS } from '../../constants/propertySearch'
 import { ROUTES } from '../../constants/routes'
@@ -156,132 +157,159 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
       ? `Page ${pagination.page} of ${pagination.totalPages}`
       : null
 
+  const headingBlock = (
+    <div>
+      <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+        {variant === 'admin' ? 'All Properties' : 'All Listings'}
+      </h2>
+      <p className="mt-1 text-sm text-slate-500">
+        {variant === 'admin'
+          ? 'Manage, filter, and review all properties in the system.'
+          : 'Search and filter the full catalogue of verified Sri Lankan properties.'}
+      </p>
+    </div>
+  )
+
+  const filterPanel = (
+    <div className={variant === 'admin' ? 'w-full min-w-0 rounded-2xl border border-slate-200/80 bg-surface p-4 shadow-sm sm:p-5' : 'w-full min-w-0'}>
+      <div className="w-full min-w-0">
+        <SearchBar
+          placeholder="Search by title, location, or keywords…"
+          aria-label="Search property listings"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onClear={handleSearchClear}
+          isLoading={isLoading}
+          maxLength={150}
+        />
+      </div>
+
+      <div className={`mt-4 grid ${filterGridClass}`}>
+        <Select
+          label="Property Type"
+          options={typeOptions}
+          value={query.type ?? ''}
+          onChange={(e) => handleFilterChange('type', e.target.value)}
+        />
+        <Select
+          label="Listing Type"
+          options={listingTypeOptions}
+          value={query.listingType ?? ''}
+          onChange={(e) => handleFilterChange('listingType', e.target.value)}
+        />
+        {variant === 'admin' && (
+          <Select
+            label="Status"
+            options={statusOptions}
+            value={query.status ?? ''}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+          />
+        )}
+      </div>
+    </div>
+  )
+
+  const resultsBlock = (
+    <div className="flex flex-col gap-4">
+      {!isLoading && (
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+          <p className="text-sm text-slate-600">
+            Showing{' '}
+            <span className="font-semibold text-slate-800">{pagination.total.toLocaleString()}</span>{' '}
+            {pagination.total === 1 ? 'property' : 'properties'}
+          </p>
+          {pageRangeLabel && (
+            <p className="text-xs font-medium text-slate-500">{pageRangeLabel}</p>
+          )}
+        </div>
+      )}
+
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-2" role="toolbar" aria-label="Active filters">
+          {chips.map((chip) => (
+            <FilterChip
+              key={chip.key}
+              label={chip.label}
+              removeAriaLabel={`Remove filter ${chip.label}`}
+              onRemove={() => removeChip(chip.key)}
+            />
+          ))}
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Spinner className="h-8 w-8 text-brand" />
+        </div>
+      ) : properties.length === 0 ? (
+        <EmptyState
+          icon={
+            <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 7.5h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+            </svg>
+          }
+          title="No properties found"
+          description={
+            variant === 'admin'
+              ? 'There are no properties matching your filters. Try adjusting your search or add a new property.'
+              : 'There are no properties matching your filters. Try broadening your search or changing filters.'
+          }
+          action={
+            variant === 'admin' ? (
+              <Link to={ROUTES.ADMIN_ADD_HOUSE}>
+                <Button variant="primary" size="sm">Add Property</Button>
+              </Link>
+            ) : (
+              <Link to={ROUTES.HOME}>
+                <Button variant="outline" size="sm">Back to home</Button>
+              </Link>
+            )
+          }
+        />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {properties.map((property) => (
+              <PropertyListingCard key={property._id} property={property} variant={variant} />
+            ))}
+          </div>
+
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={setPage}
+          />
+        </>
+      )}
+    </div>
+  )
+
+  if (variant === 'public') {
+    return (
+      <>
+        <section className="bg-white py-8 sm:py-10">
+          <SectionContainer className="flex flex-col gap-6">
+            {headingBlock}
+            {filterPanel}
+          </SectionContainer>
+        </section>
+
+        <section className="bg-slate-50 py-8 sm:py-10">
+          <SectionContainer className="flex flex-col gap-4">
+            <AlertBanner message={error} />
+            {resultsBlock}
+          </SectionContainer>
+        </section>
+      </>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-          {variant === 'admin' ? 'All Properties' : 'All Listings'}
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          {variant === 'admin'
-            ? 'Manage, filter, and review all properties in the system.'
-            : 'Search and filter the full catalogue of verified Sri Lankan properties.'}
-        </p>
-      </div>
-
-      <div className="w-full min-w-0 rounded-2xl border border-slate-200/80 bg-surface p-4 shadow-sm sm:p-5">
-        <div className="w-full min-w-0">
-          <SearchBar
-            placeholder="Search by title, location, or keywords…"
-            aria-label="Search property listings"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onClear={handleSearchClear}
-            isLoading={isLoading}
-            maxLength={150}
-          />
-        </div>
-
-        <div className={`mt-4 grid ${filterGridClass}`}>
-          <Select
-            label="Property Type"
-            options={typeOptions}
-            value={query.type ?? ''}
-            onChange={(e) => handleFilterChange('type', e.target.value)}
-          />
-          <Select
-            label="Listing Type"
-            options={listingTypeOptions}
-            value={query.listingType ?? ''}
-            onChange={(e) => handleFilterChange('listingType', e.target.value)}
-          />
-          {variant === 'admin' && (
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={query.status ?? ''}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-            />
-          )}
-        </div>
-      </div>
-
+      {headingBlock}
+      {filterPanel}
       <AlertBanner message={error} />
-
-      <div className="rounded-2xl bg-surface-muted p-4 sm:p-6">
-        <div className="flex flex-col gap-4">
-          {!isLoading && (
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-              <p className="text-sm text-slate-600">
-                Showing{' '}
-                <span className="font-semibold text-slate-800">{pagination.total.toLocaleString()}</span>{' '}
-                {pagination.total === 1 ? 'property' : 'properties'}
-              </p>
-              {pageRangeLabel && (
-                <p className="text-xs font-medium text-slate-500">{pageRangeLabel}</p>
-              )}
-            </div>
-          )}
-
-          {chips.length > 0 && (
-            <div className="flex flex-wrap gap-2" role="toolbar" aria-label="Active filters">
-              {chips.map((chip) => (
-                <FilterChip
-                  key={chip.key}
-                  label={chip.label}
-                  removeAriaLabel={`Remove filter ${chip.label}`}
-                  onRemove={() => removeChip(chip.key)}
-                />
-              ))}
-            </div>
-          )}
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Spinner className="h-8 w-8 text-brand" />
-            </div>
-          ) : properties.length === 0 ? (
-            <EmptyState
-              icon={
-                <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 7.5h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
-                </svg>
-              }
-              title="No properties found"
-              description={
-                variant === 'admin'
-                  ? 'There are no properties matching your filters. Try adjusting your search or add a new property.'
-                  : 'There are no properties matching your filters. Try broadening your search or changing filters.'
-              }
-              action={
-                variant === 'admin' ? (
-                  <Link to={ROUTES.ADMIN_ADD_HOUSE}>
-                    <Button variant="primary" size="sm">Add Property</Button>
-                  </Link>
-                ) : (
-                  <Link to={ROUTES.HOME}>
-                    <Button variant="outline" size="sm">Back to home</Button>
-                  </Link>
-                )
-              }
-            />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {properties.map((property) => (
-                  <PropertyListingCard key={property._id} property={property} variant={variant} />
-                ))}
-              </div>
-
-              <Pagination
-                page={pagination.page}
-                totalPages={pagination.totalPages}
-                onPageChange={setPage}
-              />
-            </>
-          )}
-        </div>
-      </div>
+      {resultsBlock}
     </div>
   )
 }

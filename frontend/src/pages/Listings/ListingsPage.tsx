@@ -31,11 +31,15 @@ export function ListingsPage() {
         </SectionContainer>
       </ImageSection>
 
-      {/* 2. Slider + filterable grid */}
-      <SectionContainer className="flex flex-1 flex-col gap-6 py-8 sm:py-10">
-        <PropertySlider />
-        <PropertyListingList key={location.search} variant="public" />
-      </SectionContainer>
+      {/* 2. Slider — warm off-white band */}
+      <section className="bg-slate-50 py-8 sm:py-10">
+        <SectionContainer>
+          <PropertySlider />
+        </SectionContainer>
+      </section>
+
+      {/* 3. Search/filter (white) + 4. Grid (slate-50) — rendered by PropertyListingList */}
+      <PropertyListingList key={location.search} variant="public" />
     </ListingsBrowseShell>
   )
 }

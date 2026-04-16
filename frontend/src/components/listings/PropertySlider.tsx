@@ -30,7 +30,7 @@ export function PropertySlider() {
   if (!isLoading && properties.length === 0) return null
 
   return (
-    <div className="rounded-2xl border border-slate-200/50 bg-surface p-5 shadow-sm sm:p-6">
+    <div>
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-brand">New arrivals</p>
