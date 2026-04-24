@@ -1,13 +1,11 @@
 import jwt from 'jsonwebtoken';
 import {
-  CUSTOMER_JWT_SECRET,
-  ADMIN_JWT_SECRET,
-  CUSTOMER_REFRESH_JWT_SECRET,
-  ADMIN_REFRESH_JWT_SECRET
+  getAccessJwtSecretForRole,
+  getRefreshJwtSecretForRole,
 } from '../config/jwtConfig.js';
 
 export const generateAccessToken = (userId, role = 'user', tokenVersion = 0) => {
-  const secret = role === 'admin' ? ADMIN_JWT_SECRET : CUSTOMER_JWT_SECRET;
+  const secret = getAccessJwtSecretForRole(role);
   return jwt.sign(
     { id: userId, role, tokenVersion },
     secret,
@@ -16,7 +14,7 @@ export const generateAccessToken = (userId, role = 'user', tokenVersion = 0) => 
 };
 
 export const generateRefreshToken = (userId, role = 'user', loginTime = null, tokenVersion = 0) => {
-  const secret = role === 'admin' ? ADMIN_REFRESH_JWT_SECRET : CUSTOMER_REFRESH_JWT_SECRET;
+  const secret = getRefreshJwtSecretForRole(role);
   const sessionStart = loginTime || new Date().toISOString();
   return jwt.sign(
     { id: userId, role, type: 'refresh', loginTime: sessionStart, tokenVersion },

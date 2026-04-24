@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
+import { BackButton } from '../ui/BackButton'
 
 interface AuthLayoutProps {
   panelImage: string
@@ -47,12 +48,7 @@ export function AuthLayout({ panelImage, panelContent, children }: AuthLayoutPro
               Lanka<span className="text-brand">Houses</span>
             </span>
           </Link>
-          <Link
-            to={ROUTES.HOME}
-            className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            ← Back to home
-          </Link>
+          <BackButton label="Back to home" />
         </div>
 
         {/* Form area */}

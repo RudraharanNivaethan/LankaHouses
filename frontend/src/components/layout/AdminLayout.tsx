@@ -5,18 +5,12 @@ import { useAuth } from '../../context/AuthContext'
 import { useLogout } from '../../hooks/useLogout'
 import { ROUTES } from '../../constants/routes'
 import { Spinner } from '../ui/Spinner'
+import { MenuIcon, LogoutIcon } from '../ui/icons'
+import { getInitials } from '../../utils/stringUtils'
 
 interface AdminLayoutProps {
   sidebar: ReactNode
   children: ReactNode
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() ?? '')
-    .join('')
 }
 
 export function AdminLayout({ sidebar, children }: AdminLayoutProps) {
@@ -56,9 +50,7 @@ export function AdminLayout({ sidebar, children }: AdminLayoutProps) {
             onClick={() => setMobileOpen(true)}
             aria-label="Open sidebar"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <MenuIcon className="h-5 w-5" />
           </button>
 
           <span className="text-sm font-semibold text-slate-400 lg:hidden">Admin</span>
@@ -71,7 +63,7 @@ export function AdminLayout({ sidebar, children }: AdminLayoutProps) {
                 </div>
                 <div className="hidden md:block">
                   <p className="text-sm font-semibold text-slate-800">{user.name}</p>
-                  <p className="text-xs text-slate-400">Administrator</p>
+                  <p className="text-xs text-slate-400">{user.displayRole}</p>
                 </div>
               </div>
             )}
@@ -87,9 +79,7 @@ export function AdminLayout({ sidebar, children }: AdminLayoutProps) {
               {isLoggingOut ? (
                 <Spinner className="h-4 w-4" />
               ) : (
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+                <LogoutIcon className="h-4 w-4" />
               )}
               Logout
             </button>

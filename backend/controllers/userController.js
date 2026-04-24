@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import { formatErrorResponse } from '../utils/errorUtils.js';
+import { toPublicUser } from '../utils/userDto.js';
 
 export const updateProfile = async (req, res) => {
   try {
@@ -17,7 +18,7 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    return res.status(200).json({ success: true, data: user });
+    return res.status(200).json({ success: true, data: toPublicUser(user) });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);

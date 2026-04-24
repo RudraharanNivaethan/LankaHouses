@@ -2,6 +2,7 @@ import express from 'express';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
+import superAdminRoutes from './routes/superAdminRoutes.js';
 import { globalLimiter } from './middleware/rateLimitMiddleware.js';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -61,6 +62,7 @@ app.use('/api', globalLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/property', propertyRoutes);
+app.use('/api/superadmin', superAdminRoutes);
 
 
 // 404 handler for undefined routes

@@ -1,34 +1,32 @@
 import { Link, useLocation } from 'react-router-dom'
-import { AdminLayout } from '../../components/layout/AdminLayout'
+import { AdminShell } from '../../components/layout/AdminShell'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
 import { PropertyListView } from '../../components/admin-houses/PropertyListView'
 import { Button } from '../../components/ui/Button'
+import { PlusIcon } from '../../components/ui/icons'
 import { ROUTES } from '../../constants/routes'
 
 export function AdminHousesPage() {
   const location = useLocation()
 
   return (
-    <AdminLayout sidebar={<AdminSidebar />}>
-      <div className="flex flex-col gap-7">
+    <AdminShell
+      header={
         <PageHeader
           title="Houses"
           description="Manage your property listings."
           actions={
             <Link to={ROUTES.ADMIN_ADD_HOUSE}>
               <Button variant="primary" size="md">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
+                <PlusIcon className="h-4 w-4" />
                 Add Property
               </Button>
             </Link>
           }
         />
-
-        <PropertyListView key={location.search} />
-      </div>
-    </AdminLayout>
+      }
+    >
+      <PropertyListView key={location.search} />
+    </AdminShell>
   )
 }
