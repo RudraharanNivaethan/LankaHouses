@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { CUSTOMER_JWT_SECRET, ADMIN_JWT_SECRET } from '../config/jwtConfig.js';
+import { roleSatisfies } from '../utils/roleUtils.js';
 
 /**
  * Attaches `req.user` when a valid access token cookie is present; otherwise `req.user` is null.
@@ -47,7 +48,7 @@ export const authenticate = (req, res, next) => {
 };
 
 export const authorize = (...roles) => (req, res, next) => {
-  if (!req.user || !roles.includes(req.user.role)) {
+  if (!req.user || !roleSatisfies(req.user.role, roles)) {
     return res.status(403).json({ success: false, error: 'Forbidden' });
   }
   next();

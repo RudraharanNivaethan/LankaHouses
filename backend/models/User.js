@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     phone:         { type: String },
     password:      { type: String, select: false },
     firebase_uid:  { type: String, sparse: true, unique: true },
-    role:          { type: String, enum: ['user', 'admin'], default: 'user', immutable: true },
+    role:          { type: String, enum: ['user', 'admin', 'superadmin'], default: 'user', immutable: true },
     // [OLD CODE] loginAttempts: { type: Number, default: 0 },
     // [OLD CODE] lockUntil:     { type: Date },
     tokenVersion:  { type: Number, default: 0 }
