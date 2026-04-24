@@ -16,6 +16,7 @@ import {
 import {
   getUsers,
   getUserStats,
+  getUserById,
   createAdmin,
   suggestUsers,
 } from '../controllers/superAdminController.js';
@@ -55,6 +56,14 @@ router.post(
   superAdminCreateLimiter,
   validateBody(createAdminSchema),
   createAdmin,
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  authorize(PERMISSION.USERS_READ),
+  superAdminListLimiter,
+  getUserById,
 );
 
 export default router;

@@ -1,5 +1,8 @@
+import { Link } from 'react-router-dom'
 import { Spinner } from '../ui/Spinner'
+import { buttonClassName } from '../ui/Button'
 import { formatAdminDate } from '../../utils/formatDate'
+import { adminUserDetailPath } from '../../constants/routes'
 import type { User, UserRole } from '../../types/auth'
 
 const ROLE_BADGE: Record<UserRole, string> = {
@@ -36,6 +39,7 @@ export function UserTable({ users, isLoading }: UserTableProps) {
           <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Email</th>
           <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Role</th>
           <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Joined</th>
+          <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Actions</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100 bg-white">
@@ -50,6 +54,14 @@ export function UserTable({ users, isLoading }: UserTableProps) {
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
               {formatAdminDate(u.createdAt)}
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-right">
+              <Link
+                to={adminUserDetailPath(u._id)}
+                className={buttonClassName('outline', 'sm')}
+              >
+                View
+              </Link>
             </td>
           </tr>
         ))}

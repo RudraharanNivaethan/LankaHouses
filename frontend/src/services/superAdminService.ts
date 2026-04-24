@@ -80,6 +80,11 @@ export async function fetchUserSuggestions(q: string): Promise<string[]> {
   return Array.isArray(data.data) ? data.data : []
 }
 
+export async function getUserById(id: string): Promise<User> {
+  const res = await get<{ success: boolean; data: User }>(`${API_BASE}/${id}`)
+  return res.data
+}
+
 export async function createAdmin(
   payload: CreateAdminPayload,
 ): Promise<User> {

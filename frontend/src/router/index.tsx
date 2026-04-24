@@ -18,6 +18,7 @@ import { AdminHouseDetailPage } from '../pages/Admin/AdminHouseDetailPage'
 import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
+import { AdminUserDetailsPage } from '../pages/Admin/AdminUserDetailsPage'
 import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 import { can } from '../utils/can'
@@ -233,6 +234,14 @@ export function AppRouter() {
             element={
               <RequirePermission permission="users.read">
                 <AdminUsersPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_USER_DETAIL}
+            element={
+              <RequirePermission permission="users.read">
+                <AdminUserDetailsPage />
               </RequirePermission>
             }
           />

@@ -19,6 +19,7 @@ export const ROUTES = {
   ADMIN_INQUIRIES: '/admin/inquiries',
   ADMIN_INQUIRY_DETAIL: '/admin/inquiries/:id',
   ADMIN_USERS: '/admin/users',
+  ADMIN_USER_DETAIL: '/admin/users/:id',
   ADMIN_CREATE_ADMIN: '/admin/users/new',
 } as const
 
@@ -29,6 +30,10 @@ export function adminHousesListUrl(status: PropertyStatus): string {
 
 export function listingDetailPath(id: string): string {
   return ROUTES.LISTING_DETAIL.replace(':id', id)
+}
+
+export function adminUserDetailPath(id: string): string {
+  return ROUTES.ADMIN_USER_DETAIL.replace(':id', id)
 }
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]

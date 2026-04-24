@@ -63,6 +63,18 @@ export const getUserSuggestions = async (q, limit = 8) => {
 };
 
 /**
+ * Returns a single user by their MongoDB _id.
+ * Throws AppError 404 if no user with that id exists.
+ */
+export const getUserById = async (id) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError('User not found', HTTP_STATUS.NOT_FOUND);
+  }
+  return user;
+};
+
+/**
  * Returns the total number of users grouped by role.
  */
 export const getUserRoleStats = async () => {

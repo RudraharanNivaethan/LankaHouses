@@ -5,6 +5,7 @@ import {
   getUserRoleStats,
   createAdminUser,
   getUserSuggestions,
+  getUserById as findUserById,
 } from '../services/superAdminService.js';
 
 export const getUsers = async (req, res) => {
@@ -42,6 +43,16 @@ export const suggestUsers = async (req, res) => {
     const { q, limit } = req.validatedQuery;
     const suggestions = await getUserSuggestions(q, limit);
     return res.status(200).json({ success: true, data: suggestions });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const user = await findUserById(req.params.id);
+    return res.status(200).json({ success: true, data: toPublicUser(user) });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);
