@@ -47,15 +47,17 @@ async function post<T>(url: string, body?: unknown): Promise<T> {
 
 export interface GetUsersParams {
   role?: UserRole
+  search?: string
   page?: number
   limit?: number
 }
 
 export async function getUsers(params: GetUsersParams = {}): Promise<UsersApiResponse> {
   const query = new URLSearchParams()
-  if (params.role)  query.set('role', params.role)
-  if (params.page)  query.set('page', String(params.page))
-  if (params.limit) query.set('limit', String(params.limit))
+  if (params.role)   query.set('role', params.role)
+  if (params.search) query.set('search', params.search)
+  if (params.page)   query.set('page', String(params.page))
+  if (params.limit)  query.set('limit', String(params.limit))
 
   const qs = query.toString()
   return get<UsersApiResponse>(`${API_BASE}${qs ? `?${qs}` : ''}`)
@@ -63,6 +65,23 @@ export async function getUsers(params: GetUsersParams = {}): Promise<UsersApiRes
 
 export async function getUserStats(): Promise<UserRoleStats> {
   const res = await get<UserRoleStatsApiResponse>(`${API_BASE}/stats`)
+  return res.data
+}
+
+export async function fetchUserSuggestions(q: string): Promise<string[]> {
+  if (!q.trim()) return []
+  const params = new URLSearchParams({ q: q.trim(), limit: '8' })
+  const res = await fetch(`${API_BASE}/suggest?${params}`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+  if (!res.ok) return []
+  const data = (await res.json()) as { success: boolean; data: string[] }
+  return Array.isArray(data.data) ? data.data : []
+}
+
+export async function getUserById(id: string): Promise<User> {
+  const res = await get<{ success: boolean; data: User }>(`${API_BASE}/${id}`)
   return res.data
 }
 

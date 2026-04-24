@@ -18,7 +18,9 @@ import { AdminHouseDetailPage } from '../pages/Admin/AdminHouseDetailPage'
 import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
+import { AdminUserDetailsPage } from '../pages/Admin/AdminUserDetailsPage'
 import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
+import { AdminProfilePage } from '../pages/Admin/AdminProfilePage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 import { can } from '../utils/can'
 
@@ -73,6 +75,33 @@ function RequirePermission({ permission, children }: { permission: string; child
   return <>{children}</>
 }
 
+/**
+ * Renders the profile page in the correct layout for the authenticated user.
+ * Admins and superadmins get AdminProfilePage (inside AdminShell).
+ * Regular users get ProfilePage inside the public Navbar + Footer layout.
+ * Unauthenticated users are redirected to login.
+ */
+function ProfileRoute() {
+  const { user, isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
+  if (isLoading) return null
+  if (!isAuthenticated) {
+    return <Navigate to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname)}`} replace />
+  }
+  if (can(user, ADMIN_ENTRY_CAPABILITY)) {
+    return <AdminProfilePage />
+  }
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      <main className="flex flex-1 flex-col">
+        <ProfilePage />
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
 function NotFound() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 py-32 text-center">
@@ -108,16 +137,6 @@ function MainLayout() {
           <Route path={ROUTES.HOME} element={<HomePage />} />
           <Route path={ROUTES.LISTINGS} element={<ListingsPage />} />
           <Route path={ROUTES.LISTING_DETAIL} element={<ListingDetailPage />} />
-
-          {/* Protected routes */}
-          <Route
-            path={ROUTES.PROFILE}
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Catch-all: prevents blank screen for registered-but-unbuilt routes */}
           <Route path="*" element={<NotFound />} />
@@ -237,6 +256,14 @@ export function AppRouter() {
             }
           />
           <Route
+            path={ROUTES.ADMIN_USER_DETAIL}
+            element={
+              <RequirePermission permission="users.read">
+                <AdminUserDetailsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path={ROUTES.ADMIN_CREATE_ADMIN}
             element={
               <RequirePermission permission="admins.create">
@@ -244,6 +271,9 @@ export function AppRouter() {
               </RequirePermission>
             }
           />
+
+          {/* Profile — top-level so it is reachable by all roles */}
+          <Route path={ROUTES.PROFILE} element={<ProfileRoute />} />
 
           {/* All other routes — wrapped in Navbar + Footer layout */}
           <Route path="*" element={<MainLayout />} />

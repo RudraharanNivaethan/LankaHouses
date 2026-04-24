@@ -4,17 +4,21 @@ import { PERMISSION } from '../utils/permissionKeys.js';
 import { validateBody, validateQuery } from '../validation/validationMiddleware.js';
 import {
   listUsersQuerySchema,
+  userSuggestQuerySchema,
   createAdminSchema,
 } from '../validation/schemas/superAdminSchema.js';
 import {
   superAdminListLimiter,
   superAdminStatsLimiter,
   superAdminCreateLimiter,
+  superAdminSuggestLimiter,
 } from '../middleware/rateLimitMiddleware.js';
 import {
   getUsers,
   getUserStats,
+  getUserById,
   createAdmin,
+  suggestUsers,
 } from '../controllers/superAdminController.js';
 
 const router = Router();
@@ -36,6 +40,15 @@ router.get(
   getUserStats,
 );
 
+router.get(
+  '/suggest',
+  authenticate,
+  authorize(PERMISSION.USERS_READ),
+  superAdminSuggestLimiter,
+  validateQuery(userSuggestQuerySchema),
+  suggestUsers,
+);
+
 router.post(
   '/admins',
   authenticate,
@@ -43,6 +56,14 @@ router.post(
   superAdminCreateLimiter,
   validateBody(createAdminSchema),
   createAdmin,
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  authorize(PERMISSION.USERS_READ),
+  superAdminListLimiter,
+  getUserById,
 );
 
 export default router;

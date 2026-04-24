@@ -27,7 +27,11 @@ export function AdminShell({
   const gapClass = gap === 'none' ? '' : gap === 'sm' ? 'gap-6' : 'gap-7'
 
   return (
-    <AdminLayout sidebar={<AdminSidebar pendingInquiries={pendingInquiries} />}>
+    <AdminLayout
+      sidebar={(collapsed) => (
+        <AdminSidebar pendingInquiries={pendingInquiries} collapsed={collapsed} />
+      )}
+    >
       <div className={`flex flex-col ${gapClass}`.trim()}>
         {header}
         {children}

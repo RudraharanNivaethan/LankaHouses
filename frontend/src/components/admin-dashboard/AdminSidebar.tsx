@@ -38,9 +38,10 @@ const NAV_ITEMS: NavItem[] = [
 
 interface AdminSidebarProps {
   pendingInquiries?: number
+  collapsed?: boolean
 }
 
-export function AdminSidebar({ pendingInquiries }: AdminSidebarProps) {
+export function AdminSidebar({ pendingInquiries, collapsed }: AdminSidebarProps) {
   const { user } = useAuth()
   const permissions = user?.permissions
 
@@ -57,6 +58,7 @@ export function AdminSidebar({ pendingInquiries }: AdminSidebarProps) {
             label={item.label}
             end={item.end}
             badge={badge}
+            collapsed={collapsed}
           />
         )
       })}

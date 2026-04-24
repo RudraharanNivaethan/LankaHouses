@@ -102,6 +102,11 @@ export const propertyQuerySchema = z.object({
   limit:       z.coerce.number().int().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').optional().default(20),
 });
 
+export const propertySuggestQuerySchema = z.object({
+  q:     searchQueryField,
+  limit: z.coerce.number().int().min(1).max(10).optional().default(8),
+});
+
 export const propertyIdParamsSchema = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid property ID'),
 });

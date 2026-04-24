@@ -9,12 +9,14 @@ import {
   propertyModifyLimiter,
   propertyStatsLimiter,
   propertyMetaLimiter,
+  propertySuggestLimiter,
 } from '../middleware/rateLimitMiddleware.js';
 import { validateBody, validateParams, validateQuery } from '../validation/validationMiddleware.js';
 import {
   createPropertySchema,
   updatePropertySchema,
   propertyQuerySchema,
+  propertySuggestQuerySchema,
   propertyIdParamsSchema,
   propertyImageIndexSchema,
 } from '../validation/schemas/propertySchema.js';
@@ -29,6 +31,7 @@ import {
   deleteProperty,
   addImages,
   deleteImage,
+  suggestProperties,
 } from '../controllers/propertyController.js';
 
 const router = Router();
@@ -67,6 +70,14 @@ router.get(
   authorize(PERMISSION.PROPERTIES_STATS_READ),
   propertyMetaLimiter,
   getPropertyStatuses
+);
+
+router.get(
+  '/suggest',
+  optionalAuthenticate,
+  propertySuggestLimiter,
+  validateQuery(propertySuggestQuerySchema),
+  suggestProperties,
 );
 
 router.get(

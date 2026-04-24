@@ -9,7 +9,12 @@ interface Pagination {
   totalPages: number
 }
 
-export function useUsers(roleFilter?: UserRole) {
+export interface UserFilters {
+  role?: UserRole
+  search?: string
+}
+
+export function useUsers(filters: UserFilters = {}) {
   const [users, setUsers] = useState<User[]>([])
   const [pagination, setPagination] = useState<Pagination | null>(null)
   const [page, setPage] = useState(1)
@@ -20,7 +25,7 @@ export function useUsers(roleFilter?: UserRole) {
     setIsLoading(true)
     setError(null)
     try {
-      const res = await getUsers({ role: roleFilter, page })
+      const res = await getUsers({ role: filters.role, search: filters.search, page })
       setUsers(res.data)
       setPagination(res.pagination)
     } catch (err) {
@@ -28,7 +33,7 @@ export function useUsers(roleFilter?: UserRole) {
     } finally {
       setIsLoading(false)
     }
-  }, [roleFilter, page])
+  }, [filters.role, filters.search, page])
 
   useEffect(() => {
     fetch()
