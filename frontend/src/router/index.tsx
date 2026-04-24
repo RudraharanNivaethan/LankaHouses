@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from '../context/AuthContext'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
 import { HomePage } from '../pages/Home/HomePage'
+import { AboutPage } from '../pages/About/AboutPage'
+import { ContactPage } from '../pages/Contact/ContactPage'
 import { LoginPage } from '../pages/Auth/LoginPage'
 import { SignupPage } from '../pages/Auth/SignupPage'
 import { ForgotPasswordPage } from '../pages/Auth/ForgotPasswordPage'
@@ -135,6 +137,8 @@ function MainLayout() {
       <main className="flex flex-1 flex-col">
         <Routes>
           <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route path={ROUTES.ABOUT} element={<AboutPage />} />
+          <Route path={ROUTES.CONTACT} element={<ContactPage />} />
           <Route path={ROUTES.LISTINGS} element={<ListingsPage />} />
           <Route path={ROUTES.LISTING_DETAIL} element={<ListingDetailPage />} />
 
