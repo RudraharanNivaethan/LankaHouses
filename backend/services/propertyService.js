@@ -98,6 +98,28 @@ function buildTextSearchClause(trimmedSearch) {
 }
 
 /** Counts by status for admin dashboard (no pagination). */
+const SUGGEST_MAX = 10;
+
+/**
+ * Returns up to `limit` autocomplete suggestion strings for the given query.
+ * Matches against property titles and districts (case-insensitive substring).
+ * Results are deduplicated and sorted alphabetically.
+ */
+export const getPropertySuggestions = async (q, limit = 8) => {
+  if (!q || !q.trim()) return [];
+  const rx = new RegExp(escapeRegexLiteral(q.trim()), 'i');
+  const cap = Math.min(limit, SUGGEST_MAX);
+
+  const [titles, districts] = await Promise.all([
+    Property.distinct('title',    { title:    rx, status: 'active' }),
+    Property.distinct('district', { district: rx, status: 'active' }),
+  ]);
+
+  const merged = [...new Set([...titles, ...districts])];
+  merged.sort((a, b) => a.localeCompare(b));
+  return merged.slice(0, cap);
+};
+
 export const countListingsByStatus = async () => {
   const [activeListings, soldListings, removedListings] = await Promise.all([
     Property.countDocuments({ status: 'active' }),

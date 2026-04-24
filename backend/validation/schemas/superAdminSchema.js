@@ -2,6 +2,20 @@ import { z } from 'zod';
 import validator from 'validator';
 import { sanitizeString, normalizeEmail, isStrongPassword } from '../sanitizers.js';
 
+export const userSuggestQuerySchema = z.object({
+  q:     z
+    .string()
+    .optional()
+    .transform((val) => (val === undefined ? undefined : sanitizeString(val)))
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      const trimmed = val.trim();
+      if (!trimmed) return undefined;
+      return trimmed.length > 150 ? trimmed.slice(0, 150) : trimmed;
+    }),
+  limit: z.coerce.number().int().min(1).max(10).optional().default(8),
+});
+
 export const listUsersQuerySchema = z.object({
   role:  z.enum(['user', 'admin', 'superadmin']).optional(),
   search: z

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useUsers } from '../../hooks/useUsers'
-import { useDebouncedValue } from '../../hooks/useDebouncedValue'
-import { PROPERTY_SEARCH_DEBOUNCE_MS } from '../../constants/propertySearch'
+import { normalizeSearchInput } from '../../hooks/useDebouncedSearch'
+import { useSearchSuggestions } from '../../hooks/useSearchSuggestions'
+import { fetchUserSuggestions } from '../../services/superAdminService'
 import { isUserRole } from '../../constants/roles'
-import { SearchBar } from '../ui/SearchBar'
+import { SearchAutocomplete } from '../ui/SearchAutocomplete'
 import { FilterChip } from '../ui/FilterChip'
 import { AlertBanner } from '../ui/AlertBanner'
 import { Pagination } from '../ui/Pagination'
@@ -13,9 +14,7 @@ import { UserTable } from './UserTable'
 import type { UserRole } from '../../types/auth'
 
 function searchFromParam(raw: string | null): string {
-  if (!raw) return ''
-  const t = raw.trim()
-  return t.length > 150 ? t.slice(0, 150) : t
+  return normalizeSearchInput(raw ?? '')
 }
 
 export function UserListView() {
@@ -28,12 +27,16 @@ export function UserListView() {
 
   const [roleFilter, setRoleFilter] = useState<UserRole | undefined>(initialRole)
   const [searchInput, setSearchInput] = useState(initialSearch)
-  const debouncedSearch = useDebouncedValue(searchInput, PROPERTY_SEARCH_DEBOUNCE_MS)
-  const [activeSearch, setActiveSearch] = useState(initialSearch || undefined)
+  const [activeSearch, setActiveSearch] = useState<string | undefined>(initialSearch || undefined)
 
   const { users, pagination, page, setPage, isLoading, error } = useUsers({
     role: roleFilter,
     search: activeSearch,
+  })
+
+  const { suggestions, isLoadingSuggestions, clearSuggestions } = useSearchSuggestions({
+    query: searchInput,
+    fetcher: fetchUserSuggestions,
   })
 
   const syncUrl = useCallback(
@@ -46,23 +49,15 @@ export function UserListView() {
     [setSearchParams],
   )
 
-  useEffect(() => {
-    const trimmed = searchInput.trim()
-    if (trimmed === '') {
-      if (activeSearch !== undefined) {
-        setActiveSearch(undefined)
-        setPage(1)
-        syncUrl(roleFilter, undefined)
-      }
-      return
-    }
-    const next = debouncedSearch.trim() || undefined
-    if (!next || next !== trimmed) return
+  const handleSearchSubmit = (value: string) => {
+    const next = normalizeSearchInput(value) || undefined
+    setSearchInput(value)
+    clearSuggestions()
     if (next === activeSearch) return
     setActiveSearch(next)
     setPage(1)
     syncUrl(roleFilter, next)
-  }, [searchInput, debouncedSearch, activeSearch, roleFilter, syncUrl, setPage])
+  }
 
   const handleRoleChange = (role: UserRole | undefined) => {
     setRoleFilter(role)
@@ -72,6 +67,7 @@ export function UserListView() {
 
   const handleSearchClear = () => {
     setSearchInput('')
+    clearSuggestions()
     setActiveSearch(undefined)
     setPage(1)
     syncUrl(roleFilter, undefined)
@@ -79,6 +75,7 @@ export function UserListView() {
 
   const removeSearchChip = () => {
     setSearchInput('')
+    clearSuggestions()
     setActiveSearch(undefined)
     setPage(1)
     syncUrl(roleFilter, undefined)
@@ -92,12 +89,15 @@ export function UserListView() {
   return (
     <div className="flex flex-col gap-6">
       <div className="w-full min-w-0 rounded-2xl border border-slate-200/80 bg-surface p-4 shadow-sm sm:p-5">
-        <SearchBar
+        <SearchAutocomplete
           placeholder="Search by name or email…"
           aria-label="Search users"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={setSearchInput}
+          onSubmit={handleSearchSubmit}
           onClear={handleSearchClear}
+          suggestions={suggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
           isLoading={isLoading}
           maxLength={150}
         />

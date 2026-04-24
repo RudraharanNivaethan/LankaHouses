@@ -4,6 +4,7 @@ import {
   listUsers,
   getUserRoleStats,
   createAdminUser,
+  getUserSuggestions,
 } from '../services/superAdminService.js';
 
 export const getUsers = async (req, res) => {
@@ -30,6 +31,17 @@ export const getUserStats = async (_req, res) => {
   try {
     const stats = await getUserRoleStats();
     return res.status(200).json({ success: true, data: stats });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const suggestUsers = async (req, res) => {
+  try {
+    const { q, limit } = req.validatedQuery;
+    const suggestions = await getUserSuggestions(q, limit);
+    return res.status(200).json({ success: true, data: suggestions });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);

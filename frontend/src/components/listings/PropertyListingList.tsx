@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useProperties } from '../../hooks/useProperties'
-import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { normalizeSearchInput } from '../../hooks/useDebouncedSearch'
+import { useSearchSuggestions } from '../../hooks/useSearchSuggestions'
+import { fetchPropertySuggestions } from '../../services/propertyService'
 import { PropertyListingCard } from './PropertyListingCard'
 import { Pagination } from '../ui/Pagination'
 import { EmptyState } from '../ui/EmptyState'
@@ -10,11 +12,10 @@ import { AlertBanner } from '../ui/AlertBanner'
 import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
 import { BackButton } from '../ui/BackButton'
-import { SearchBar } from '../ui/SearchBar'
+import { SearchAutocomplete } from '../ui/SearchAutocomplete'
 import { FilterChip } from '../ui/FilterChip'
 import { SectionContainer } from '../layout/SectionContainer'
 import { PROPERTY_TYPES, LISTING_TYPES, PROPERTY_STATUSES } from '../../constants/property'
-import { PROPERTY_SEARCH_DEBOUNCE_MS } from '../../constants/propertySearch'
 import { ROUTES } from '../../constants/routes'
 import {
   buildFilterChips,
@@ -40,10 +41,8 @@ function listingTypeFromSearchParam(raw: string | null): ListingType | undefined
 }
 
 function searchFromSearchParam(raw: string | null): string | undefined {
-  if (!raw) return undefined
-  const t = raw.trim()
-  if (!t) return undefined
-  return t.length > 150 ? t.slice(0, 150) : t
+  const normalized = normalizeSearchInput(raw ?? '')
+  return normalized === '' ? undefined : normalized
 }
 
 const typeOptions = [
@@ -89,7 +88,11 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
   } = useProperties(initialQuery)
 
   const [searchInput, setSearchInput] = useState(() => initialSearch ?? '')
-  const debouncedSearch = useDebouncedValue(searchInput, PROPERTY_SEARCH_DEBOUNCE_MS)
+
+  const { suggestions, isLoadingSuggestions, clearSuggestions } = useSearchSuggestions({
+    query: searchInput,
+    fetcher: fetchPropertySuggestions,
+  })
 
   const pushUrlForQuery = useCallback(
     (next: PropertyQueryParams) => {
@@ -102,21 +105,14 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
     [variant, setSearchParams],
   )
 
-  useEffect(() => {
-    const trimmedInput = searchInput.trim()
-    if (trimmedInput === '') {
-      if ((query.search ?? undefined) !== undefined) {
-        setFilters({ search: undefined })
-        pushUrlForQuery({ ...query, search: undefined })
-      }
-      return
-    }
-    const next = debouncedSearch.trim() || undefined
-    if (!next || next !== trimmedInput) return
+  const handleSearchSubmit = (value: string) => {
+    const next = normalizeSearchInput(value) || undefined
+    setSearchInput(value)
+    clearSuggestions()
     if (next === (query.search ?? undefined)) return
     setFilters({ search: next })
     pushUrlForQuery({ ...query, search: next })
-  }, [searchInput, debouncedSearch, query, setFilters, pushUrlForQuery])
+  }
 
   const handleFilterChange = (key: string, value: string) => {
     const merged = { ...query, [key]: value || undefined }
@@ -132,12 +128,13 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
 
   const handleSearchClear = () => {
     setSearchInput('')
+    clearSuggestions()
     setFilters({ search: undefined })
     pushUrlForQuery({ ...query, search: undefined })
   }
 
   const removeChip = (key: FilterChipKey) => {
-    if (key === 'search') setSearchInput('')
+    if (key === 'search') { setSearchInput(''); clearSuggestions() }
     setFilters({ [key]: undefined } as Omit<PropertyQueryParams, 'page' | 'limit'>)
     const merged = { ...query, [key]: undefined }
     if (variant === 'public') {
@@ -174,12 +171,15 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
   const filterPanel = (
     <div className={variant === 'admin' ? 'w-full min-w-0 rounded-2xl border border-slate-200/80 bg-surface p-4 shadow-sm sm:p-5' : 'w-full min-w-0'}>
       <div className="w-full min-w-0">
-        <SearchBar
+        <SearchAutocomplete
           placeholder="Search by title, location, or keywords…"
           aria-label="Search property listings"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={setSearchInput}
+          onSubmit={handleSearchSubmit}
           onClear={handleSearchClear}
+          suggestions={suggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
           isLoading={isLoading}
           maxLength={150}
         />

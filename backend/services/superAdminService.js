@@ -41,6 +41,27 @@ export const listUsers = async ({
   };
 };
 
+const SUGGEST_MAX = 10;
+
+/**
+ * Returns up to `limit` autocomplete suggestion strings for the given query.
+ * Matches against user name and email (case-insensitive substring).
+ */
+export const getUserSuggestions = async (q, limit = 8) => {
+  if (!q || !q.trim()) return [];
+  const rx = new RegExp(escapeRegExp(q.trim()), 'i');
+  const cap = Math.min(limit, SUGGEST_MAX);
+
+  const [names, emails] = await Promise.all([
+    User.distinct('name',  { name:  rx }),
+    User.distinct('email', { email: rx }),
+  ]);
+
+  const merged = [...new Set([...names, ...emails])];
+  merged.sort((a, b) => a.localeCompare(b));
+  return merged.slice(0, cap);
+};
+
 /**
  * Returns the total number of users grouped by role.
  */

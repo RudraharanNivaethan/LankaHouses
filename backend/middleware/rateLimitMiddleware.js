@@ -226,6 +226,16 @@ export const superAdminStatsLimiter = createDualLimiter({
   getUserId: authUserId,
 });
 
+/** GET /api/superadmin/suggest — privileged suggest (120 user / 240 IP per min). */
+export const superAdminSuggestLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   120,
+  ipCap:     240,
+  error:     'Too many user suggestion requests. Please try again in a moment.',
+  namespace: 'saSuggest',
+  getUserId: authUserId,
+});
+
 /** POST /api/superadmin/admins — privileged write (10 user / 30 IP per min). */
 export const superAdminCreateLimiter = createDualLimiter({
   windowMs:  60 * 1000,
@@ -234,6 +244,30 @@ export const superAdminCreateLimiter = createDualLimiter({
   error:     'Admin creation limit reached. Please slow down.',
   namespace: 'saCreate',
   getUserId: authUserId,
+});
+
+/**
+ * GET /api/property/suggest — tiered suggest limiter.
+ * Higher caps than search because autocomplete fires on every debounced keystroke.
+ *   Guest:  20 / window IP-only
+ *   User:   60 user / 120 IP per window
+ *   Admin: 200 user / 400 IP per window
+ */
+const suggestUserCapFn = (req) => {
+  if (!req.user) return PROPERTY_SEARCH_USER_CAP_GUEST * 2;
+  if (req.user.permissions?.includes(PERMISSION.PROPERTIES_MANAGE)) return PROPERTY_SEARCH_USER_CAP_ADMIN * 2;
+  return PROPERTY_SEARCH_USER_CAP_USER * 2;
+};
+
+const suggestIpCapFn = (req) => suggestUserCapFn(req) * 2;
+
+export const propertySuggestLimiter = createDualLimiter({
+  windowMs:  PROPERTY_LIST_SEARCH_WINDOW_MS,
+  userCap:   suggestUserCapFn,
+  ipCap:     suggestIpCapFn,
+  error:     'Too many suggestion requests. Please try again in a moment.',
+  namespace: 'propsuggest',
+  getUserId: publicUserId,
 });
 
 const searchUserCapFn = (req) => {

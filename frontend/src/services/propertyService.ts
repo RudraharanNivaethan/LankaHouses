@@ -122,6 +122,15 @@ export async function removePropertyImage(id: string, imageIndex: number): Promi
   return data as unknown as PropertyApiResponse
 }
 
+export async function fetchPropertySuggestions(q: string): Promise<string[]> {
+  if (!q.trim()) return []
+  const params = new URLSearchParams({ q: q.trim(), limit: '8' })
+  const res = await fetch(`${API_BASE}/suggest?${params}`, { credentials: 'include' })
+  if (!res.ok) return []
+  const data = (await res.json()) as { success: boolean; data: string[] }
+  return Array.isArray(data.data) ? data.data : []
+}
+
 export async function deleteProperty(id: string): Promise<DeletePropertyApiResponse> {
   const res = await fetch(`${API_BASE}/${id}`, {
     method: 'DELETE',

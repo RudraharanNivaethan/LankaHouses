@@ -9,6 +9,7 @@ import {
   addPropertyImages,
   deletePropertyImage,
   countListingsByStatus,
+  getPropertySuggestions,
 } from '../services/propertyService.js';
 import { STATUS_VALUES } from '../validation/schemas/propertySchema.js';
 
@@ -104,6 +105,17 @@ export const deleteImage = async (req, res) => {
   try {
     const property = await deletePropertyImage(req.validatedParams.id, req.validatedParams.imageIndex);
     return res.status(200).json({ success: true, data: property });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const suggestProperties = async (req, res) => {
+  try {
+    const { q, limit } = req.validatedQuery;
+    const suggestions = await getPropertySuggestions(q, limit);
+    return res.status(200).json({ success: true, data: suggestions });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);

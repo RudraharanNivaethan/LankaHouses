@@ -68,6 +68,18 @@ export async function getUserStats(): Promise<UserRoleStats> {
   return res.data
 }
 
+export async function fetchUserSuggestions(q: string): Promise<string[]> {
+  if (!q.trim()) return []
+  const params = new URLSearchParams({ q: q.trim(), limit: '8' })
+  const res = await fetch(`${API_BASE}/suggest?${params}`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+  if (!res.ok) return []
+  const data = (await res.json()) as { success: boolean; data: string[] }
+  return Array.isArray(data.data) ? data.data : []
+}
+
 export async function createAdmin(
   payload: CreateAdminPayload,
 ): Promise<User> {
