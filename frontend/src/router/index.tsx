@@ -18,13 +18,14 @@ import { AdminHouseDetailPage } from '../pages/Admin/AdminHouseDetailPage'
 import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
+import { isAdminLike } from '../utils/roleUtils'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (isAuthenticated) {
-    const target = user?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
+    const target = isAdminLike(user?.role) ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
     return <Navigate to={target} replace />
   }
   return <>{children}</>
@@ -47,7 +48,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 function AdminRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated || user?.role !== 'admin') return <NotFound />
+  if (!isAuthenticated || !isAdminLike(user?.role)) return <NotFound />
   return <>{children}</>
 }
 
@@ -72,7 +73,7 @@ function MainLayout() {
 
   if (isLoading) return null
 
-  if (isAuthenticated && user?.role === 'admin') {
+  if (isAuthenticated && isAdminLike(user?.role)) {
     if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
       return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
     }
