@@ -1,6 +1,7 @@
 import { AdminShell } from '../../components/layout/AdminShell'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { PlaceholderPage } from '../../components/admin/PlaceholderPage'
+import { BackButton } from '../../components/ui/BackButton'
 
 const InquiriesIcon = (
   <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -12,10 +13,13 @@ export function AdminInquiriesPage() {
   return (
     <AdminShell
       header={
-        <PageHeader
-          title="Inquiries"
-          description="Review and respond to buyer inquiries."
-        />
+        <div>
+          <BackButton className="mb-3" />
+          <PageHeader
+            title="Inquiries"
+            description="Review and respond to buyer inquiries."
+          />
+        </div>
       }
     >
       <PlaceholderPage

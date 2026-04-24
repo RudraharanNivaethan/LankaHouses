@@ -1,12 +1,10 @@
-import { Link } from 'react-router-dom'
 import { AdminShell } from '../../components/layout/AdminShell'
 import { AlertBanner } from '../../components/ui/AlertBanner'
 import { SuccessBanner } from '../../components/ui/SuccessBanner'
 import { Input } from '../../components/ui/Input'
 import { Spinner } from '../../components/ui/Spinner'
-import { ChevronLeftIcon } from '../../components/ui/icons'
+import { BackButton } from '../../components/ui/BackButton'
 import { useCreateAdmin } from '../../hooks/useCreateAdmin'
-import { ROUTES } from '../../constants/routes'
 
 export function AdminCreateAdminPage() {
   const { form, onSubmit, serverError, successMessage, isLoading } = useCreateAdmin()
@@ -17,13 +15,7 @@ export function AdminCreateAdminPage() {
 
   const header = (
     <div>
-      <Link
-        to={ROUTES.ADMIN_USERS}
-        className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-brand"
-      >
-        <ChevronLeftIcon className="h-4 w-4" />
-        Back to Users
-      </Link>
+      <BackButton className="mb-3" />
       <h1 className="text-2xl font-bold text-slate-800">Create Admin</h1>
       <p className="mt-1 text-sm text-slate-500">
         Create a new admin account. The account will be active immediately.
