@@ -8,8 +8,8 @@ import {
 
 export const getUsers = async (req, res) => {
   try {
-    const { role, page, limit } = req.validatedQuery;
-    const result = await listUsers({ role, page, limit });
+    const { role, search, page, limit } = req.validatedQuery;
+    const result = await listUsers({ role, search, page, limit });
     return res.status(200).json({
       success: true,
       data:       result.users.map(toPublicUser),

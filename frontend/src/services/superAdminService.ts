@@ -47,15 +47,17 @@ async function post<T>(url: string, body?: unknown): Promise<T> {
 
 export interface GetUsersParams {
   role?: UserRole
+  search?: string
   page?: number
   limit?: number
 }
 
 export async function getUsers(params: GetUsersParams = {}): Promise<UsersApiResponse> {
   const query = new URLSearchParams()
-  if (params.role)  query.set('role', params.role)
-  if (params.page)  query.set('page', String(params.page))
-  if (params.limit) query.set('limit', String(params.limit))
+  if (params.role)   query.set('role', params.role)
+  if (params.search) query.set('search', params.search)
+  if (params.page)   query.set('page', String(params.page))
+  if (params.limit)  query.set('limit', String(params.limit))
 
   const qs = query.toString()
   return get<UsersApiResponse>(`${API_BASE}${qs ? `?${qs}` : ''}`)

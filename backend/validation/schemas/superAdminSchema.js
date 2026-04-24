@@ -4,6 +4,16 @@ import { sanitizeString, normalizeEmail, isStrongPassword } from '../sanitizers.
 
 export const listUsersQuerySchema = z.object({
   role:  z.enum(['user', 'admin', 'superadmin']).optional(),
+  search: z
+    .string()
+    .optional()
+    .transform((val) => (val === undefined ? undefined : sanitizeString(val)))
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      const trimmed = val.trim();
+      if (!trimmed) return undefined;
+      return trimmed.length > 150 ? trimmed.slice(0, 150) : trimmed;
+    }),
   page:  z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
 });

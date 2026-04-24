@@ -5,12 +5,25 @@ import { AppError, HTTP_STATUS } from '../utils/errorUtils.js';
 const DEFAULT_PAGE  = 1;
 const DEFAULT_LIMIT = 20;
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * Returns a paginated list of users, optionally filtered by role.
  */
-export const listUsers = async ({ role, page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = {}) => {
+export const listUsers = async ({
+  role,
+  search,
+  page = DEFAULT_PAGE,
+  limit = DEFAULT_LIMIT,
+} = {}) => {
   const filter = {};
   if (role) filter.role = role;
+  if (search) {
+    const rx = new RegExp(escapeRegExp(search), 'i');
+    filter.$or = [{ name: rx }, { email: rx }];
+  }
 
   const skip = (page - 1) * limit;
 
