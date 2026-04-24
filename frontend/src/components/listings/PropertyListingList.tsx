@@ -9,6 +9,7 @@ import { Spinner } from '../ui/Spinner'
 import { AlertBanner } from '../ui/AlertBanner'
 import { Select } from '../ui/Select'
 import { Button } from '../ui/Button'
+import { BackButton } from '../ui/BackButton'
 import { SearchBar } from '../ui/SearchBar'
 import { FilterChip } from '../ui/FilterChip'
 import { SectionContainer } from '../layout/SectionContainer'
@@ -260,9 +261,7 @@ export function PropertyListingList({ variant }: PropertyListingListProps) {
                 <Button variant="primary" size="sm">Add Property</Button>
               </Link>
             ) : (
-              <Link to={ROUTES.HOME}>
-                <Button variant="outline" size="sm">Back to home</Button>
-              </Link>
+              <BackButton variant="outline" size="sm" label="Back to home" />
             )
           }
         />

@@ -5,6 +5,7 @@ import { DetailSection } from '../ui/DetailSection'
 import { DetailField } from '../ui/DetailField'
 import { StatusBadge } from '../ui/StatusBadge'
 import { Button } from '../ui/Button'
+import { BackButton } from '../ui/BackButton'
 import { STATUS_LABELS, STATUS_COLORS } from '../../constants/property'
 import { ROUTES } from '../../constants/routes'
 import { useRequireAuth } from '../../hooks/useRequireAuth'
@@ -137,11 +138,11 @@ export function PropertyDetailPanel({ variant, property, onDeleteClick }: Proper
       )}
 
       <div>
-        <Link to={variant === 'admin' ? ROUTES.ADMIN_HOUSES : ROUTES.LISTINGS}>
-          <Button variant="outline" size="sm">
-            {variant === 'admin' ? 'Back to Properties' : 'Back to listings'}
-          </Button>
-        </Link>
+        <BackButton
+          variant="outline"
+          size="sm"
+          label={variant === 'admin' ? 'Back to Properties' : 'Back to listings'}
+        />
       </div>
     </div>
   )

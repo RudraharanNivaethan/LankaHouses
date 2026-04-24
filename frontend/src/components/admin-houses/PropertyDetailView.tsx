@@ -1,12 +1,11 @@
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useProperty } from '../../hooks/useProperty'
 import { useDeleteProperty } from '../../hooks/useDeleteProperty'
 import { PropertyDetailPanel } from '../listings/PropertyDetailPanel'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { Spinner } from '../ui/Spinner'
 import { AlertBanner } from '../ui/AlertBanner'
-import { Button } from '../ui/Button'
-import { ROUTES } from '../../constants/routes'
+import { BackButton } from '../ui/BackButton'
 
 export function PropertyDetailView() {
   const { id } = useParams<{ id: string }>()
@@ -32,9 +31,7 @@ export function PropertyDetailView() {
     return (
       <div className="flex flex-col gap-4">
         <AlertBanner message={error ?? 'Property not found.'} />
-        <Link to={ROUTES.ADMIN_HOUSES}>
-          <Button variant="outline" size="sm">Back to Properties</Button>
-        </Link>
+        <BackButton variant="outline" size="sm" label="Back to Properties" />
       </div>
     )
   }

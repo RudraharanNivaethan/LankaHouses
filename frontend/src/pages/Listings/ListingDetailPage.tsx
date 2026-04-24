@@ -1,12 +1,11 @@
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useProperty } from '../../hooks/useProperty'
 import { PropertyDetailPanel } from '../../components/listings/PropertyDetailPanel'
 import { ListingsBrowseShell } from '../../components/layout/ListingsBrowseShell'
 import { SectionContainer } from '../../components/layout/SectionContainer'
 import { Spinner } from '../../components/ui/Spinner'
 import { AlertBanner } from '../../components/ui/AlertBanner'
-import { Button } from '../../components/ui/Button'
-import { ROUTES } from '../../constants/routes'
+import { BackButton } from '../../components/ui/BackButton'
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -29,9 +28,7 @@ export function ListingDetailPage() {
       <ListingsBrowseShell>
         <SectionContainer className="flex flex-1 flex-col gap-4 py-16">
           <AlertBanner message={error ?? 'Property not found.'} />
-          <Link to={ROUTES.LISTINGS}>
-            <Button variant="outline" size="sm">Back to listings</Button>
-          </Link>
+          <BackButton variant="outline" size="sm" label="Back to listings" />
         </SectionContainer>
       </ListingsBrowseShell>
     )
