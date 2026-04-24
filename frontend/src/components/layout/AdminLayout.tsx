@@ -63,7 +63,7 @@ export function AdminLayout({ sidebar, children }: AdminLayoutProps) {
                 </div>
                 <div className="hidden md:block">
                   <p className="text-sm font-semibold text-slate-800">{user.name}</p>
-                  <p className="text-xs text-slate-400">{user.permissions.displayRole}</p>
+                  <p className="text-xs text-slate-400">{user.displayRole}</p>
                 </div>
               </div>
             )}

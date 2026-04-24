@@ -1,5 +1,5 @@
 import { formatErrorResponse } from '../utils/errorUtils.js';
-import { isAdminLike } from '../utils/roleUtils.js';
+import { PERMISSION } from '../utils/permissionKeys.js';
 import {
   createPropertyRecord,
   listProperties,
@@ -34,7 +34,7 @@ export const getAdminListingStats = async (_req, res) => {
 
 export const getProperties = async (req, res) => {
   try {
-    const viewerIsAdmin = isAdminLike(req.user?.role);
+    const viewerIsAdmin = req.user?.permissions?.includes(PERMISSION.PROPERTIES_MANAGE) ?? false;
     const result = await listProperties(req.validatedQuery, { viewerIsAdmin });
     return res.status(200).json({
       success: true,
@@ -54,7 +54,7 @@ export const getProperties = async (req, res) => {
 
 export const getPropertyById = async (req, res) => {
   try {
-    const viewerIsAdmin = isAdminLike(req.user?.role);
+    const viewerIsAdmin = req.user?.permissions?.includes(PERMISSION.PROPERTIES_MANAGE) ?? false;
     const property = await findPropertyById(req.validatedParams.id, { viewerIsAdmin });
     return res.status(200).json({ success: true, data: property });
   } catch (error) {

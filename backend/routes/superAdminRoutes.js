@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
+import { PERMISSION } from '../utils/permissionKeys.js';
 import { validateBody, validateQuery } from '../validation/validationMiddleware.js';
 import {
   listUsersQuerySchema,
@@ -21,7 +22,7 @@ const router = Router();
 router.get(
   '/',
   authenticate,
-  authorize('superadmin'),
+  authorize(PERMISSION.USERS_READ),
   superAdminListLimiter,
   validateQuery(listUsersQuerySchema),
   getUsers,
@@ -30,7 +31,7 @@ router.get(
 router.get(
   '/stats',
   authenticate,
-  authorize('superadmin'),
+  authorize(PERMISSION.USERS_STATS_READ),
   superAdminStatsLimiter,
   getUserStats,
 );
@@ -38,7 +39,7 @@ router.get(
 router.post(
   '/admins',
   authenticate,
-  authorize('superadmin'),
+  authorize(PERMISSION.ADMINS_CREATE),
   superAdminCreateLimiter,
   validateBody(createAdminSchema),
   createAdmin,

@@ -1,13 +1,15 @@
-import { getPermissionsForRole } from './permissions.js';
+import { getPermissionsForRole, getDisplayRoleForRole } from './permissions.js';
 
 /**
- * Shapes a Mongoose user document (or plain object) into the public payload
- * returned to the frontend. Strips private / internal fields such as
- * `password`, `firebase_uid`, `tokenVersion`, and `__v`, and attaches the
- * backend-derived `permissions` object so the client never has to compute
- * privileges from the role string.
+ * Shapes a Mongoose user document into the public payload returned to the
+ * frontend. Strips internal fields (`password`, `firebase_uid`,
+ * `tokenVersion`, `__v`) and attaches:
  *
- * Accepts a Mongoose document or any object with matching fields.
+ *  - `displayRole`   — human-readable label, top-level (not inside permissions)
+ *  - `permissions`   — flat string[] of PERMISSION.XXX keys the user holds;
+ *                      frontend consumes these via `user.permissions.includes(key)`
+ *
+ * Accepts a Mongoose document or any plain object with matching fields.
  */
 export const toPublicUser = (user) => {
   if (!user) return null;
@@ -22,8 +24,9 @@ export const toPublicUser = (user) => {
     email:       plain.email,
     phone:       plain.phone ?? null,
     role:        plain.role,
+    displayRole: getDisplayRoleForRole(plain.role),
     createdAt:   plain.createdAt,
     updatedAt:   plain.updatedAt,
-    permissions: getPermissionsForRole(plain.role),
+    permissions: [...getPermissionsForRole(plain.role)],
   };
 };

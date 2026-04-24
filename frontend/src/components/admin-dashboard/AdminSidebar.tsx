@@ -3,7 +3,6 @@ import { SidebarLink } from '../ui/SidebarLink'
 import { HousesIcon, InquiriesIcon, UsersIcon } from '../ui/icons'
 import { ROUTES } from '../../constants/routes'
 import { useAuth } from '../../context/AuthContext'
-import type { UserPermissions } from '../../types/auth'
 
 const DashboardIcon = (
   <svg fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
@@ -16,20 +15,25 @@ interface NavItem {
   icon: ReactNode
   label: string
   end?: boolean
-  /** Optional backend-supplied capability required to show this link. */
-  requires?: keyof UserPermissions
+  /**
+   * Optional permission key required to show this link.
+   * If present, the link is only rendered when `user.permissions` includes
+   * this string. The string values come from the backend (`/api/auth/me`) —
+   * never defined or duplicated on the frontend.
+   */
+  requires?: string
 }
 
 /**
- * Nav manifest. Each entry may declare a `requires` capability; if present,
- * the link is only rendered when `user.permissions[requires]` is true.
- * Capabilities come from the backend (`/api/auth/me`), never computed locally.
+ * Nav manifest. Each entry may declare a `requires` permission string; if
+ * present, the link is only rendered when the user holds that permission as
+ * returned by the backend.
  */
 const NAV_ITEMS: NavItem[] = [
-  { to: ROUTES.ADMIN_DASHBOARD, icon: DashboardIcon,   label: 'Dashboard', end: true },
-  { to: ROUTES.ADMIN_HOUSES,    icon: <HousesIcon />,  label: 'Houses' },
+  { to: ROUTES.ADMIN_DASHBOARD, icon: DashboardIcon,     label: 'Dashboard',  end: true },
+  { to: ROUTES.ADMIN_HOUSES,    icon: <HousesIcon />,    label: 'Houses' },
   { to: ROUTES.ADMIN_INQUIRIES, icon: <InquiriesIcon />, label: 'Inquiries' },
-  { to: ROUTES.ADMIN_USERS,     icon: <UsersIcon />,   label: 'Users', requires: 'canViewAllUsers' },
+  { to: ROUTES.ADMIN_USERS,     icon: <UsersIcon />,     label: 'Users', requires: 'users.read' },
 ]
 
 interface AdminSidebarProps {
@@ -43,7 +47,7 @@ export function AdminSidebar({ pendingInquiries }: AdminSidebarProps) {
   return (
     <div className="flex flex-col gap-1">
       {NAV_ITEMS.map((item) => {
-        if (item.requires && !permissions?.[item.requires]) return null
+        if (item.requires && !permissions?.includes(item.requires)) return null
         const badge = item.to === ROUTES.ADMIN_INQUIRIES ? pendingInquiries : undefined
         return (
           <SidebarLink

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate, authorize, optionalAuthenticate } from '../middleware/authMiddleware.js';
+import { PERMISSION } from '../utils/permissionKeys.js';
 import {
   propertyListReadLimiter,
   propertyListSearchLimiter,
@@ -35,7 +36,7 @@ const router = Router();
 router.post(
   '/',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_MANAGE),
   propertyCreateLimiter,
   ...propertyUploadBundle,
   requireImages,
@@ -55,7 +56,7 @@ router.get(
 router.get(
   '/stats/listings',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_STATS_READ),
   propertyStatsLimiter,
   getAdminListingStats
 );
@@ -63,7 +64,7 @@ router.get(
 router.get(
   '/meta/statuses',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_STATS_READ),
   propertyMetaLimiter,
   getPropertyStatuses
 );
@@ -79,7 +80,7 @@ router.get(
 router.patch(
   '/:id',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_MANAGE),
   propertyModifyLimiter,
   validateParams(propertyIdParamsSchema),
   validateBody(updatePropertySchema),
@@ -89,7 +90,7 @@ router.patch(
 router.delete(
   '/:id',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_MANAGE),
   propertyModifyLimiter,
   validateParams(propertyIdParamsSchema),
   deleteProperty
@@ -98,7 +99,7 @@ router.delete(
 router.post(
   '/:id/images',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_MANAGE),
   propertyModifyLimiter,
   validateParams(propertyIdParamsSchema),
   ...propertyUploadBundle,
@@ -109,7 +110,7 @@ router.post(
 router.delete(
   '/:id/images/:imageIndex',
   authenticate,
-  authorize('admin'),
+  authorize(PERMISSION.PROPERTIES_MANAGE),
   propertyModifyLimiter,
   validateParams(propertyImageIndexSchema),
   deleteImage

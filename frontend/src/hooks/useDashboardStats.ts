@@ -20,7 +20,7 @@ export interface DashboardStats {
  */
 export function useDashboardStats() {
   const { user } = useAuth()
-  const canViewUserStats = user?.permissions.canViewUserRoleStats ?? false
+  const canViewUserStats = user?.permissions.includes('users.stats.read') ?? false
 
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)

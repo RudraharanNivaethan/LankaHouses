@@ -42,7 +42,7 @@ function ActionCard({ to, icon, title, description, accent = 'text-brand' }: Act
  */
 export function QuickActions() {
   const { user } = useAuth()
-  const canCreateAdmin = user?.permissions.canCreateAdmin ?? false
+  const canCreateAdmin = user?.permissions.includes('admins.create') ?? false
 
   return (
     <div>

@@ -26,7 +26,9 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (isAuthenticated) {
-    const target = user?.permissions.canAccessAdminPanel ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
+    const target = user?.permissions.includes('admin.access')
+      ? ROUTES.ADMIN_DASHBOARD
+      : ROUTES.HOME
     return <Navigate to={target} replace />
   }
   return <>{children}</>
@@ -44,21 +46,22 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-// Requires authentication AND admin-like access; non-admins see the 404 page
-// so the route's existence is not leaked (indistinguishable from an invalid
-// URL). Capability comes from `user.permissions` supplied by the backend.
-function AdminRoute({ children }: { children: ReactNode }) {
+/**
+ * Generic permission-key guard.
+ *
+ * Returns the 404 page (not a redirect) so the existence of the route is
+ * indistinguishable from an invalid URL — security through obscurity is the
+ * intent here.
+ *
+ * Usage:
+ *   <RequirePermission permission={'admin.access'}>
+ *     <AdminDashboardPage />
+ *   </RequirePermission>
+ */
+function RequirePermission({ permission, children }: { permission: string; children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated || !user?.permissions.canAccessAdminPanel) return <NotFound />
-  return <>{children}</>
-}
-
-// Requires authentication AND superadmin-only access; non-superadmins see 404
-function SuperAdminRoute({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated, isLoading } = useAuth()
-  if (isLoading) return null
-  if (!isAuthenticated || !user?.permissions.canAccessSuperAdminPanel) return <NotFound />
+  if (!isAuthenticated || !user?.permissions.includes(permission)) return <NotFound />
   return <>{children}</>
 }
 
@@ -83,7 +86,7 @@ function MainLayout() {
 
   if (isLoading) return null
 
-  if (isAuthenticated && user?.permissions.canAccessAdminPanel) {
+  if (isAuthenticated && user?.permissions.includes('admin.access')) {
     if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
       return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
     }
@@ -154,65 +157,65 @@ export function AppRouter() {
           <Route
             path="/admin"
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_DASHBOARD}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminDashboardPage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_HOUSES}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminHousesPage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_HOUSE_DETAIL}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminHouseDetailPage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_ADD_HOUSE}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminAddHousePage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_EDIT_HOUSE}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminEditHousePage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_INQUIRIES}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminInquiriesPage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_INQUIRY_DETAIL}
             element={
-              <AdminRoute>
+              <RequirePermission permission={'admin.access'}>
                 <AdminInquiryDetailPage />
-              </AdminRoute>
+              </RequirePermission>
             }
           />
 
@@ -220,17 +223,17 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_USERS}
             element={
-              <SuperAdminRoute>
+              <RequirePermission permission={'superadmin.access'}>
                 <AdminUsersPage />
-              </SuperAdminRoute>
+              </RequirePermission>
             }
           />
           <Route
             path={ROUTES.ADMIN_CREATE_ADMIN}
             element={
-              <SuperAdminRoute>
+              <RequirePermission permission={'superadmin.access'}>
                 <AdminCreateAdminPage />
-              </SuperAdminRoute>
+              </RequirePermission>
             }
           />
 
