@@ -4,20 +4,13 @@ import { Button } from '../ui/Button'
 import { ROUTES } from '../../constants/routes'
 import { useAuth } from '../../context/AuthContext'
 import { useLogout } from '../../hooks/useLogout'
+import { getInitials } from '../../utils/stringUtils'
 
 const NAV_LINKS = [
   { label: 'Browse', to: ROUTES.LISTINGS },
   { label: 'About', to: ROUTES.ABOUT },
   { label: 'Contact', to: ROUTES.CONTACT },
 ]
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() ?? '')
-    .join('')
-}
 
 function UserAvatar({ name }: { name: string }) {
   return (

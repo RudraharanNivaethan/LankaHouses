@@ -17,8 +17,10 @@ import { AdminEditHousePage } from '../pages/Admin/AdminEditHousePage'
 import { AdminHouseDetailPage } from '../pages/Admin/AdminHouseDetailPage'
 import { AdminInquiriesPage } from '../pages/Admin/AdminInquiriesPage'
 import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
+import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
+import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
-import { isAdminLike } from '../utils/roleUtils'
+import { isAdminLike, roleSatisfies } from '../utils/roleUtils'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
@@ -49,6 +51,14 @@ function AdminRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (!isAuthenticated || !isAdminLike(user?.role)) return <NotFound />
+  return <>{children}</>
+}
+
+// Requires authentication AND superadmin role specifically; non-superadmins see 404
+function SuperAdminRoute({ children }: { children: ReactNode }) {
+  const { user, isAuthenticated, isLoading } = useAuth()
+  if (isLoading) return null
+  if (!isAuthenticated || !roleSatisfies(user?.role, ['superadmin'])) return <NotFound />
   return <>{children}</>
 }
 
@@ -203,6 +213,24 @@ export function AppRouter() {
               <AdminRoute>
                 <AdminInquiryDetailPage />
               </AdminRoute>
+            }
+          />
+
+          {/* SuperAdmin-only routes */}
+          <Route
+            path={ROUTES.ADMIN_USERS}
+            element={
+              <SuperAdminRoute>
+                <AdminUsersPage />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_CREATE_ADMIN}
+            element={
+              <SuperAdminRoute>
+                <AdminCreateAdminPage />
+              </SuperAdminRoute>
             }
           />
 

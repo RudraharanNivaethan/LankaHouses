@@ -18,6 +18,8 @@ export const ROUTES = {
   ADMIN_EDIT_HOUSE: '/admin/houses/:id/edit',
   ADMIN_INQUIRIES: '/admin/inquiries',
   ADMIN_INQUIRY_DETAIL: '/admin/inquiries/:id',
+  ADMIN_USERS: '/admin/users',
+  ADMIN_CREATE_ADMIN: '/admin/users/new',
 } as const
 
 /** Admin houses list filtered by listing lifecycle status (matches API `status` query). */

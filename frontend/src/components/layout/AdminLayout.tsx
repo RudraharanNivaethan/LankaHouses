@@ -5,18 +5,11 @@ import { useAuth } from '../../context/AuthContext'
 import { useLogout } from '../../hooks/useLogout'
 import { ROUTES } from '../../constants/routes'
 import { Spinner } from '../ui/Spinner'
+import { getInitials } from '../../utils/stringUtils'
 
 interface AdminLayoutProps {
   sidebar: ReactNode
   children: ReactNode
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() ?? '')
-    .join('')
 }
 
 export function AdminLayout({ sidebar, children }: AdminLayoutProps) {

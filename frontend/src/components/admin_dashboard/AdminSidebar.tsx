@@ -19,16 +19,26 @@ const InquiriesIcon = (
   </svg>
 )
 
+const UsersIcon = (
+  <svg fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2a4 4 0 100-8 4 4 0 000 8zm6 0a3 3 0 100-6 3 3 0 000 6zm-12 0a3 3 0 100-6 3 3 0 000 6z" />
+  </svg>
+)
+
 interface AdminSidebarProps {
   pendingInquiries?: number
+  isSuperAdmin?: boolean
 }
 
-export function AdminSidebar({ pendingInquiries }: AdminSidebarProps) {
+export function AdminSidebar({ pendingInquiries, isSuperAdmin = false }: AdminSidebarProps) {
   return (
     <div className="flex flex-col gap-1">
       <SidebarLink to={ROUTES.ADMIN_DASHBOARD} icon={DashboardIcon} label="Dashboard" end />
       <SidebarLink to={ROUTES.ADMIN_HOUSES} icon={HousesIcon} label="Houses" />
       <SidebarLink to={ROUTES.ADMIN_INQUIRIES} icon={InquiriesIcon} label="Inquiries" badge={pendingInquiries} />
+      {isSuperAdmin && (
+        <SidebarLink to={ROUTES.ADMIN_USERS} icon={UsersIcon} label="Users" />
+      )}
     </div>
   )
 }

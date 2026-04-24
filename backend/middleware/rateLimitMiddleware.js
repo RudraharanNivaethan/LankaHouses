@@ -204,6 +204,38 @@ export const propertyByIdReadLimiter = createDualLimiter({
   getUserId: publicUserId,
 });
 
+// ─── SuperAdmin routes ────────────────────────────────────────────────────────
+
+/** GET /api/superadmin — dual read limit (60 user / 180 IP per min). */
+export const superAdminListLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many user list requests. Please try again in a moment.',
+  namespace: 'saList',
+  getUserId: authUserId,
+});
+
+/** GET /api/superadmin/stats — dual read limit (60 user / 180 IP per min). */
+export const superAdminStatsLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many user stat requests. Please try again in a moment.',
+  namespace: 'saStats',
+  getUserId: authUserId,
+});
+
+/** POST /api/superadmin/admins — privileged write (10 user / 30 IP per min). */
+export const superAdminCreateLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   10,
+  ipCap:     30,
+  error:     'Admin creation limit reached. Please slow down.',
+  namespace: 'saCreate',
+  getUserId: authUserId,
+});
+
 const searchUserCapFn = (req) => {
   if (!req.user) return PROPERTY_SEARCH_USER_CAP_GUEST;
   if (isAdminLike(req.user.role)) return PROPERTY_SEARCH_USER_CAP_ADMIN;

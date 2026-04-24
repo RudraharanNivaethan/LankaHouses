@@ -7,6 +7,9 @@ interface DashboardStatsProps {
   removedListings: number
   totalInquiries: number
   pendingInquiries: number
+  totalUsers?: number
+  totalAdmins?: number
+  totalSuperAdmins?: number
 }
 
 const ListingsIcon = (
@@ -39,50 +42,92 @@ const RemovedIcon = (
   </svg>
 )
 
+const UsersIcon = (
+  <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2a4 4 0 100-8 4 4 0 000 8zm6 0a3 3 0 100-6 3 3 0 000 6zm-12 0a3 3 0 100-6 3 3 0 000 6z" />
+  </svg>
+)
+
 export function DashboardStats({
   activeListings,
   soldListings,
   removedListings,
   totalInquiries,
   pendingInquiries,
+  totalUsers,
+  totalAdmins,
+  totalSuperAdmins,
 }: DashboardStatsProps) {
+  const showUserStats =
+    totalUsers !== undefined &&
+    totalAdmins !== undefined &&
+    totalSuperAdmins !== undefined
+
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      <StatCard
-        icon={ListingsIcon}
-        value={activeListings}
-        label="Active Listings"
-        href={adminHousesListUrl('active')}
-        iconColor="emerald"
-      />
-      <StatCard
-        icon={SoldIcon}
-        value={soldListings}
-        label="Sold Listings"
-        href={adminHousesListUrl('sold')}
-        iconColor="brand"
-      />
-      <StatCard
-        icon={RemovedIcon}
-        value={removedListings}
-        label="Removed Listings"
-        href={adminHousesListUrl('removed')}
-        iconColor="rose"
-      />
-      <StatCard
-        icon={TotalInquiriesIcon}
-        value={totalInquiries}
-        label="Total Inquiries"
-        href={ROUTES.ADMIN_INQUIRIES}
-        iconColor="blue"
-      />
-      <StatCard
-        icon={PendingIcon}
-        value={pendingInquiries}
-        label="Pending Inquiries"
-        href={ROUTES.ADMIN_INQUIRIES}
-        iconColor="amber"
-      />
+    <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <StatCard
+          icon={ListingsIcon}
+          value={activeListings}
+          label="Active Listings"
+          href={adminHousesListUrl('active')}
+          iconColor="emerald"
+        />
+        <StatCard
+          icon={SoldIcon}
+          value={soldListings}
+          label="Sold Listings"
+          href={adminHousesListUrl('sold')}
+          iconColor="brand"
+        />
+        <StatCard
+          icon={RemovedIcon}
+          value={removedListings}
+          label="Removed Listings"
+          href={adminHousesListUrl('removed')}
+          iconColor="rose"
+        />
+        <StatCard
+          icon={TotalInquiriesIcon}
+          value={totalInquiries}
+          label="Total Inquiries"
+          href={ROUTES.ADMIN_INQUIRIES}
+          iconColor="blue"
+        />
+        <StatCard
+          icon={PendingIcon}
+          value={pendingInquiries}
+          label="Pending Inquiries"
+          href={ROUTES.ADMIN_INQUIRIES}
+          iconColor="amber"
+        />
+      </div>
+
+      {showUserStats && (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <StatCard
+            icon={UsersIcon}
+            value={totalUsers!}
+            label="Total Users"
+            href={ROUTES.ADMIN_USERS}
+            iconColor="blue"
+          />
+          <StatCard
+            icon={UsersIcon}
+            value={totalAdmins!}
+            label="Total Admins"
+            href={`${ROUTES.ADMIN_USERS}?role=admin`}
+            iconColor="brand"
+          />
+          <StatCard
+            icon={UsersIcon}
+            value={totalSuperAdmins!}
+            label="Super Admins"
+            href={`${ROUTES.ADMIN_USERS}?role=superadmin`}
+            iconColor="emerald"
+          />
+        </div>
+      )}
     </div>
   )
 }

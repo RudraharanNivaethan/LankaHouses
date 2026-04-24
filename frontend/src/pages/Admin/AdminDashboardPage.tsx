@@ -7,13 +7,15 @@ import { Spinner } from '../../components/ui/Spinner'
 import { AlertBanner } from '../../components/ui/AlertBanner'
 import { useDashboardStats } from '../../hooks/useDashboardStats'
 import { useAuth } from '../../context/AuthContext'
+import { roleSatisfies } from '../../utils/roleUtils'
 
 export function AdminDashboardPage() {
-  const { stats, isLoading, error } = useDashboardStats()
   const { user } = useAuth()
+  const isSuperAdmin = roleSatisfies(user?.role, ['superadmin'])
+  const { stats, isLoading, error } = useDashboardStats(isSuperAdmin)
 
   return (
-    <AdminLayout sidebar={<AdminSidebar pendingInquiries={stats?.pendingInquiries} />}>
+    <AdminLayout sidebar={<AdminSidebar pendingInquiries={stats?.pendingInquiries} isSuperAdmin={isSuperAdmin} />}>
       <div className="flex flex-col gap-7">
         {user && <WelcomeBanner name={user.name} />}
 
@@ -32,8 +34,11 @@ export function AdminDashboardPage() {
                 removedListings={stats.removedListings}
                 totalInquiries={stats.totalInquiries}
                 pendingInquiries={stats.pendingInquiries}
+                totalUsers={stats.userStats?.totalUsers}
+                totalAdmins={stats.userStats?.totalAdmins}
+                totalSuperAdmins={stats.userStats?.totalSuperAdmins}
               />
-              <QuickActions />
+              <QuickActions showCreateAdmin={isSuperAdmin} />
             </>
           )
         )}

@@ -1,3 +1,5 @@
+import { formatAdminLongDate } from '../../utils/formatDate'
+
 interface WelcomeBannerProps {
   name: string
 }
@@ -7,15 +9,6 @@ function getGreeting(): string {
   if (hour < 12) return 'Good morning'
   if (hour < 17) return 'Good afternoon'
   return 'Good evening'
-}
-
-function getFormattedDate(): string {
-  return new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 
 export function WelcomeBanner({ name }: WelcomeBannerProps) {
@@ -38,7 +31,7 @@ export function WelcomeBanner({ name }: WelcomeBannerProps) {
           </p>
         </div>
         <p className="mt-3 shrink-0 text-xs font-medium text-white/50 sm:mt-0 sm:text-right">
-          {getFormattedDate()}
+          {formatAdminLongDate()}
         </p>
       </div>
     </div>
