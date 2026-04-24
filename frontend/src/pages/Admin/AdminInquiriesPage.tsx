@@ -1,6 +1,5 @@
-import { AdminLayout } from '../../components/layout/AdminLayout'
+import { AdminShell } from '../../components/layout/AdminShell'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
 import { PlaceholderPage } from '../../components/admin/PlaceholderPage'
 
 const InquiriesIcon = (
@@ -11,19 +10,20 @@ const InquiriesIcon = (
 
 export function AdminInquiriesPage() {
   return (
-    <AdminLayout sidebar={<AdminSidebar />}>
-      <div className="flex flex-col gap-7">
+    <AdminShell
+      header={
         <PageHeader
           title="Inquiries"
           description="Review and respond to buyer inquiries."
         />
-        <PlaceholderPage
-          icon={InquiriesIcon}
-          title="Inquiry Management"
-          description="The inquiries table with status filtering (Pending / Contacted / Closed) will be built in Sprint 2."
-          badge="Coming in Sprint 2"
-        />
-      </div>
-    </AdminLayout>
+      }
+    >
+      <PlaceholderPage
+        icon={InquiriesIcon}
+        title="Inquiry Management"
+        description="The inquiries table with status filtering (Pending / Contacted / Closed) will be built in Sprint 2."
+        badge="Coming in Sprint 2"
+      />
+    </AdminShell>
   )
 }

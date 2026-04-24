@@ -20,14 +20,13 @@ import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
 import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
-import { isAdminLike, roleSatisfies } from '../utils/roleUtils'
 
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (isAuthenticated) {
-    const target = isAdminLike(user?.role) ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
+    const target = user?.permissions.canAccessAdminPanel ? ROUTES.ADMIN_DASHBOARD : ROUTES.HOME
     return <Navigate to={target} replace />
   }
   return <>{children}</>
@@ -45,20 +44,21 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-// Requires authentication AND admin role; non-admins see the 404 page so
-// the route's existence is not leaked (indistinguishable from an invalid URL)
+// Requires authentication AND admin-like access; non-admins see the 404 page
+// so the route's existence is not leaked (indistinguishable from an invalid
+// URL). Capability comes from `user.permissions` supplied by the backend.
 function AdminRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated || !isAdminLike(user?.role)) return <NotFound />
+  if (!isAuthenticated || !user?.permissions.canAccessAdminPanel) return <NotFound />
   return <>{children}</>
 }
 
-// Requires authentication AND superadmin role specifically; non-superadmins see 404
+// Requires authentication AND superadmin-only access; non-superadmins see 404
 function SuperAdminRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated || !roleSatisfies(user?.role, ['superadmin'])) return <NotFound />
+  if (!isAuthenticated || !user?.permissions.canAccessSuperAdminPanel) return <NotFound />
   return <>{children}</>
 }
 
@@ -83,7 +83,7 @@ function MainLayout() {
 
   if (isLoading) return null
 
-  if (isAuthenticated && isAdminLike(user?.role)) {
+  if (isAuthenticated && user?.permissions.canAccessAdminPanel) {
     if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
       return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
     }

@@ -1,4 +1,5 @@
 import { formatErrorResponse } from '../utils/errorUtils.js';
+import { toPublicUser } from '../utils/userDto.js';
 import {
   listUsers,
   getUserRoleStats,
@@ -11,7 +12,7 @@ export const getUsers = async (req, res) => {
     const result = await listUsers({ role, page, limit });
     return res.status(200).json({
       success: true,
-      data:       result.users,
+      data:       result.users.map(toPublicUser),
       pagination: {
         total:      result.total,
         page:       result.page,
@@ -38,7 +39,7 @@ export const getUserStats = async (_req, res) => {
 export const createAdmin = async (req, res) => {
   try {
     const user = await createAdminUser(req.body);
-    return res.status(201).json({ success: true, data: user });
+    return res.status(201).json({ success: true, data: toPublicUser(user) });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);

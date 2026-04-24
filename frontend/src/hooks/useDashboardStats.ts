@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAdminListingStats } from '../services/propertyService'
 import { getUserStats } from '../services/superAdminService'
+import { useAuth } from '../context/AuthContext'
 import type { UserRoleStats } from '../types/auth'
 
 export interface DashboardStats {
@@ -12,7 +13,15 @@ export interface DashboardStats {
   userStats?: UserRoleStats
 }
 
-export function useDashboardStats(isSuperAdmin = false) {
+/**
+ * Loads the admin dashboard stats. Branches on the authenticated user's
+ * backend-supplied `canViewUserRoleStats` permission; pages no longer pass
+ * a role flag.
+ */
+export function useDashboardStats() {
+  const { user } = useAuth()
+  const canViewUserStats = user?.permissions.canViewUserRoleStats ?? false
+
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +35,7 @@ export function useDashboardStats(isSuperAdmin = false) {
       try {
         const requests: [ReturnType<typeof getAdminListingStats>, Promise<UserRoleStats | null>] = [
           getAdminListingStats(),
-          isSuperAdmin ? getUserStats() : Promise.resolve(null),
+          canViewUserStats ? getUserStats() : Promise.resolve(null),
         ]
         const [listingRes, userRoleStats] = await Promise.all(requests)
         if (active) {
@@ -49,7 +58,7 @@ export function useDashboardStats(isSuperAdmin = false) {
 
     fetchStats()
     return () => { active = false }
-  }, [isSuperAdmin])
+  }, [canViewUserStats])
 
   return { stats, isLoading, error }
 }

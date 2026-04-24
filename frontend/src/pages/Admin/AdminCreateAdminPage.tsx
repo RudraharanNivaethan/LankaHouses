@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { AdminLayout } from '../../components/layout/AdminLayout'
-import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
+import { AdminShell } from '../../components/layout/AdminShell'
 import { AlertBanner } from '../../components/ui/AlertBanner'
 import { SuccessBanner } from '../../components/ui/SuccessBanner'
 import { Input } from '../../components/ui/Input'
 import { Spinner } from '../../components/ui/Spinner'
+import { ChevronLeftIcon } from '../../components/ui/icons'
 import { useCreateAdmin } from '../../hooks/useCreateAdmin'
 import { ROUTES } from '../../constants/routes'
 
@@ -15,30 +15,28 @@ export function AdminCreateAdminPage() {
     formState: { errors },
   } = form
 
-  return (
-    <AdminLayout sidebar={<AdminSidebar isSuperAdmin />}>
-      <div className="flex flex-col gap-6 max-w-xl">
-        {/* Header */}
-        <div>
-          <Link
-            to={ROUTES.ADMIN_USERS}
-            className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-brand"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Users
-          </Link>
-          <h1 className="text-2xl font-bold text-slate-800">Create Admin</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Create a new admin account. The account will be active immediately.
-          </p>
-        </div>
+  const header = (
+    <div>
+      <Link
+        to={ROUTES.ADMIN_USERS}
+        className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-brand"
+      >
+        <ChevronLeftIcon className="h-4 w-4" />
+        Back to Users
+      </Link>
+      <h1 className="text-2xl font-bold text-slate-800">Create Admin</h1>
+      <p className="mt-1 text-sm text-slate-500">
+        Create a new admin account. The account will be active immediately.
+      </p>
+    </div>
+  )
 
+  return (
+    <AdminShell header={header} gap="sm">
+      <div className="flex flex-col gap-6 max-w-xl">
         <AlertBanner message={serverError} />
         <SuccessBanner message={successMessage} />
 
-        {/* Form */}
         <form
           onSubmit={onSubmit}
           noValidate
@@ -82,6 +80,6 @@ export function AdminCreateAdminPage() {
           </button>
         </form>
       </div>
-    </AdminLayout>
+    </AdminShell>
   )
 }

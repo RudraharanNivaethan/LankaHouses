@@ -44,8 +44,8 @@ export function UserTable({ users, isLoading }: UserTableProps) {
             <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-800">{u.name}</td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">{u.email}</td>
             <td className="whitespace-nowrap px-6 py-4">
-              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${ROLE_BADGE[u.role]}`}>
-                {u.role}
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${ROLE_BADGE[u.role]}`}>
+                {u.permissions.displayRole}
               </span>
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">

@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom'
-import { AdminLayout } from '../../components/layout/AdminLayout'
+import { AdminShell } from '../../components/layout/AdminShell'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { AdminSidebar } from '../../components/admin_dashboard/AdminSidebar'
 import { PlaceholderPage } from '../../components/admin/PlaceholderPage'
 
 const InquiryDetailIcon = (
@@ -14,19 +13,20 @@ export function AdminInquiryDetailPage() {
   const { id } = useParams<{ id: string }>()
 
   return (
-    <AdminLayout sidebar={<AdminSidebar />}>
-      <div className="flex flex-col gap-7">
+    <AdminShell
+      header={
         <PageHeader
           title="Inquiry Detail"
           description={id ? `Viewing inquiry ID: ${id}` : 'Full inquiry view with reply form.'}
         />
-        <PlaceholderPage
-          icon={InquiryDetailIcon}
-          title="Inquiry Detail View"
-          description="The full inquiry detail with buyer information, property reference, and reply form will be built in Sprint 2."
-          badge="Coming in Sprint 2"
-        />
-      </div>
-    </AdminLayout>
+      }
+    >
+      <PlaceholderPage
+        icon={InquiryDetailIcon}
+        title="Inquiry Detail View"
+        description="The full inquiry detail with buyer information, property reference, and reply form will be built in Sprint 2."
+        badge="Coming in Sprint 2"
+      />
+    </AdminShell>
   )
 }

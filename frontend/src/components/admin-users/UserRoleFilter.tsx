@@ -1,16 +1,5 @@
+import { ROLE_OPTIONS } from '../../constants/roles'
 import type { UserRole } from '../../types/auth'
-
-interface RoleOption {
-  label: string
-  value: UserRole | undefined
-}
-
-const ROLE_OPTIONS: RoleOption[] = [
-  { label: 'All',         value: undefined },
-  { label: 'Users',       value: 'user' },
-  { label: 'Admins',      value: 'admin' },
-  { label: 'Superadmins', value: 'superadmin' },
-]
 
 interface UserRoleFilterProps {
   active: UserRole | undefined

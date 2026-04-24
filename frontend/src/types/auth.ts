@@ -1,12 +1,30 @@
 export type UserRole = 'admin' | 'superadmin' | 'user'
 
+/**
+ * Backend-supplied capability flags. The frontend MUST only read these — it
+ * must never compute them from the raw `role` string. Backend (see
+ * `backend/utils/permissions.js`) remains the source of truth.
+ */
+export interface UserPermissions {
+  displayRole: string
+  canAccessAdminPanel: boolean
+  canManageProperties: boolean
+  canManageInquiries: boolean
+  canAccessSuperAdminPanel: boolean
+  canViewAllUsers: boolean
+  canCreateAdmin: boolean
+  canViewUserRoleStats: boolean
+}
+
 export interface User {
   _id: string
   name: string
   email: string
-  phone?: string
+  phone?: string | null
   role: UserRole
   createdAt?: string
+  updatedAt?: string
+  permissions: UserPermissions
 }
 
 export interface LoginFormData {
