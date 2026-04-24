@@ -1,15 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Spinner } from '../ui/Spinner'
+import { EmptyState } from '../ui/EmptyState'
 import { buttonClassName } from '../ui/Button'
 import { formatAdminDate } from '../../utils/formatDate'
 import { adminUserDetailPath } from '../../constants/routes'
-import type { User, UserRole } from '../../types/auth'
-
-const ROLE_BADGE: Record<UserRole, string> = {
-  user:       'bg-slate-100 text-slate-600',
-  admin:      'bg-blue-100 text-blue-700',
-  superadmin: 'bg-brand/10 text-brand',
-}
+import { UserRoleBadge } from './UserRoleBadge'
+import type { User } from '../../types/auth'
 
 interface UserTableProps {
   users: User[]
@@ -27,7 +23,10 @@ export function UserTable({ users, isLoading }: UserTableProps) {
 
   if (users.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-slate-400">No users found.</div>
+      <EmptyState
+        title="No users found"
+        description="No users match your current filters. Try adjusting your search or role filter."
+      />
     )
   }
 
@@ -35,27 +34,35 @@ export function UserTable({ users, isLoading }: UserTableProps) {
     <table className="min-w-full divide-y divide-slate-100">
       <thead className="bg-slate-50">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Name</th>
-          <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Email</th>
-          <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Role</th>
-          <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Joined</th>
-          <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Actions</th>
+          <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Name
+          </th>
+          <th className="hidden px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 sm:table-cell">
+            Email
+          </th>
+          <th className="hidden px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 lg:table-cell">
+            Role
+          </th>
+          <th className="hidden px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 lg:table-cell">
+            Joined
+          </th>
+          <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100 bg-white">
         {users.map((u) => (
           <tr key={u._id} className="transition-colors hover:bg-slate-50">
-            <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-800">{u.name}</td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">{u.email}</td>
-            <td className="whitespace-nowrap px-6 py-4">
-              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${ROLE_BADGE[u.role]}`}>
-                {u.displayRole}
-              </span>
+            <td className="px-6 py-4 text-sm font-medium text-slate-800">{u.name}</td>
+            <td className="hidden px-6 py-4 text-sm text-slate-600 sm:table-cell">{u.email}</td>
+            <td className="hidden px-6 py-4 lg:table-cell">
+              <UserRoleBadge role={u.role} displayRole={u.displayRole} />
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+            <td className="hidden px-6 py-4 text-sm text-slate-500 lg:table-cell">
               {formatAdminDate(u.createdAt)}
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-right">
+            <td className="px-6 py-4 text-right">
               <Link
                 to={adminUserDetailPath(u._id)}
                 className={buttonClassName('outline', 'sm')}
