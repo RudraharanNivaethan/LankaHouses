@@ -62,15 +62,19 @@ export function AdminLayout({ sidebar, children }: AdminLayoutProps) {
 
           <div className="ml-auto flex items-center gap-4">
             {user && (
-              <div className="hidden items-center gap-3 sm:flex">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-xs font-bold text-white shadow-md">
+              <Link
+                to={ROUTES.PROFILE}
+                className="hidden items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-slate-100 sm:flex"
+                aria-label="My profile"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white shadow-md">
                   {getInitials(user.name)}
                 </div>
                 <div className="hidden md:block">
                   <p className="text-sm font-semibold text-slate-800">{user.name}</p>
                   <p className="text-xs text-slate-400">{user.displayRole}</p>
                 </div>
-              </div>
+              </Link>
             )}
 
             <div className="h-5 w-px bg-slate-200 hidden sm:block" aria-hidden="true" />
