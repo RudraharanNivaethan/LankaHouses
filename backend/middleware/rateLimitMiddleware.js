@@ -1,4 +1,5 @@
 import { createDualLimiter } from '../lib/rate-limit/index.js';
+import { isAdminLike } from '../utils/roleUtils.js';
 
 export { createDualLimiter };
 
@@ -205,7 +206,7 @@ export const propertyByIdReadLimiter = createDualLimiter({
 
 const searchUserCapFn = (req) => {
   if (!req.user) return PROPERTY_SEARCH_USER_CAP_GUEST;
-  if (req.user.role === 'admin') return PROPERTY_SEARCH_USER_CAP_ADMIN;
+  if (isAdminLike(req.user.role)) return PROPERTY_SEARCH_USER_CAP_ADMIN;
   return PROPERTY_SEARCH_USER_CAP_USER;
 };
 

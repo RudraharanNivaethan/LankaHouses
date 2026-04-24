@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { CUSTOMER_JWT_SECRET, ADMIN_JWT_SECRET } from '../config/jwtConfig.js';
+import { getAccessJwtSecretForRole } from '../config/jwtConfig.js';
 import { roleSatisfies } from '../utils/roleUtils.js';
 
 /**
@@ -14,7 +14,7 @@ export const optionalAuthenticate = (req, res, next) => {
   const unverified = jwt.decode(token);
   if (!unverified?.role) return next();
 
-  const secret = unverified.role === 'admin' ? ADMIN_JWT_SECRET : CUSTOMER_JWT_SECRET;
+  const secret = getAccessJwtSecretForRole(unverified.role);
 
   try {
     const decoded = jwt.verify(token, secret);
@@ -33,7 +33,7 @@ export const authenticate = (req, res, next) => {
   const unverified = jwt.decode(token);
   if (!unverified?.role) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
-  const secret = unverified.role === 'admin' ? ADMIN_JWT_SECRET : CUSTOMER_JWT_SECRET;
+  const secret = getAccessJwtSecretForRole(unverified.role);
 
   try {
     const decoded = jwt.verify(token, secret);

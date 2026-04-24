@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils.js';
 import { AppError, HTTP_STATUS } from '../utils/errorUtils.js';
-import { CUSTOMER_REFRESH_JWT_SECRET, ADMIN_REFRESH_JWT_SECRET } from '../config/jwtConfig.js';
+import { getRefreshJwtSecretForRole } from '../config/jwtConfig.js';
 import admin from '../config/firebaseAdmin.js';
 
 const SESSION_LIMIT_HOURS = 6;
@@ -68,7 +68,7 @@ export const verifyRefreshToken = async (token) => {
   const unverified = jwt.decode(token);
   if (!unverified?.role) throw new AppError('Unauthorized', HTTP_STATUS.UNAUTHORIZED);
 
-  const secret = unverified.role === 'admin' ? ADMIN_REFRESH_JWT_SECRET : CUSTOMER_REFRESH_JWT_SECRET;
+  const secret = getRefreshJwtSecretForRole(unverified.role);
 
   let decoded;
   try {
