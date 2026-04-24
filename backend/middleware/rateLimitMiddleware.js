@@ -238,7 +238,7 @@ export const superAdminCreateLimiter = createDualLimiter({
 
 const searchUserCapFn = (req) => {
   if (!req.user) return PROPERTY_SEARCH_USER_CAP_GUEST;
-  if (req.user.permissions?.includes(PERMISSION.ADMIN_ACCESS)) return PROPERTY_SEARCH_USER_CAP_ADMIN;
+  if (req.user.permissions?.includes(PERMISSION.PROPERTIES_MANAGE)) return PROPERTY_SEARCH_USER_CAP_ADMIN;
   return PROPERTY_SEARCH_USER_CAP_USER;
 };
 

@@ -66,7 +66,7 @@ export const authenticate = (req, res, next) => {
 /**
  * Permission-key authorization middleware.
  *
- * Usage: authorize(PERMISSION.ADMIN_ACCESS)
+ * Usage: authorize(PERMISSION.PROPERTIES_MANAGE)
  *        authorize(PERMISSION.USERS_READ, PERMISSION.ADMINS_CREATE)  // all keys required
  *
  * Returns 403 if the user does not hold ALL of the specified permission keys.

@@ -11,22 +11,21 @@ const ROLE_DISPLAY = Object.freeze({
 });
 
 /**
- * Permissions granted to all admin-like roles (admin + superadmin).
+ * Capabilities granted to all admin-level roles (admin + superadmin).
  * Extend this array to add a new capability that both roles share.
+ * Keys describe what the user CAN DO, not what role they hold.
  */
 const ADMIN_PERMISSIONS = Object.freeze([
-  PERMISSION.ADMIN_ACCESS,
   PERMISSION.PROPERTIES_MANAGE,
   PERMISSION.PROPERTIES_STATS_READ,
   PERMISSION.INQUIRIES_MANAGE,
 ]);
 
 /**
- * Additional permissions exclusive to superadmin.
+ * Additional capabilities exclusive to superadmin.
  * Extend this array to add a new superadmin-only capability.
  */
 const SUPERADMIN_EXTRA_PERMISSIONS = Object.freeze([
-  PERMISSION.SUPERADMIN_ACCESS,
   PERMISSION.USERS_READ,
   PERMISSION.USERS_STATS_READ,
   PERMISSION.ADMINS_CREATE,
@@ -38,7 +37,7 @@ const SUPERADMIN_PERMISSIONS = Object.freeze([
 ]);
 
 /**
- * Returns the flat permission key array for a given role.
+ * Returns the flat capability array for a given role.
  *
  * This is the single backend source of truth for what a role can do.
  * Role hierarchy ("superadmin inherits admin") is expressed by sharing
@@ -47,7 +46,7 @@ const SUPERADMIN_PERMISSIONS = Object.freeze([
  * Adding a new capability only requires:
  *   1. Add key to permissionKeys.js
  *   2. Add it to the appropriate array above
- *   3. Use it in authorize() and on the frontend — nothing else changes
+ *   3. Use it in authorize() on a route — nothing else changes
  */
 export const getPermissionsForRole = (role) => {
   if (role === 'superadmin') return SUPERADMIN_PERMISSIONS;

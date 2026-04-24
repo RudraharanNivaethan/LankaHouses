@@ -21,12 +21,22 @@ import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
 import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 
+/**
+ * `properties.manage` is used as the "admin panel entry" capability.
+ * All admin-level users hold it; regular users never do.
+ * It is a real capability — not a role membership token.
+ *
+ * If a future role needs panel access without property management,
+ * introduce a dedicated `panel.access` capability key in the backend registry.
+ */
+const ADMIN_ENTRY_CAPABILITY = 'properties.manage'
+
 // Redirects already-authenticated users away from auth pages (login, signup)
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (isAuthenticated) {
-    const target = user?.permissions.includes('admin.access')
+    const target = user?.permissions.includes(ADMIN_ENTRY_CAPABILITY)
       ? ROUTES.ADMIN_DASHBOARD
       : ROUTES.HOME
     return <Navigate to={target} replace />
@@ -47,16 +57,13 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 /**
- * Generic permission-key guard.
+ * Capability-based route guard.
  *
- * Returns the 404 page (not a redirect) so the existence of the route is
- * indistinguishable from an invalid URL — security through obscurity is the
- * intent here.
+ * Accepts any permission key string from the backend registry.
+ * Returns the 404 page (not a redirect) so the route's existence is
+ * indistinguishable from an invalid URL.
  *
- * Usage:
- *   <RequirePermission permission={'admin.access'}>
- *     <AdminDashboardPage />
- *   </RequirePermission>
+ * Usage: <RequirePermission permission="properties.manage">
  */
 function RequirePermission({ permission, children }: { permission: string; children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
@@ -86,7 +93,7 @@ function MainLayout() {
 
   if (isLoading) return null
 
-  if (isAuthenticated && user?.permissions.includes('admin.access')) {
+  if (isAuthenticated && user?.permissions.includes(ADMIN_ENTRY_CAPABILITY)) {
     if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
       return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
     }
@@ -153,11 +160,11 @@ export function AppRouter() {
             }
           />
 
-          {/* Admin routes — own layout with sidebar, no public Navbar/Footer */}
+          {/* Admin routes — capability-gated, each route uses the specific capability it requires */}
           <Route
             path="/admin"
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="properties.manage">
                 <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
               </RequirePermission>
             }
@@ -165,7 +172,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_DASHBOARD}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="properties.stats.read">
                 <AdminDashboardPage />
               </RequirePermission>
             }
@@ -173,7 +180,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_HOUSES}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="properties.manage">
                 <AdminHousesPage />
               </RequirePermission>
             }
@@ -181,7 +188,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_HOUSE_DETAIL}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="properties.manage">
                 <AdminHouseDetailPage />
               </RequirePermission>
             }
@@ -189,7 +196,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_ADD_HOUSE}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="properties.manage">
                 <AdminAddHousePage />
               </RequirePermission>
             }
@@ -197,7 +204,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_EDIT_HOUSE}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="properties.manage">
                 <AdminEditHousePage />
               </RequirePermission>
             }
@@ -205,7 +212,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_INQUIRIES}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="inquiries.manage">
                 <AdminInquiriesPage />
               </RequirePermission>
             }
@@ -213,17 +220,17 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_INQUIRY_DETAIL}
             element={
-              <RequirePermission permission={'admin.access'}>
+              <RequirePermission permission="inquiries.manage">
                 <AdminInquiryDetailPage />
               </RequirePermission>
             }
           />
 
-          {/* SuperAdmin-only routes */}
+          {/* Superadmin-capability routes — each gated by its specific capability */}
           <Route
             path={ROUTES.ADMIN_USERS}
             element={
-              <RequirePermission permission={'superadmin.access'}>
+              <RequirePermission permission="users.read">
                 <AdminUsersPage />
               </RequirePermission>
             }
@@ -231,7 +238,7 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_CREATE_ADMIN}
             element={
-              <RequirePermission permission={'superadmin.access'}>
+              <RequirePermission permission="admins.create">
                 <AdminCreateAdminPage />
               </RequirePermission>
             }
