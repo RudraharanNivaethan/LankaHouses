@@ -20,6 +20,7 @@ import { AdminInquiryDetailPage } from '../pages/Admin/AdminInquiryDetailPage'
 import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
 import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
+import { can } from '../utils/can'
 
 /**
  * `properties.manage` is used as the "admin panel entry" capability.
@@ -36,7 +37,7 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
   if (isAuthenticated) {
-    const target = user?.permissions.includes(ADMIN_ENTRY_CAPABILITY)
+    const target = can(user, ADMIN_ENTRY_CAPABILITY)
       ? ROUTES.ADMIN_DASHBOARD
       : ROUTES.HOME
     return <Navigate to={target} replace />
@@ -68,7 +69,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 function RequirePermission({ permission, children }: { permission: string; children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated || !user?.permissions.includes(permission)) return <NotFound />
+  if (!isAuthenticated || !can(user, permission)) return <NotFound />
   return <>{children}</>
 }
 
@@ -93,7 +94,7 @@ function MainLayout() {
 
   if (isLoading) return null
 
-  if (isAuthenticated && user?.permissions.includes(ADMIN_ENTRY_CAPABILITY)) {
+  if (isAuthenticated && can(user, ADMIN_ENTRY_CAPABILITY)) {
     if (!ADMIN_PERMITTED_PATHS.includes(location.pathname)) {
       return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
     }
