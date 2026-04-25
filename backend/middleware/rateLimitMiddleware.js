@@ -294,3 +294,45 @@ export const propertyListSearchLimiter = createDualLimiter({
   getUserId: publicUserId,
   skip:      (req) => !String(req.query?.search ?? '').trim(),
 });
+
+// ─── Inquiry routes ───────────────────────────────────────────────────────────
+
+/** POST /api/inquiries/* — dual write limit (10 user / 30 IP per 15 min). */
+export const inquiryCreateLimiter = createDualLimiter({
+  windowMs:  15 * 60 * 1000,
+  userCap:   10,
+  ipCap:     30,
+  error:     'Inquiry creation limit reached. Please slow down.',
+  namespace: 'inqcreate',
+  getUserId: authUserId,
+});
+
+/** GET /api/inquiries/my* — dual read limit (60 user / 180 IP per min). */
+export const inquiryReadLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many inquiry read requests. Please try again in a moment.',
+  namespace: 'inqread',
+  getUserId: authUserId,
+});
+
+/** GET /api/admin/inquiries* — dual admin read limit (60 user / 180 IP per min). */
+export const adminInquiryReadLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   60,
+  ipCap:     180,
+  error:     'Too many admin inquiry read requests. Please try again in a moment.',
+  namespace: 'adminInqRead',
+  getUserId: authUserId,
+});
+
+/** PATCH /api/admin/inquiries/:id/reply|close — dual admin modify limit (30 user / 90 IP per min). */
+export const adminInquiryModifyLimiter = createDualLimiter({
+  windowMs:  60 * 1000,
+  userCap:   30,
+  ipCap:     90,
+  error:     'Too many inquiry modification requests. Please slow down.',
+  namespace: 'adminInqMod',
+  getUserId: authUserId,
+});

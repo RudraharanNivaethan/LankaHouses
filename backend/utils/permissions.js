@@ -11,6 +11,14 @@ const ROLE_DISPLAY = Object.freeze({
 });
 
 /**
+ * Capabilities granted to regular users only.
+ * Extend this array to add a new user-only capability.
+ */
+const USER_PERMISSIONS = Object.freeze([
+  PERMISSION.INQUIRIES_SUBMIT,
+]);
+
+/**
  * Capabilities granted to all admin-level roles (admin + superadmin).
  * Extend this array to add a new capability that both roles share.
  * Keys describe what the user CAN DO, not what role they hold.
@@ -51,6 +59,7 @@ const SUPERADMIN_PERMISSIONS = Object.freeze([
 export const getPermissionsForRole = (role) => {
   if (role === 'superadmin') return SUPERADMIN_PERMISSIONS;
   if (role === 'admin')      return ADMIN_PERMISSIONS;
+  if (role === 'user')       return USER_PERMISSIONS;
   return Object.freeze([]);
 };
 

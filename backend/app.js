@@ -3,6 +3,8 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import superAdminRoutes from './routes/superAdminRoutes.js';
+import inquiryRoutes from './routes/inquiryRoutes.js';
+import adminInquiryRoutes from './routes/adminInquiryRoutes.js';
 import { globalLimiter } from './middleware/rateLimitMiddleware.js';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -63,6 +65,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/property', propertyRoutes);
 app.use('/api/superadmin', superAdminRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/admin/inquiries', adminInquiryRoutes);
 
 
 // 404 handler for undefined routes
