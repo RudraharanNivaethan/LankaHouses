@@ -8,7 +8,7 @@ import { AlertBanner } from '../../components/ui/AlertBanner'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { BackButton } from '../../components/ui/BackButton'
 import { formatAdminDate } from '../../utils/formatDate'
-import { ROUTES } from '../../constants/routes'
+import { ROUTES, listingDetailPath } from '../../constants/routes'
 
 function DetailSkeleton() {
   return (
@@ -104,7 +104,11 @@ export function InquiryDetailsPage() {
         {inquiry.inquiryType === 'PROPERTY' && (
           <div className="mb-6">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Property</p>
-            <PropertyPreviewCard property={property} isLoading={propertyLoading} />
+            <PropertyPreviewCard
+            property={property}
+            isLoading={propertyLoading}
+            linkTo={property ? listingDetailPath(property._id) : undefined}
+          />
           </div>
         )}
 

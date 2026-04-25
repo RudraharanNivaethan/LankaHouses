@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom'
 import type { PropertyRecord } from '../../types/property'
+import { Skeleton } from '../ui/Skeleton'
 
 interface PropertyPreviewCardProps {
   property: PropertyRecord | null
   isLoading?: boolean
+  /** When provided, the card becomes a navigable link. */
+  linkTo?: string
 }
 
 function formatPrice(price: number): string {
@@ -10,20 +14,32 @@ function formatPrice(price: number): string {
   return `Rs. ${price.toLocaleString()}`
 }
 
-export function PropertyPreviewCard({ property, isLoading = false }: PropertyPreviewCardProps) {
+const BASE_CLASSES =
+  'flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all'
+
+const LINK_EXTRA_CLASSES =
+  'hover:border-brand/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand'
+
+export function PropertyPreviewCard({ property, isLoading = false, linkTo }: PropertyPreviewCardProps) {
   if (isLoading) {
     return (
-      <div className="animate-pulse rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <div className="h-4 w-2/3 rounded bg-slate-200" />
-        <div className="mt-2 h-3 w-1/2 rounded bg-slate-200" />
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-16 w-20 shrink-0 rounded-lg" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-3 w-3/4" />
+          </div>
+        </div>
       </div>
     )
   }
 
   if (!property) return null
 
-  return (
-    <div className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  const content = (
+    <>
       {property.images[0] && (
         <img
           src={property.images[0].url}
@@ -43,7 +59,20 @@ export function PropertyPreviewCard({ property, isLoading = false }: PropertyPre
           <span className="text-slate-400">·</span>
           <span className="capitalize text-slate-500">{property.listingType}</span>
         </div>
+        {linkTo && (
+          <p className="mt-1.5 text-xs font-medium text-brand">View property →</p>
+        )}
       </div>
-    </div>
+    </>
   )
+
+  if (linkTo) {
+    return (
+      <Link to={linkTo} className={`${BASE_CLASSES} ${LINK_EXTRA_CLASSES}`}>
+        {content}
+      </Link>
+    )
+  }
+
+  return <div className={BASE_CLASSES}>{content}</div>
 }

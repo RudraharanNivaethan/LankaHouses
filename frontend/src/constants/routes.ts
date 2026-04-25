@@ -52,6 +52,10 @@ export function adminInquiryDetailPath(id: string): string {
   return ROUTES.ADMIN_INQUIRY_DETAIL.replace(':id', id)
 }
 
+export function adminHouseDetailPath(id: string): string {
+  return ROUTES.ADMIN_HOUSE_DETAIL.replace(':id', id)
+}
+
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
 
 /**
