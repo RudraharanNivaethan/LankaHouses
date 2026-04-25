@@ -23,6 +23,10 @@ import { AdminUsersPage } from '../pages/Admin/AdminUsersPage'
 import { AdminUserDetailsPage } from '../pages/Admin/AdminUserDetailsPage'
 import { AdminCreateAdminPage } from '../pages/Admin/AdminCreateAdminPage'
 import { AdminProfilePage } from '../pages/Admin/AdminProfilePage'
+import { MyInquiriesPage } from '../pages/inquiries/MyInquiriesPage'
+import { InquiryDetailsPage } from '../pages/inquiries/InquiryDetailsPage'
+import { CreateGeneralInquiryPage } from '../pages/inquiries/CreateGeneralInquiryPage'
+import { CreatePropertyInquiryPage } from '../pages/inquiries/CreatePropertyInquiryPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 import { can } from '../utils/can'
 
@@ -141,6 +145,39 @@ function MainLayout() {
           <Route path={ROUTES.CONTACT} element={<ContactPage />} />
           <Route path={ROUTES.LISTINGS} element={<ListingsPage />} />
           <Route path={ROUTES.LISTING_DETAIL} element={<ListingDetailPage />} />
+
+          <Route
+            path={ROUTES.MY_INQUIRIES}
+            element={
+              <RequirePermission permission="inquiries.submit">
+                <MyInquiriesPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path={ROUTES.INQUIRY_DETAIL}
+            element={
+              <RequirePermission permission="inquiries.submit">
+                <InquiryDetailsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path={ROUTES.CREATE_GENERAL_INQUIRY}
+            element={
+              <RequirePermission permission="inquiries.submit">
+                <CreateGeneralInquiryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path={ROUTES.CREATE_PROPERTY_INQUIRY}
+            element={
+              <RequirePermission permission="inquiries.submit">
+                <CreatePropertyInquiryPage />
+              </RequirePermission>
+            }
+          />
 
           {/* Catch-all: prevents blank screen for registered-but-unbuilt routes */}
           <Route path="*" element={<NotFound />} />

@@ -11,6 +11,10 @@ export const ROUTES = {
   ABOUT: '/about',
   CONTACT: '/contact',
   INQUIRY: '/inquiry',
+  MY_INQUIRIES:              '/inquiries/my',
+  INQUIRY_DETAIL:            '/inquiries/my/:inquiryId',
+  CREATE_GENERAL_INQUIRY:    '/inquiries/new/general',
+  CREATE_PROPERTY_INQUIRY:   '/inquiries/new/property/:propertyId',
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_HOUSES: '/admin/houses',
   ADMIN_HOUSE_DETAIL: '/admin/houses/:id',
@@ -34,6 +38,18 @@ export function listingDetailPath(id: string): string {
 
 export function adminUserDetailPath(id: string): string {
   return ROUTES.ADMIN_USER_DETAIL.replace(':id', id)
+}
+
+export function inquiryDetailPath(inquiryId: string): string {
+  return ROUTES.INQUIRY_DETAIL.replace(':inquiryId', inquiryId)
+}
+
+export function createPropertyInquiryPath(propertyId: string): string {
+  return ROUTES.CREATE_PROPERTY_INQUIRY.replace(':propertyId', propertyId)
+}
+
+export function adminInquiryDetailPath(id: string): string {
+  return ROUTES.ADMIN_INQUIRY_DETAIL.replace(':id', id)
 }
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
