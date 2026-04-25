@@ -41,6 +41,7 @@ export interface InquiryQueryParams {
 export interface MyInquiryQueryParams {
   inquiryType?: InquiryType
   status?: InquiryStatus
+  search?: string
   page?: number
   limit?: number
 }

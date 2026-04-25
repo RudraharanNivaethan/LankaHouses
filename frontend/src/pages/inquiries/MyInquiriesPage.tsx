@@ -65,7 +65,7 @@ export function MyInquiriesPage() {
           <aside className="w-full shrink-0 lg:w-56">
             <div className="sticky top-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Filters</p>
-              <InquiryFilters filters={filters} onChange={handleFiltersChange} vertical />
+              <InquiryFilters filters={filters} onChange={handleFiltersChange} vertical showSearch />
             </div>
           </aside>
 
