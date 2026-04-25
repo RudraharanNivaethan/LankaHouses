@@ -1,11 +1,22 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { ImageSection } from '../../components/layout/ImageSection'
 import { SectionContainer } from '../../components/layout/SectionContainer'
 import { ROUTES } from '../../constants/routes'
 import { buttonClassName } from '../../components/ui/Button'
 import { SectionHeader } from '../../components/ui/SectionHeader'
+import { Input } from '../../components/ui/Input'
+import { Textarea } from '../../components/ui/Textarea'
+import { AlertBanner } from '../../components/ui/AlertBanner'
+import { FormSubmitButton } from '../../components/ui/FormSubmitButton'
+import { useAuth } from '../../context/AuthContext'
+import { can } from '../../utils/can'
+import { createInquirySchema, type CreateInquirySchema } from '../../schemas/inquiry'
+import { createGeneralInquiry } from '../../services/inquiryService'
 
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80'
@@ -62,17 +73,40 @@ const FAQ_ITEMS = [
   },
 ]
 
-const inputClasses =
-  'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20'
-
 export function ContactPage() {
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [selectedFaq, setSelectedFaq] = useState(0)
   const [messageSent, setMessageSent] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setMessageSent(true)
-    event.currentTarget.reset()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateInquirySchema>({
+    resolver: zodResolver(createInquirySchema),
+  })
+
+  const mutation = useMutation({
+    mutationFn: createGeneralInquiry,
+    onSuccess: () => {
+      toast.success('Inquiry submitted successfully')
+      setMessageSent(true)
+      setServerError(null)
+      reset()
+    },
+    onError: (err: Error) => {
+      setServerError(err.message ?? 'Failed to submit inquiry.')
+    },
+  })
+
+  const canSubmitInquiry = !isLoading && isAuthenticated && can(user, 'inquiries.submit')
+
+  function onSubmit(data: CreateInquirySchema) {
+    setServerError(null)
+    setMessageSent(false)
+    mutation.mutate(data)
   }
 
   return (
@@ -131,44 +165,59 @@ export function ContactPage() {
 
             <article className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
               <h2 className="text-2xl font-bold text-slate-900">Send Us a Message</h2>
-              <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">Full Name</span>
-                  <input required type="text" className={inputClasses} />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">Email Address</span>
-                  <input required type="email" className={inputClasses} />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">Phone Number</span>
-                  <input required type="tel" className={inputClasses} />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">Subject</span>
-                  <select required className={inputClasses} defaultValue="">
-                    <option value="" disabled>
-                      Select a subject
-                    </option>
-                    <option value="general">General Inquiry</option>
-                    <option value="property">Property Inquiry</option>
-                    <option value="support">Support</option>
-                  </select>
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">Message</span>
-                  <textarea required rows={4} className={inputClasses} />
-                </label>
+              {!canSubmitInquiry ? (
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-semibold text-slate-900">Sign in required</p>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                    To contact our team, please sign in and submit your inquiry through your account.
+                  </p>
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <Link
+                      to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(ROUTES.CONTACT)}`}
+                      className={buttonClassName('primary', 'md', 'w-full sm:w-auto text-center')}
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      to={`${ROUTES.SIGNUP}?redirect=${encodeURIComponent(ROUTES.CONTACT)}`}
+                      className={buttonClassName('outline', 'md', 'w-full sm:w-auto text-center')}
+                    >
+                      Create account
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <AlertBanner message={serverError} />
+                  <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-5" noValidate>
+                    <Input
+                      label="Title"
+                      placeholder="Brief summary of your question"
+                      error={errors.title?.message}
+                      disabled={mutation.isPending}
+                      {...register('title')}
+                    />
+                    <Textarea
+                      label="Message"
+                      rows={6}
+                      placeholder="Describe your inquiry in detail…"
+                      error={errors.message?.message}
+                      disabled={mutation.isPending}
+                      {...register('message')}
+                    />
+                    <FormSubmitButton
+                      isLoading={mutation.isPending}
+                      label="Send Message"
+                      loadingLabel="Sending…"
+                    />
+                  </form>
 
-                <button type="submit" className={buttonClassName('primary', 'md', 'w-full sm:w-auto')}>
-                  Send Message
-                </button>
-              </form>
-
-              {messageSent && (
-                <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                  Your message has been sent. Our team will get back to you shortly.
-                </p>
+                  {messageSent && (
+                    <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                      Your inquiry has been sent. Our team will get back to you shortly.
+                    </p>
+                  )}
+                </>
               )}
             </article>
           </div>

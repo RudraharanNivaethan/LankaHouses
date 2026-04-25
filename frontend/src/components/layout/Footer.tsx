@@ -7,7 +7,7 @@ const QUICK_LINKS = [
   { label: 'Browse Listings', to: ROUTES.LISTINGS },
   { label: 'About Us', to: ROUTES.ABOUT },
   { label: 'Contact', to: ROUTES.CONTACT },
-  { label: 'Submit Inquiry', to: ROUTES.INQUIRY },
+  { label: 'Submit Inquiry', to: ROUTES.CREATE_GENERAL_INQUIRY },
 ]
 
 const PROPERTY_TYPE_PLURAL_LABEL: Record<BackendPropertyType, string> = {
