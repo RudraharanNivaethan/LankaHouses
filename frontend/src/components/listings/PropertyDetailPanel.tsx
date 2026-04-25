@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ImageGallery } from '../ui/ImageGallery'
 import { DetailSection } from '../ui/DetailSection'
 import { DetailField } from '../ui/DetailField'
@@ -7,8 +6,10 @@ import { StatusBadge } from '../ui/StatusBadge'
 import { Button } from '../ui/Button'
 import { BackButton } from '../ui/BackButton'
 import { STATUS_LABELS, STATUS_COLORS } from '../../constants/property'
-import { ROUTES } from '../../constants/routes'
+import { ROUTES, createPropertyInquiryPath } from '../../constants/routes'
 import { useRequireAuth } from '../../hooks/useRequireAuth'
+import { useAuth } from '../../context/AuthContext'
+import { can } from '../../utils/can'
 import type { PropertyRecord } from '../../types/property'
 
 function formatPrice(price: number): string {
@@ -35,13 +36,15 @@ export function PropertyDetailPanel({ variant, property, onDeleteClick }: Proper
     alt: `${property.title} - Image ${idx + 1}`,
   }))
 
+  const { user } = useAuth()
   const { requireAuth } = useRequireAuth()
-  const [inquiryNotice, setInquiryNotice] = useState(false)
+  const navigate = useNavigate()
 
   const handleInquiryClick = () => {
     requireAuth(() => {
-      setInquiryNotice(true)
-      setTimeout(() => setInquiryNotice(false), 3000)
+      if (can(user, 'inquiries.submit')) {
+        navigate(createPropertyInquiryPath(property._id))
+      }
     })
   }
 
@@ -81,12 +84,6 @@ export function PropertyDetailPanel({ variant, property, onDeleteClick }: Proper
           </Button>
         )}
       </div>
-
-      {inquiryNotice && (
-        <div className="rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm font-medium text-brand">
-          Inquiry feature coming soon. We&rsquo;ll notify you when it&rsquo;s available!
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">

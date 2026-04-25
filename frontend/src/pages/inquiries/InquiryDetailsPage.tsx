@@ -1,92 +1,146 @@
-import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import type { InquiryRecord } from '../../types/inquiry'
-import type { PropertyRecord } from '../../types/property'
+import { useParams, Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { getMyInquiryById } from '../../services/inquiryService'
 import { getPropertyById } from '../../services/propertyService'
 import { InquiryStatusBadge } from '../../components/inquiries/InquiryStatusBadge'
 import { PropertyPreviewCard } from '../../components/inquiries/PropertyPreviewCard'
 import { AlertBanner } from '../../components/ui/AlertBanner'
-import { Spinner } from '../../components/ui/Spinner'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { BackButton } from '../../components/ui/BackButton'
-import { DetailField } from '../../components/ui/DetailField'
 import { formatAdminDate } from '../../utils/formatDate'
+import { ROUTES } from '../../constants/routes'
+
+function DetailSkeleton() {
+  return (
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-3">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-6 w-20 rounded-full" />
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <Skeleton className="h-10" />
+        <Skeleton className="h-10" />
+        <Skeleton className="h-10" />
+      </div>
+      <Skeleton className="h-32 rounded-xl" />
+      <Skeleton className="h-24 rounded-xl" />
+    </div>
+  )
+}
 
 export function InquiryDetailsPage() {
   const { inquiryId } = useParams<{ inquiryId: string }>()
-  const [inquiry, setInquiry] = useState<InquiryRecord | null>(null)
-  const [property, setProperty] = useState<PropertyRecord | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!inquiryId) return
-    setIsLoading(true)
-    getMyInquiryById(inquiryId)
-      .then(async (res) => {
-        setInquiry(res.data)
-        if (res.data.propertyId) {
-          const prop = await getPropertyById(res.data.propertyId).catch(() => null)
-          setProperty(prop?.data ?? null)
-        }
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load inquiry.'))
-      .finally(() => setIsLoading(false))
-  }, [inquiryId])
+  const { data: inquiryRes, isLoading, error } = useQuery({
+    queryKey: ['my-inquiry', inquiryId],
+    queryFn: () => getMyInquiryById(inquiryId!),
+    enabled: !!inquiryId,
+  })
+
+  const inquiry = inquiryRes?.data
+
+  const { data: propertyRes, isLoading: propertyLoading } = useQuery({
+    queryKey: ['property', inquiry?.propertyId],
+    queryFn: () => getPropertyById(inquiry!.propertyId!),
+    enabled: !!inquiry?.propertyId,
+  })
+
+  const property = propertyRes?.data ?? null
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-24">
-        <Spinner className="h-6 w-6 text-brand" />
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+          <BackButton className="mb-6" />
+          <DetailSkeleton />
+        </div>
       </div>
     )
   }
 
   if (error || !inquiry) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-10">
-        <BackButton className="mb-4" />
-        <AlertBanner message={error ?? 'Inquiry not found.'} />
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+          <BackButton className="mb-6" />
+          <AlertBanner message={error instanceof Error ? error.message : 'Inquiry not found.'} />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-      <BackButton className="mb-4" />
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+        <BackButton className="mb-6" />
 
-      <div className="flex items-start justify-between gap-3">
-        <h1 className="text-xl font-bold text-slate-800">{inquiry.title}</h1>
-        <InquiryStatusBadge status={inquiry.status} />
-      </div>
-
-      <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-        <DetailField label="Type"    value={inquiry.inquiryType === 'GENERAL' ? 'General' : 'Property'} />
-        <DetailField label="Created" value={formatAdminDate(inquiry.createdAt)} />
-        <DetailField label="Updated" value={formatAdminDate(inquiry.updatedAt)} />
-      </dl>
-
-      {inquiry.inquiryType === 'PROPERTY' && (
-        <div className="mt-6">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Property</p>
-          <PropertyPreviewCard property={property} isLoading={false} />
+        {/* Title row */}
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">{inquiry.title}</h1>
+          <InquiryStatusBadge status={inquiry.status} />
         </div>
-      )}
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-2 text-sm font-semibold text-slate-700">Your Message</h2>
-        <p className="whitespace-pre-wrap text-sm text-slate-800">{inquiry.message}</p>
-      </section>
-
-      {inquiry.adminReply && (
-        <section className="mt-4 rounded-xl border border-green-200 bg-green-50 p-5">
-          <h2 className="text-sm font-semibold text-green-800">Admin Reply</h2>
-          {inquiry.repliedAt && (
-            <p className="mt-0.5 text-xs text-green-600">{formatAdminDate(inquiry.repliedAt)}</p>
+        {/* Metadata row */}
+        <div className="mb-6 flex flex-wrap gap-5 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+          <div>
+            <p className="text-xs font-semibold text-slate-500">Type</p>
+            <p className="mt-0.5 text-sm font-medium text-slate-800">
+              {inquiry.inquiryType === 'GENERAL' ? 'General Inquiry' : 'Property Inquiry'}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500">Submitted</p>
+            <p className="mt-0.5 text-sm font-medium text-slate-800">{formatAdminDate(inquiry.createdAt)}</p>
+          </div>
+          {inquiry.updatedAt !== inquiry.createdAt && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500">Last Updated</p>
+              <p className="mt-0.5 text-sm font-medium text-slate-800">{formatAdminDate(inquiry.updatedAt)}</p>
+            </div>
           )}
-          <p className="mt-3 whitespace-pre-wrap text-sm text-green-900">{inquiry.adminReply}</p>
+        </div>
+
+        {/* Property card */}
+        {inquiry.inquiryType === 'PROPERTY' && (
+          <div className="mb-6">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Property</p>
+            <PropertyPreviewCard property={property} isLoading={propertyLoading} />
+          </div>
+        )}
+
+        {/* User message */}
+        <section className="mb-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-slate-700">Your Message</h2>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{inquiry.message}</p>
         </section>
-      )}
+
+        {/* Admin reply */}
+        {inquiry.adminReply ? (
+          <section className="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-green-800">Admin Reply</h2>
+              {inquiry.repliedAt && (
+                <span className="text-xs text-green-600">{formatAdminDate(inquiry.repliedAt)}</span>
+              )}
+            </div>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-green-900">{inquiry.adminReply}</p>
+          </section>
+        ) : inquiry.status === 'PENDING' ? (
+          <div className="rounded-xl border border-yellow-200 bg-yellow-50 px-5 py-4 text-sm text-yellow-700">
+            Your inquiry is pending review. We'll reply as soon as possible.
+          </div>
+        ) : null}
+
+        {/* Back to list */}
+        <div className="mt-8">
+          <Link
+            to={ROUTES.MY_INQUIRIES}
+            className="text-sm font-medium text-brand hover:text-brand-dark"
+          >
+            ← Back to My Inquiries
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
