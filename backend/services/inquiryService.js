@@ -120,6 +120,9 @@ export const replyToInquiry = async (inquiryId, adminReply) => {
   if (!inquiry) {
     throw new AppError('Inquiry not found', HTTP_STATUS.NOT_FOUND);
   }
+  if (inquiry.status === 'REPLIED') {
+    throw new AppError('Inquiry has already been replied to', HTTP_STATUS.CONFLICT);
+  }
   inquiry.adminReply = adminReply;
   inquiry.repliedAt  = new Date();
   inquiry.status     = 'REPLIED';
