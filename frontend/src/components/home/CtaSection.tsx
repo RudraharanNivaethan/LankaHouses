@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Button, buttonClassName } from '../ui/Button'
+import { buttonClassName } from '../ui/Button'
 import { ROUTES } from '../../constants/routes'
 import { Badge } from '../ui/Badge'
 import { ImageSection } from '../layout/ImageSection'
@@ -40,13 +40,16 @@ export function CtaSection() {
           >
             Browse All Properties
           </Link>
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-full border-white/50 text-white hover:border-white hover:bg-white/10 sm:w-auto"
+          <Link
+            to={ROUTES.CONTACT}
+            className={buttonClassName(
+              'outline',
+              'lg',
+              'w-full border-white/50 text-white hover:border-white hover:bg-white/10 sm:w-auto text-center',
+            )}
           >
             Contact Us
-          </Button>
+          </Link>
         </div>
       </SectionContainer>
     </ImageSection>

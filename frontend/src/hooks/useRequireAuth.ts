@@ -1,11 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { ROUTES } from '../constants/routes'
+import { setIntendedRoute } from '../utils/intendedRoute'
 
 /**
  * Returns a guard function that either runs the callback (if authenticated)
- * or redirects to login with a `?redirect=` param so the user is returned
- * to the current page after authentication.
+ * or stores the current location as the intended post-login destination
+ * (sessionStorage) and navigates to the login page.
  */
 export function useRequireAuth() {
   const { isAuthenticated } = useAuth()
@@ -15,11 +16,10 @@ export function useRequireAuth() {
   const requireAuth = (callback: () => void) => {
     if (isAuthenticated) {
       callback()
-    } else {
-      navigate(
-        `${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname + location.search)}`,
-      )
+      return
     }
+    setIntendedRoute(location.pathname + location.search)
+    navigate(ROUTES.LOGIN)
   }
 
   return { requireAuth }

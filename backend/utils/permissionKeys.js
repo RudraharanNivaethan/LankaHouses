@@ -12,6 +12,9 @@
  * at runtime for authorization decisions.
  */
 export const PERMISSION = Object.freeze({
+  // Capabilities granted to regular users
+  INQUIRIES_SUBMIT:      'inquiries.submit',
+
   // Capabilities granted to admin + superadmin
   PROPERTIES_MANAGE:     'properties.manage',
   PROPERTIES_STATS_READ: 'properties.stats.read',

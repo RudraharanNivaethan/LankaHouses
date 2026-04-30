@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Button, buttonClassName } from '../ui/Button'
+import { buttonClassName } from '../ui/Button'
 import { ROUTES } from '../../constants/routes'
 import { Badge } from '../ui/Badge'
 import { StatItem } from '../ui/StatItem'
@@ -59,13 +59,12 @@ export function HeroSection() {
           >
             Browse Properties
           </Link>
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-full border-white/50 text-white hover:border-brand hover:bg-brand hover:text-white sm:w-auto"
+          <Link
+            to={ROUTES.CREATE_GENERAL_INQUIRY}
+            className={buttonClassName('outline', 'lg', 'w-full border-white/50 text-white hover:border-brand hover:bg-brand hover:text-white sm:w-auto text-center')}
           >
             Submit an Inquiry
-          </Button>
+          </Link>
         </div>
       </SectionContainer>
     </ImageSection>
