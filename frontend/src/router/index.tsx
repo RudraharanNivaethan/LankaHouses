@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import { Navbar } from '../components/layout/Navbar'
@@ -29,6 +30,7 @@ import { CreateGeneralInquiryPage } from '../pages/inquiries/CreateGeneralInquir
 import { CreatePropertyInquiryPage } from '../pages/inquiries/CreatePropertyInquiryPage'
 import { ROUTES, ADMIN_PERMITTED_PATHS } from '../constants/routes'
 import { can } from '../utils/can'
+import { setIntendedRoute, consumeIntendedRoute } from '../utils/intendedRoute'
 
 /**
  * `properties.manage` is used as the "admin panel entry" capability.
@@ -40,16 +42,37 @@ import { can } from '../utils/can'
  */
 const ADMIN_ENTRY_CAPABILITY = 'properties.manage'
 
-// Redirects already-authenticated users away from auth pages (login, signup)
+/**
+ * The single post-authentication navigator.
+ *
+ * Wraps every auth page (login, signup, forgot-password). When auth state
+ * flips to authenticated, this effect runs exactly once per transition and
+ * routes the user to:
+ *   - ADMIN_DASHBOARD if they hold the admin entry capability
+ *   - the intended route stored in sessionStorage by a guard, if safe
+ *   - HOME otherwise
+ *
+ * `useEffect` is used instead of a render-time <Navigate> so that
+ * consumeIntendedRoute() runs only on commit (not twice during React 18
+ * strict-mode double-render), and so this is the only place that owns
+ * post-login navigation.
+ */
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
-  if (isLoading) return null
-  if (isAuthenticated) {
-    const target = can(user, ADMIN_ENTRY_CAPABILITY)
-      ? ROUTES.ADMIN_DASHBOARD
-      : ROUTES.HOME
-    return <Navigate to={target} replace />
-  }
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated) return
+    if (can(user, ADMIN_ENTRY_CAPABILITY)) {
+      consumeIntendedRoute()
+      navigate(ROUTES.ADMIN_DASHBOARD, { replace: true })
+      return
+    }
+    const target = consumeIntendedRoute() ?? ROUTES.HOME
+    navigate(target, { replace: true })
+  }, [isLoading, isAuthenticated, user, navigate])
+
+  if (isLoading || isAuthenticated) return null
   return <>{children}</>
 }
 
@@ -81,7 +104,8 @@ function UserGuard({ permission, children }: { permission?: string; children: Re
   const location = useLocation()
   if (isLoading) return null
   if (!isAuthenticated) {
-    return <Navigate to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />
+    setIntendedRoute(location.pathname + location.search)
+    return <Navigate to={ROUTES.LOGIN} replace />
   }
   if (permission && !can(user, permission)) return <NotFound />
   return <>{children}</>
@@ -98,7 +122,8 @@ function ProfileRoute() {
   const location = useLocation()
   if (isLoading) return null
   if (!isAuthenticated) {
-    return <Navigate to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname)}`} replace />
+    setIntendedRoute(location.pathname + location.search)
+    return <Navigate to={ROUTES.LOGIN} replace />
   }
   if (can(user, ADMIN_ENTRY_CAPABILITY)) {
     return <AdminProfilePage />

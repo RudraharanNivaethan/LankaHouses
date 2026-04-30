@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useSearchParams } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { firebaseAuth } from '../config/firebase'
 import { registerSchema } from '../schemas/auth'
 import { firebaseRegister } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
-import { getPostAuthDestination } from '../utils/authRedirect'
 import type { RegisterFormData } from '../types/auth'
 
 function mapFirebaseRegisterError(code: string): string {
@@ -36,8 +34,6 @@ export function useRegister() {
   const { refreshUser } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
 
   const onSubmit = form.handleSubmit(async (data) => {
     setServerError(null)
@@ -48,8 +44,8 @@ export function useRegister() {
       firebaseCreated = true
       const idToken = await credential.user.getIdToken()
       await firebaseRegister(idToken, data.name, data.phone || undefined)
-      const me = await refreshUser()
-      navigate(getPostAuthDestination(me, searchParams), { replace: true })
+      // Post-login navigation is owned by RedirectIfAuthenticated.
+      await refreshUser()
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {

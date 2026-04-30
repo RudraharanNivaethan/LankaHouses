@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useSearchParams } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { firebaseAuth } from '../config/firebase'
 import { loginSchema } from '../schemas/auth'
 import { firebaseExchange } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
-import { getPostAuthDestination } from '../utils/authRedirect'
 import type { LoginFormData } from '../types/auth'
 
 function mapFirebaseLoginError(code: string): string {
@@ -36,8 +34,6 @@ export function useLogin() {
   const { refreshUser } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
 
   const onSubmit = form.handleSubmit(async (data) => {
     setServerError(null)
@@ -46,8 +42,9 @@ export function useLogin() {
       const credential = await signInWithEmailAndPassword(firebaseAuth, data.email, data.password)
       const idToken = await credential.user.getIdToken()
       await firebaseExchange(idToken)
-      const me = await refreshUser()
-      navigate(getPostAuthDestination(me, searchParams), { replace: true })
+      // Post-login navigation is owned by RedirectIfAuthenticated; simply
+      // updating auth state here triggers the centralized redirect.
+      await refreshUser()
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {

@@ -15,6 +15,7 @@ import { AlertBanner } from '../../components/ui/AlertBanner'
 import { FormSubmitButton } from '../../components/ui/FormSubmitButton'
 import { useAuth } from '../../context/AuthContext'
 import { can } from '../../utils/can'
+import { setIntendedRoute } from '../../utils/intendedRoute'
 import { createInquirySchema, type CreateInquirySchema } from '../../schemas/inquiry'
 import { createGeneralInquiry } from '../../services/inquiryService'
 
@@ -173,13 +174,15 @@ export function ContactPage() {
                   </p>
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                     <Link
-                      to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(ROUTES.CONTACT)}`}
+                      to={ROUTES.LOGIN}
+                      onClick={() => setIntendedRoute(ROUTES.CONTACT)}
                       className={buttonClassName('primary', 'md', 'w-full sm:w-auto text-center')}
                     >
                       Log in
                     </Link>
                     <Link
-                      to={`${ROUTES.SIGNUP}?redirect=${encodeURIComponent(ROUTES.CONTACT)}`}
+                      to={ROUTES.SIGNUP}
+                      onClick={() => setIntendedRoute(ROUTES.CONTACT)}
                       className={buttonClassName('outline', 'md', 'w-full sm:w-auto text-center')}
                     >
                       Create account
