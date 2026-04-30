@@ -53,31 +53,37 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-// Redirects unauthenticated users to login, preserving the intended destination
-function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
-  const location = useLocation()
+/**
+ * Guard for admin routes. Never redirects to login.
+ *
+ * Both unauthenticated visitors and authenticated users who lack the required
+ * permission receive the same 404 response, making admin routes
+ * indistinguishable from non-existent URLs. This prevents route enumeration
+ * by observing whether a login redirect or a 404 is returned.
+ */
+function AdminGuard({ permission, children }: { permission: string; children: ReactNode }) {
+  const { user, isAuthenticated, isLoading } = useAuth()
   if (isLoading) return null
-  if (!isAuthenticated) {
-    const loginUrl = `${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname + location.search)}`
-    return <Navigate to={loginUrl} replace />
-  }
+  if (!isAuthenticated || !can(user, permission)) return <NotFound />
   return <>{children}</>
 }
 
 /**
- * Capability-based route guard.
+ * Guard for user-facing authenticated routes (e.g. inquiries, profile actions).
  *
- * Accepts any permission key string from the backend registry.
- * Returns the 404 page (not a redirect) so the route's existence is
- * indistinguishable from an invalid URL.
- *
- * Usage: <RequirePermission permission="properties.manage">
+ * Unauthenticated visitors are redirected to login with a return URL because
+ * the existence of these routes is intentionally public knowledge. Authenticated
+ * users who lack the optional permission receive a 404 instead of a redirect or
+ * an error message.
  */
-function RequirePermission({ permission, children }: { permission: string; children: ReactNode }) {
+function UserGuard({ permission, children }: { permission?: string; children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
   if (isLoading) return null
-  if (!isAuthenticated || !can(user, permission)) return <NotFound />
+  if (!isAuthenticated) {
+    return <Navigate to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />
+  }
+  if (permission && !can(user, permission)) return <NotFound />
   return <>{children}</>
 }
 
@@ -149,33 +155,33 @@ function MainLayout() {
           <Route
             path={ROUTES.MY_INQUIRIES}
             element={
-              <RequirePermission permission="inquiries.submit">
+              <UserGuard permission="inquiries.submit">
                 <MyInquiriesPage />
-              </RequirePermission>
+              </UserGuard>
             }
           />
           <Route
             path={ROUTES.INQUIRY_DETAIL}
             element={
-              <RequirePermission permission="inquiries.submit">
+              <UserGuard permission="inquiries.submit">
                 <InquiryDetailsPage />
-              </RequirePermission>
+              </UserGuard>
             }
           />
           <Route
             path={ROUTES.CREATE_GENERAL_INQUIRY}
             element={
-              <RequirePermission permission="inquiries.submit">
+              <UserGuard permission="inquiries.submit">
                 <CreateGeneralInquiryPage />
-              </RequirePermission>
+              </UserGuard>
             }
           />
           <Route
             path={ROUTES.CREATE_PROPERTY_INQUIRY}
             element={
-              <RequirePermission permission="inquiries.submit">
+              <UserGuard permission="inquiries.submit">
                 <CreatePropertyInquiryPage />
-              </RequirePermission>
+              </UserGuard>
             }
           />
 
@@ -187,8 +193,6 @@ function MainLayout() {
     </div>
   )
 }
-
-export { ProtectedRoute }
 
 export function AppRouter() {
   return (
@@ -221,69 +225,72 @@ export function AppRouter() {
             }
           />
 
-          {/* Admin routes — capability-gated, each route uses the specific capability it requires */}
+          {/* Admin routes — capability-gated via AdminGuard, which returns 404 for
+              all unauthorized visitors (guests and wrong-permission users alike).
+              This ensures admin route existence cannot be inferred from response
+              differences (e.g. login redirect vs 404). */}
           <Route
             path="/admin"
             element={
-              <RequirePermission permission="properties.manage">
+              <AdminGuard permission="properties.manage">
                 <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_DASHBOARD}
             element={
-              <RequirePermission permission="properties.stats.read">
+              <AdminGuard permission="properties.stats.read">
                 <AdminDashboardPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_HOUSES}
             element={
-              <RequirePermission permission="properties.manage">
+              <AdminGuard permission="properties.manage">
                 <AdminHousesPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_HOUSE_DETAIL}
             element={
-              <RequirePermission permission="properties.manage">
+              <AdminGuard permission="properties.manage">
                 <AdminHouseDetailPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_ADD_HOUSE}
             element={
-              <RequirePermission permission="properties.manage">
+              <AdminGuard permission="properties.manage">
                 <AdminAddHousePage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_EDIT_HOUSE}
             element={
-              <RequirePermission permission="properties.manage">
+              <AdminGuard permission="properties.manage">
                 <AdminEditHousePage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_INQUIRIES}
             element={
-              <RequirePermission permission="inquiries.manage">
+              <AdminGuard permission="inquiries.manage">
                 <AdminInquiriesPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_INQUIRY_DETAIL}
             element={
-              <RequirePermission permission="inquiries.manage">
+              <AdminGuard permission="inquiries.manage">
                 <AdminInquiryDetailPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
 
@@ -291,25 +298,25 @@ export function AppRouter() {
           <Route
             path={ROUTES.ADMIN_USERS}
             element={
-              <RequirePermission permission="users.read">
+              <AdminGuard permission="users.read">
                 <AdminUsersPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_USER_DETAIL}
             element={
-              <RequirePermission permission="users.read">
+              <AdminGuard permission="users.read">
                 <AdminUserDetailsPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
           <Route
             path={ROUTES.ADMIN_CREATE_ADMIN}
             element={
-              <RequirePermission permission="admins.create">
+              <AdminGuard permission="admins.create">
                 <AdminCreateAdminPage />
-              </RequirePermission>
+              </AdminGuard>
             }
           />
 
