@@ -22,38 +22,35 @@ import { createGeneralInquiry } from '../../services/inquiryService'
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80'
 
+// Add team photos to /frontend/public/images/contact-us-profiles and keep filenames in sync below.
 const TEAM_MEMBERS = [
   {
-    name: 'Kasun Perera',
+    name: 'Rudraharan Nivaethan',
     role: 'Founder & CEO',
     description:
       'Leads the vision and strategy of LankaHouses, ensuring a transparent and user-first property platform.',
-    image:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=700&q=80',
+    image: '/images/contact-us-profiles/nivaethan.jpeg',
   },
   {
-    name: 'Nadeesha Fernando',
+    name: 'Vepusanan Nanthakumar',
     role: 'Operations Manager',
     description:
       'Oversees daily operations and ensures every property listing meets our verification standards.',
-    image:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=700&q=80',
+    image: '/images/contact-us-profiles/vepusanan.png',
   },
   {
-    name: 'Tharindu Silva',
+    name: 'Tharsigan Gnanasekar',
     role: 'Product & Technology Lead',
     description:
       'Responsible for building and improving the platform experience with modern technology.',
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=700&q=80',
+    image: '/images/contact-us-profiles/tharsigan.jpeg',
   },
   {
-    name: 'Ishara Jayasinghe',
+    name: 'Sharanjaa Senthuran',
     role: 'Customer Success Manager',
     description:
       'Works closely with users to ensure smooth inquiries and excellent support throughout their journey.',
-    image:
-      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=700&q=80',
+    image: '/images/contact-us-profiles/sharanjaa.jpeg',
   },
 ]
 
