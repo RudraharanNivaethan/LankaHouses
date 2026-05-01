@@ -22,35 +22,37 @@ import { createGeneralInquiry } from '../../services/inquiryService'
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80'
 
-// Add team photos to /frontend/public/images/contact-us-profiles and keep filenames in sync below.
+const CLOUDINARY_BASE =
+  'https://res.cloudinary.com/dagzirllc/image/upload/f_auto,q_auto,w_400,h_512,c_fill,g_face/lankahouses/contact-profiles'
+
 const TEAM_MEMBERS = [
   {
     name: 'Rudraharan Nivaethan',
     role: 'Founder & CEO',
     description:
       'Leads the vision and strategy of LankaHouses, ensuring a transparent and user-first property platform.',
-    image: '/images/contact-us-profiles/nivaethan.jpeg',
+    image: `${CLOUDINARY_BASE}/nivaethan`,
   },
   {
     name: 'Vepusanan Nanthakumar',
     role: 'Operations Manager',
     description:
       'Oversees daily operations and ensures every property listing meets our verification standards.',
-    image: '/images/contact-us-profiles/vepusanan.png',
+    image: `${CLOUDINARY_BASE}/vepusanan`,
   },
   {
     name: 'Tharsigan Gnanasekar',
     role: 'Product & Technology Lead',
     description:
       'Responsible for building and improving the platform experience with modern technology.',
-    image: '/images/contact-us-profiles/tharsigan.jpeg',
+    image: `${CLOUDINARY_BASE}/tharsigan`,
   },
   {
     name: 'Sharanjaa Senthuran',
     role: 'Customer Success Manager',
     description:
       'Works closely with users to ensure smooth inquiries and excellent support throughout their journey.',
-    image: '/images/contact-us-profiles/sharanjaa.jpeg',
+    image: `${CLOUDINARY_BASE}/sharanjaa`,
   },
 ]
 
