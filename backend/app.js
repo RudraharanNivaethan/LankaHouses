@@ -32,12 +32,25 @@ if (isProduction()) app.use(helmet());
 // HTTP request logging
 app.use(morgan(isProduction() ? 'combined' : 'dev'));
 
-// CORS — active in both environments
-const FRONTEND_URL = process.env[`FRONTEND_URL_${getEnvSuffix()}`];
+// CORS — active in both environments.
+// FRONTEND_URL_PROD / FRONTEND_URL_DEV can be a comma-separated list of
+// allowed origins so that multiple clients (e.g. Vercel preview URLs) can be
+// added without code changes.
+const rawFrontendUrl = process.env[`FRONTEND_URL_${getEnvSuffix()}`] ?? '';
+const allowedOrigins = rawFrontendUrl
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 const corsOptions = {
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, Postman).
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' is not allowed`));
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
