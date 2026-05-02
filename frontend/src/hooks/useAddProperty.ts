@@ -5,6 +5,7 @@ import { addPropertySchema } from '../schemas/property'
 import type { AddPropertySchema } from '../schemas/property'
 import { createProperty } from '../services/propertyService'
 import { MAX_IMAGES, MAX_IMAGE_SIZE_MB } from '../constants/property'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useAddProperty() {
   const [images, setImages] = useState<File[]>([])
@@ -63,7 +64,7 @@ export function useAddProperty() {
       reset()
       setImages([])
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : 'Failed to create property.')
+      setApiError(getClientErrorMessage(err))
     }
   }
 

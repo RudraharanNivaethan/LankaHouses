@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createAdminSchema, type CreateAdminFormData } from '../schemas/superAdmin'
 import { createAdmin } from '../services/superAdminService'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useCreateAdmin() {
   const form = useForm<CreateAdminFormData>({
@@ -23,7 +24,7 @@ export function useCreateAdmin() {
       setSuccessMessage(`Admin "${created.name}" created successfully.`)
       form.reset()
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Failed to create admin.')
+      setServerError(getClientErrorMessage(err))
     } finally {
       setIsLoading(false)
     }

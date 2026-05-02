@@ -16,6 +16,7 @@ import {
   getAdminInquiryById,
   replyToInquiry,
   closeInquiry,
+  getInquiryStats,
 } from '../controllers/inquiryController.js';
 
 const router = Router();
@@ -27,6 +28,14 @@ router.get(
   adminInquiryReadLimiter,
   validateQuery(inquiryQuerySchema),
   getAdminInquiries
+);
+
+router.get(
+  '/stats',
+  authenticate,
+  authorize(PERMISSION.INQUIRIES_MANAGE),
+  adminInquiryReadLimiter,
+  getInquiryStats
 );
 
 router.get(

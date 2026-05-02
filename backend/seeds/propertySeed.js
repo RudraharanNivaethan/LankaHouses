@@ -7,17 +7,18 @@ import { dirname, join } from 'path';
 import Property from '../models/Property.js';
 import connect from '../config/dbConnection.js';
 import { deleteImageByPublicId } from '../utils/cloudinary.js';
+import { isProduction } from '../utils/env.js';
 
 const RESEED = process.argv.includes('--reseed');
 
-if (process.env.NODE_ENV === 'production') {
+if (isProduction()) {
   console.error('❌ Property seed must not run in production.');
   process.exit(1);
 }
 
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL_DEV;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD_DEV;
-const API_KEY        = process.env.FIREBASE_WEB_API_KEY;
+const API_KEY        = process.env.FIREBASE_WEB_API_KEY_DEV;
 const PORT           = process.env.PORT_DEV || 3000;
 const HOST           = process.env.HOST_DEV || '127.0.0.1';
 const BASE_URL       = `http://${HOST}:${PORT}`;
@@ -25,7 +26,7 @@ const BASE_URL       = `http://${HOST}:${PORT}`;
 const missing = [];
 if (!ADMIN_EMAIL)    missing.push('ADMIN_EMAIL_DEV');
 if (!ADMIN_PASSWORD) missing.push('ADMIN_PASSWORD_DEV');
-if (!API_KEY)        missing.push('FIREBASE_WEB_API_KEY');
+if (!API_KEY)        missing.push('FIREBASE_WEB_API_KEY_DEV');
 
 if (missing.length) {
   console.error(`❌ Missing env variable(s): ${missing.join(', ')}`);

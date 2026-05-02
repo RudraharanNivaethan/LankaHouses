@@ -1,51 +1,38 @@
 import multer from 'multer';
 import crypto from 'crypto';
-// Middleware to validate file mime type using file-type package
 import { fileTypeFromBuffer } from 'file-type';
-// Image processing library for resizing
 import sharp from 'sharp';
 
 import { uploadImageBuffer } from '../utils/cloudinary.js';
+import { AppError, formatErrorResponse, logError } from '../utils/errorUtils.js';
 
 // Configuration for image uploads - easily modifiable for future scalability
 const UPLOAD_CONFIG = {
-  // Maximum number of images allowed per product
   MAX_IMAGES: 10,
-  // Maximum file size per image (5MB)
   MAX_FILE_SIZE: 5 * 1024 * 1024,
-  // Allowed image types
   MIME_TYPES: {
     'image/jpeg': 'jpg',
-    'image/jpg': 'jpg',
-    'image/png': 'png',
+    'image/jpg':  'jpg',
+    'image/png':  'png',
     'image/webp': 'webp',
     'image/avif': 'avif'
   },
-  // Image resizing configuration for consistent dimensions
   IMAGE_RESIZE: {
-    // Standard e-commerce product image dimensions (16:9 aspect ratio)
-    WIDTH: 800,
-    HEIGHT: 600,
-    // Quality settings for optimal file size vs quality balance
-    QUALITY: 85,
-    // Format to convert all images to (for consistency)
+    WIDTH:        800,
+    HEIGHT:       600,
+    QUALITY:      85,
     OUTPUT_FORMAT: 'jpeg',
-    // Enable progressive JPEG for better loading experience
-    PROGRESSIVE: true,
-    // Strip metadata to reduce file size
+    PROGRESSIVE:  true,
     STRIP_METADATA: true
   }
 };
 
-// For backward compatibility, keep MIME_TYPES reference
 const MIME_TYPES = UPLOAD_CONFIG.MIME_TYPES;
 
 // Configure multer storage (memory only — no local disk writes)
 const storage = multer.memoryStorage();
 
-// File filter function
 const fileFilter = (req, file, cb) => {
-  // Check if file type is allowed (with type check to prevent type confusion attacks)
   if (typeof file.mimetype === 'string' && MIME_TYPES[file.mimetype]) {
     cb(null, true);
   } else {
@@ -53,34 +40,38 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Create multer instance with configuration
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
     fileSize: UPLOAD_CONFIG.MAX_FILE_SIZE,
-    files: UPLOAD_CONFIG.MAX_IMAGES // Limit to single image
+    files: UPLOAD_CONFIG.MAX_IMAGES
   }
 });
 
 // Helper retained for compatibility (no-op with memory storage)
 const cleanupFiles = async () => {};
 
-// Centralized error response formatter for image uploads
+/**
+ * Creates an AppError that carries upload-specific code and details.
+ * formatErrorResponse exposes code in all envs, details only in dev.
+ */
+const makeUploadError = (code, message, statusCode = 400) => {
+  const err = new AppError(message, statusCode);
+  err.code = code;
+  err.details = {
+    maxFileSize:  UPLOAD_CONFIG.MAX_FILE_SIZE,
+    maxFiles:     UPLOAD_CONFIG.MAX_IMAGES,
+    allowedTypes: Object.keys(UPLOAD_CONFIG.MIME_TYPES)
+  };
+  return err;
+};
+
 const sendUploadError = (res, code, message, statusCode = 400) => {
-  return res.status(statusCode).json({
-    success: false,
-    error: {
-      code,
-      message,
-      details: {
-        maxFileSize: UPLOAD_CONFIG.MAX_FILE_SIZE,
-        maxFiles: UPLOAD_CONFIG.MAX_IMAGES,
-        allowedTypes: Object.keys(UPLOAD_CONFIG.MIME_TYPES)
-      }
-    },
-    timestamp: new Date().toISOString()
-  });
+  const { statusCode: sc, response } = formatErrorResponse(
+    makeUploadError(code, message, statusCode)
+  );
+  return res.status(sc).json(response);
 };
 
 // Middleware to enforce that a file MUST be present (for Create)
@@ -92,26 +83,21 @@ export const requireImage = (req, res, next) => {
 };
 
 export const validateImage = async (req, res, next) => {
-  // If no file, just skip (logic for required vs optional is handled by requireImage)
   if (!req.file) return next();
 
-  // Safety check: ensure only one image is uploaded (with Array.isArray to prevent type confusion)
   if (Array.isArray(req.files) && req.files.length > UPLOAD_CONFIG.MAX_IMAGES) {
     await cleanupFiles(req);
     return sendUploadError(res, 'TOO_MANY_FILES', `Only ${UPLOAD_CONFIG.MAX_IMAGES} images allowed`);
   }
 
   try {
-    // Validate buffer type to prevent type confusion attacks
     if (!Buffer.isBuffer(req.file.buffer)) {
       await cleanupFiles(req);
       return sendUploadError(res, 'INVALID_FILE_DATA', 'Invalid file data received');
     }
 
-    // Detect actual file type
     const fileType = await fileTypeFromBuffer(req.file.buffer);
 
-    // Validate against allowed MIME types (with string type check to prevent type confusion)
     if (!fileType || typeof fileType.ext !== 'string' || !Object.values(MIME_TYPES).includes(fileType.ext)) {
       await cleanupFiles(req);
       return sendUploadError(res, 'INVALID_FILE_TYPE', 'Invalid file type detected. Only JPG, JPEG, PNG, WEBP, and AVIF are allowed.');
@@ -125,9 +111,7 @@ export const validateImage = async (req, res, next) => {
 
 export const uploadProductImage = upload.single('image');
 
-// Image processing middleware - resizes images to consistent dimensions
 export const processImage = async (req, res, next) => {
-  // Skip if no file was uploaded
   if (!req.file) {
     return next();
   }
@@ -135,25 +119,22 @@ export const processImage = async (req, res, next) => {
   try {
     const inputBuffer = req.file.buffer;
 
-    // Validate buffer type and content to prevent type confusion attacks
     if (!Buffer.isBuffer(inputBuffer) || inputBuffer.length === 0) {
       throw new Error('Invalid or empty file buffer');
     }
 
-    // Process image with Sharp - read from memory and output a buffer
     const processedBuffer = await sharp(inputBuffer)
       .resize(UPLOAD_CONFIG.IMAGE_RESIZE.WIDTH, UPLOAD_CONFIG.IMAGE_RESIZE.HEIGHT, {
-        fit: 'cover', // Crop to fill dimensions while maintaining aspect ratio
-        position: 'center' // Center the crop
+        fit: 'cover',
+        position: 'center'
       })
       .jpeg({
         quality: UPLOAD_CONFIG.IMAGE_RESIZE.QUALITY,
         progressive: UPLOAD_CONFIG.IMAGE_RESIZE.PROGRESSIVE
       })
-      .withMetadata(!UPLOAD_CONFIG.IMAGE_RESIZE.STRIP_METADATA) // Strip metadata if configured
+      .withMetadata(!UPLOAD_CONFIG.IMAGE_RESIZE.STRIP_METADATA)
       .toBuffer();
 
-    // Upload processed buffer to Cloudinary
     const randomName = crypto.randomBytes(16).toString('hex');
     const publicId = `product_${randomName}`;
 
@@ -161,40 +142,20 @@ export const processImage = async (req, res, next) => {
       public_id: publicId
     });
 
-    // Attach Cloudinary results for downstream service layer
     req.file.cloudinaryUrl = uploaded.secure_url;
     req.file.cloudinaryPublicId = uploaded.public_id;
-
-    // Keep metadata consistent for any other middleware that inspects req.file
     req.file.mimetype = `image/${UPLOAD_CONFIG.IMAGE_RESIZE.OUTPUT_FORMAT}`;
     req.file.filename = `${publicId}.jpg`;
     req.file.buffer = processedBuffer;
 
     next();
   } catch (error) {
-    // Log detailed error information for debugging
-    console.error('Image processing error:', {
-      message: error.message,
-      stack: error.stack,
-      filename: req.file?.filename,
-      mimetype: req.file?.mimetype
-    });
-
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'IMAGE_PROCESSING_ERROR',
-        message: `Failed to process image: ${error.message}`,
-        details: {
-          maxFileSize: UPLOAD_CONFIG.MAX_FILE_SIZE,
-          maxFiles: UPLOAD_CONFIG.MAX_IMAGES,
-          allowedTypes: Object.keys(UPLOAD_CONFIG.MIME_TYPES),
-          targetDimensions: `${UPLOAD_CONFIG.IMAGE_RESIZE.WIDTH}x${UPLOAD_CONFIG.IMAGE_RESIZE.HEIGHT}`,
-          originalError: error.message
-        }
-      },
-      timestamp: new Date().toISOString()
-    });
+    logError(error, { req, context: 'processImage' });
+    return sendUploadError(
+      res,
+      'IMAGE_PROCESSING_ERROR',
+      `Failed to process image: ${error.message}`
+    );
   }
 };
 
@@ -221,45 +182,16 @@ export const handleUploadError = (error, req, res, next) => {
         message = `Upload error: ${error.message}`;
     }
 
-    return res.status(statusCode).json({
-      success: false,
-      error: {
-        code: error.code,
-        message: message,
-        details: {
-          maxFileSize: UPLOAD_CONFIG.MAX_FILE_SIZE,
-          maxFiles: UPLOAD_CONFIG.MAX_IMAGES,
-          allowedTypes: Object.keys(UPLOAD_CONFIG.MIME_TYPES)
-        }
-      },
-      timestamp: new Date().toISOString()
-    });
+    return sendUploadError(res, error.code, message, statusCode);
   }
 
-  // Handle other errors
   if (error.message) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'UPLOAD_VALIDATION_ERROR',
-        message: error.message,
-        details: {
-          maxFileSize: UPLOAD_CONFIG.MAX_FILE_SIZE,
-          maxFiles: UPLOAD_CONFIG.MAX_IMAGES,
-          allowedTypes: Object.keys(UPLOAD_CONFIG.MIME_TYPES)
-        }
-      },
-      timestamp: new Date().toISOString()
-    });
+    return sendUploadError(res, 'UPLOAD_VALIDATION_ERROR', error.message);
   }
 
-  // Pass to next error handler
   next(error);
 };
 
-// Combined middleware for standard product image processing
-// Note: handleUploadError should be called individually after multer if needed,
-// or included here for maximum maintainability.
 export const productUploadBundle = [
   uploadProductImage,
   handleUploadError,
@@ -267,7 +199,6 @@ export const productUploadBundle = [
   processImage
 ];
 
-// Export configuration for use in other parts of the application
 export { UPLOAD_CONFIG };
 
 // ─── Property multi-image upload ─────────────────────────────────────────────
@@ -294,7 +225,7 @@ export const validateImages = async (req, res, next) => {
       }
     }
     next();
-  } catch {
+  } catch (err) {
     return sendUploadError(res, 'FILE_PROCESSING_ERROR', 'Invalid file format or corrupted file');
   }
 };
@@ -331,25 +262,12 @@ export const resizeImages = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Image resize error:', {
-      message: error.message,
-      stack:   error.stack,
-    });
-
-    return res.status(400).json({
-      success: false,
-      error: {
-        code:    'IMAGE_PROCESSING_ERROR',
-        message: `Failed to process image: ${error.message}`,
-        details: {
-          maxFileSize:      UPLOAD_CONFIG.MAX_FILE_SIZE,
-          maxFiles:         UPLOAD_CONFIG.MAX_IMAGES,
-          allowedTypes:     Object.keys(UPLOAD_CONFIG.MIME_TYPES),
-          targetDimensions: `${UPLOAD_CONFIG.IMAGE_RESIZE.WIDTH}x${UPLOAD_CONFIG.IMAGE_RESIZE.HEIGHT}`,
-        },
-      },
-      timestamp: new Date().toISOString(),
-    });
+    logError(error, { req, context: 'resizeImages' });
+    return sendUploadError(
+      res,
+      'IMAGE_PROCESSING_ERROR',
+      `Failed to process image: ${error.message}`
+    );
   }
 };
 
@@ -364,9 +282,7 @@ export const propertyUploadBundle = [
 
 // ─── Generic factory (kept for future scalability) ────────────────────────────
 
-// This can be used when we want to extend to multiple images in the future
 export const createUploadMiddleware = (fieldName = 'image', maxImages = UPLOAD_CONFIG.MAX_IMAGES) => {
-  // Validate parameters to prevent type confusion
   if (typeof fieldName !== 'string' || fieldName.length === 0) {
     throw new Error('fieldName must be a non-empty string');
   }

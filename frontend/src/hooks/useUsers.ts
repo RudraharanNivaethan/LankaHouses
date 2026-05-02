@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getUsers } from '../services/superAdminService'
 import type { User, UserRole } from '../types/auth'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 interface Pagination {
   total: number
@@ -29,7 +30,7 @@ export function useUsers(filters: UserFilters = {}) {
       setUsers(res.data)
       setPagination(res.pagination)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load users')
+      setError(getClientErrorMessage(err))
     } finally {
       setIsLoading(false)
     }

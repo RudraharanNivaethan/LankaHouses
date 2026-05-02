@@ -7,23 +7,7 @@ import { loginSchema } from '../schemas/auth'
 import { firebaseExchange } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
 import type { LoginFormData } from '../types/auth'
-
-function mapFirebaseLoginError(code: string): string {
-  switch (code) {
-    case 'auth/invalid-credential':
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-      return 'Invalid email or password.'
-    case 'auth/too-many-requests':
-      return 'Too many failed attempts. Please try again later or reset your password.'
-    case 'auth/user-disabled':
-      return 'This account has been disabled. Please contact support.'
-    case 'auth/network-request-failed':
-      return 'Network error. Please check your connection and try again.'
-    default:
-      return 'Login failed. Please try again.'
-  }
-}
+import { getFirebaseErrorMessage, getClientErrorMessage } from '../utils/errorMessages'
 
 export function useLogin() {
   const form = useForm<LoginFormData>({
@@ -48,9 +32,9 @@ export function useLogin() {
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {
-        setServerError(mapFirebaseLoginError(code))
+        setServerError(getFirebaseErrorMessage(code))
       } else {
-        setServerError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+        setServerError(getClientErrorMessage(err))
       }
     } finally {
       setIsLoading(false)

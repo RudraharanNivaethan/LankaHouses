@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getUserById } from '../services/superAdminService'
 import type { User } from '../types/auth'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useUser(id: string | undefined) {
   const [user, setUser] = useState<User | null>(null)
@@ -24,7 +25,7 @@ export function useUser(id: string | undefined) {
       })
       .catch((err) => {
         if (!cancelled)
-          setError(err instanceof Error ? err.message : 'Failed to load user')
+          setError(getClientErrorMessage(err))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)

@@ -1,4 +1,5 @@
 import express from 'express';
+import morgan from 'morgan';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
@@ -10,24 +11,31 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoSanitize from 'mongo-sanitize';
+import { isProduction, getEnvSuffix } from './utils/env.js';
+import {
+  AppError,
+  NotFoundError,
+  formatErrorResponse,
+  globalErrorMiddleware
+} from './utils/errorUtils.js';
 
 const app = express();
-const isProduction = process.env.NODE_ENV === 'production';
 
-// Trust proxy (required for correct IP behind load balancers/Render/Heroku/etc)
-// app.set('trust proxy', true); Uncomment this in production
+// Trust proxy — must be set before any middleware that reads req.ip.
+// Value 1 = trust one upstream hop (Railway's load balancer), so req.ip
+// reflects the real client address for rate limiting and logging.
+if (isProduction()) app.set('trust proxy', 1);
 
-// Security headers (Helmet 8.1.0 - no known vulnerabilities)
-// Sets: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, etc.
-// app.use(helmet()); Uncomment this in production
+// Security headers — X-Frame-Options, X-Content-Type-Options, HSTS, etc.
+if (isProduction()) app.use(helmet());
+
+// HTTP request logging
+app.use(morgan(isProduction() ? 'combined' : 'dev'));
 
 // CORS — active in both environments
-// Dev: allows FRONTEND_URL from .env with fallback to localhost:5173
-// Prod: requires FRONTEND_URL to be explicitly set, no fallback
+const FRONTEND_URL = process.env[`FRONTEND_URL_${getEnvSuffix()}`];
 const corsOptions = {
-  origin: isProduction
-    ? process.env.FRONTEND_URL
-    : process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: FRONTEND_URL,
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -40,10 +48,10 @@ app.use(cookieParser());
 // Must be after express.json() to catch SyntaxError from body-parser
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid JSON in request body'
-    });
+    const { statusCode, response } = formatErrorResponse(
+      new AppError('Invalid JSON in request body', 400)
+    );
+    return res.status(statusCode).json(response);
   }
   next(err);
 });
@@ -69,12 +77,10 @@ app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/admin/inquiries', adminInquiryRoutes);
 
 
-// 404 handler for undefined routes
-app.use((req, res, next) => {
-  res.status(404).json({
-    success: false,
-    error: 'Resource not found'
-  });
-});
+// 404 handler — routes through globalErrorMiddleware for uniform shaping
+app.use((req, res, next) => next(new NotFoundError()));
+
+// Global error middleware — must be the last app.use
+app.use(globalErrorMiddleware);
 
 export default app;

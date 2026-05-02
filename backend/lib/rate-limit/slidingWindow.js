@@ -1,5 +1,6 @@
 import { defaultIpKeyForReq } from './ipKey.js';
 import { createMemoryStore } from './store.js';
+import { AppError, formatErrorResponse } from '../../utils/errorUtils.js';
 
 /**
  * Sliding window counter — single axis (one key type: either user or IP).
@@ -52,7 +53,10 @@ export const createSlidingWindowLimiter = ({
 
     const limit = capFn(req);
     if (!(limit > 0)) {
-      return res.status(500).json({ success: false, error: 'Rate limit misconfiguration' });
+      const { statusCode, response } = formatErrorResponse(
+        new AppError('Rate limit misconfiguration', 500, false)
+      );
+      return res.status(statusCode).json(response);
     }
 
     const now = Date.now();
@@ -75,7 +79,10 @@ export const createSlidingWindowLimiter = ({
       const windowEnd = entry.windowStart + windowMs;
       const retryMs = windowEnd - now;
       res.setHeader('Retry-After', String(Math.max(1, Math.ceil(retryMs / 1000))));
-      return res.status(429).json({ success: false, error });
+      const { statusCode, response } = formatErrorResponse(
+        new AppError(error, 429)
+      );
+      return res.status(statusCode).json(response);
     }
 
     store.set(fullKey, { ...entry, curr: entry.curr + 1 });

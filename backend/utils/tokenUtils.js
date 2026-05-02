@@ -3,6 +3,7 @@ import {
   getAccessJwtSecretForRole,
   getRefreshJwtSecretForRole,
 } from '../config/jwtConfig.js';
+import { isProduction } from './env.js';
 
 export const generateAccessToken = (userId, role = 'user', tokenVersion = 0) => {
   const secret = getAccessJwtSecretForRole(role);
@@ -24,7 +25,7 @@ export const generateRefreshToken = (userId, role = 'user', loginTime = null, to
 };
 
 export const setAuthCookies = (res, accessToken, refreshToken) => {
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = isProduction();
 
   res.cookie('token', accessToken, {
     httpOnly: true,
@@ -42,7 +43,7 @@ export const setAuthCookies = (res, accessToken, refreshToken) => {
 };
 
 export const clearAuthCookies = (res) => {
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = isProduction();
   const options = { httpOnly: true, secure: isProd, sameSite: 'strict' };
   res.clearCookie('token', options);
   res.clearCookie('refreshToken', options);

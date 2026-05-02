@@ -54,3 +54,13 @@ export interface CreateInquiryPayload {
 export interface AdminReplyPayload {
   adminReply: string
 }
+
+export interface InquiryStats {
+  totalInquiries: number
+  pendingInquiries: number
+}
+
+export interface InquiryStatsApiResponse {
+  success: boolean
+  data: InquiryStats
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAdminListingStats } from '../services/propertyService'
 import { getUserStats } from '../services/superAdminService'
+import { getAdminInquiryStats } from '../services/inquiryService'
 import { useAuth } from '../context/AuthContext'
 import type { UserRoleStats } from '../types/auth'
 
@@ -33,19 +34,23 @@ export function useDashboardStats() {
       setIsLoading(true)
       setError(null)
       try {
-        const requests: [ReturnType<typeof getAdminListingStats>, Promise<UserRoleStats | null>] = [
+        const requests: [
+          ReturnType<typeof getAdminListingStats>,
+          ReturnType<typeof getAdminInquiryStats>,
+          Promise<UserRoleStats | null>,
+        ] = [
           getAdminListingStats(),
+          getAdminInquiryStats(),
           canViewUserStats ? getUserStats() : Promise.resolve(null),
         ]
-        const [listingRes, userRoleStats] = await Promise.all(requests)
+        const [listingRes, inquiryStatsRes, userRoleStats] = await Promise.all(requests)
         if (active) {
           setStats({
             activeListings: listingRes.data.activeListings,
             soldListings: listingRes.data.soldListings,
             removedListings: listingRes.data.removedListings,
-            // Inquiry stats will be populated from the real inquiries API endpoint in a future sprint.
-            totalInquiries: 0,
-            pendingInquiries: 0,
+            totalInquiries: inquiryStatsRes.data.totalInquiries,
+            pendingInquiries: inquiryStatsRes.data.pendingInquiries,
             ...(userRoleStats ? { userStats: userRoleStats } : {}),
           })
         }

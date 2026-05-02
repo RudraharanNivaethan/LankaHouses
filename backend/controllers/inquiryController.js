@@ -8,6 +8,7 @@ import {
   findAdminInquiryById,
   replyToInquiry        as svcReply,
   closeInquiry          as svcClose,
+  countInquiryStats     as svcCountStats,
 } from '../services/inquiryService.js';
 
 export const createGeneralInquiry = async (req, res) => {
@@ -102,6 +103,16 @@ export const closeInquiry = async (req, res) => {
   try {
     const inquiry = await svcClose(req.validatedParams.inquiryId);
     return res.status(200).json({ success: true, data: inquiry });
+  } catch (error) {
+    const { statusCode, response } = formatErrorResponse(error);
+    return res.status(statusCode).json(response);
+  }
+};
+
+export const getInquiryStats = async (_req, res) => {
+  try {
+    const stats = await svcCountStats();
+    return res.status(200).json({ success: true, data: stats });
   } catch (error) {
     const { statusCode, response } = formatErrorResponse(error);
     return res.status(statusCode).json(response);

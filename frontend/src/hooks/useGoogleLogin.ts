@@ -3,6 +3,7 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { firebaseAuth } from '../config/firebase'
 import { firebaseExchange } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
+import { getFirebaseErrorMessage, getClientErrorMessage } from '../utils/errorMessages'
 
 export function useGoogleLogin() {
   const { refreshUser } = useAuth()
@@ -24,7 +25,8 @@ export function useGoogleLogin() {
       if ((err as { code?: string }).code === 'auth/popup-closed-by-user') {
         return
       }
-      setError(err instanceof Error ? err.message : 'Google sign-in failed. Please try again.')
+      const code = (err as { code?: string }).code ?? ''
+      setError(code.startsWith('auth/') ? getFirebaseErrorMessage(code) : getClientErrorMessage(err))
     } finally {
       setIsLoading(false)
     }

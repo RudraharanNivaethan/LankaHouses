@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { getProperties } from '../services/propertyService'
 import type { PropertyRecord, PaginationInfo, PropertyQueryParams } from '../types/property'
 import { DEFAULT_PAGE_LIMIT } from '../constants/property'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useProperties(initialQuery: PropertyQueryParams = {}) {
   const [properties, setProperties] = useState<PropertyRecord[]>([])
@@ -27,7 +28,7 @@ export function useProperties(initialQuery: PropertyQueryParams = {}) {
       setProperties(result.data)
       setPagination(result.pagination)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load properties.')
+      setError(getClientErrorMessage(err))
       setProperties([])
     } finally {
       setIsLoading(false)
