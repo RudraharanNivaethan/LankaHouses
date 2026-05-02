@@ -3,14 +3,15 @@
  *
  * In development the frontend dev-server and the Express backend run on
  * different ports, so we point directly at the local backend.
- * In production the frontend is hosted on Vercel and must call the Railway
- * backend by its full public URL.
+ * In production all /api/* requests are proxied through Vercel's edge to the
+ * Railway backend (configured via the rewrite rule in vercel.json), so a
+ * relative path is used — no hard-coded Railway URL in frontend code.
  *
  * Override either value via the corresponding VITE_* env variable so the
  * defaults can be changed without touching source code.
  *
- * DEV  default : http://localhost:8080/api
- * PROD default : https://backend-production-5de3.up.railway.app/api
+ * DEV  default : http://localhost:3000/api  (direct to local backend)
+ * PROD default : /api                       (proxied through Vercel to Railway)
  */
 
 import { isDev } from '../utils/env';

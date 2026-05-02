@@ -80,6 +80,14 @@ app.use((req, res, next) => {
 });
 
 
+// Prevent Vercel (and any other CDN/proxy) from caching API responses.
+// Without this, GET /api/property/:id can be served from the edge cache after
+// a PATCH update, making updates appear not to have been saved.
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 // Routes
 app.use('/api', globalLimiter);
 app.use('/api/auth', authRoutes);
