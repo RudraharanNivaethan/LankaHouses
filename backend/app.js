@@ -21,11 +21,13 @@ import {
 
 const app = express();
 
-// Trust proxy (required for correct IP behind load balancers/Render/Heroku/etc)
-// app.set('trust proxy', true); Uncomment this in production
+// Trust proxy — must be set before any middleware that reads req.ip.
+// Value 1 = trust one upstream hop (Railway's load balancer), so req.ip
+// reflects the real client address for rate limiting and logging.
+if (isProduction()) app.set('trust proxy', 1);
 
-// Security headers (Helmet 8.1.0 - no known vulnerabilities)
-// app.use(helmet()); Uncomment this in production
+// Security headers — X-Frame-Options, X-Content-Type-Options, HSTS, etc.
+if (isProduction()) app.use(helmet());
 
 // HTTP request logging
 app.use(morgan(isProduction() ? 'combined' : 'dev'));

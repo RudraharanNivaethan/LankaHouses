@@ -5,14 +5,16 @@ import { isProduction, getEnvSuffix } from './utils/env.js';
 import { logError } from './utils/errorUtils.js';
 
 const env = getEnvSuffix();
-const HOST = process.env[`HOST_${env}`];
-const PORT = process.env[`PORT_${env}`];
+// Fall back to Railway's auto-injected PORT / a safe default host so the
+// service starts without requiring PORT_PROD / HOST_PROD to be set manually
+// in the Railway Variables panel.
+const HOST = process.env[`HOST_${env}`] ?? '0.0.0.0';
+const PORT = process.env[`PORT_${env}`] ?? process.env.PORT;
 
-const missingBind = [];
-if (!HOST) missingBind.push(`HOST_${env}`);
-if (!PORT) missingBind.push(`PORT_${env}`);
-if (missingBind.length) {
-  throw new Error(`Missing server bind config: ${missingBind.join(', ')}. Check your .env file.`);
+if (!PORT) {
+  throw new Error(
+    `Missing server port: set PORT_${env} or PORT in your environment. Check your .env file.`
+  );
 }
 
 let server;
