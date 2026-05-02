@@ -107,7 +107,7 @@ export const firebaseRegister = async (idToken, name, phone) => {
   let decoded;
   try {
     decoded = await admin.auth().verifyIdToken(idToken);
-  } catch {
+  } catch (err) {
     throw new AppError('Invalid Firebase token', HTTP_STATUS.UNAUTHORIZED);
   }
 
@@ -136,7 +136,7 @@ export const firebaseExchange = async (idToken) => {
   let decoded;
   try {
     decoded = await admin.auth().verifyIdToken(idToken);
-  } catch {
+  } catch (err) {
     throw new AppError('Invalid Firebase token', HTTP_STATUS.UNAUTHORIZED);
   }
 
