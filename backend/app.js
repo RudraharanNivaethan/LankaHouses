@@ -36,7 +36,7 @@ app.use(morgan(isProduction() ? 'combined' : 'dev'));
 const corsOptions = {
   origin: isProduction()
     ? process.env.FRONTEND_URL
-    : process.env.FRONTEND_URL || 'http://localhost:5173',
+    : process.env.FRONTEND_URL,
   credentials: true,
   optionsSuccessStatus: 200
 };

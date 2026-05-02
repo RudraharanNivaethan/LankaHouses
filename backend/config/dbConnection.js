@@ -1,22 +1,23 @@
 // dbConnection.js
 import mongoose from 'mongoose';
+import { isProduction } from '../utils/env.js';
 
 // =============================================================================
 // ENVIRONMENT-BASED DATABASE SELECTION
 // =============================================================================
 
-const isProduction = process.env.NODE_ENV === 'production';
-const environment = isProduction ? 'production' : 'development';
+const isProd = isProduction();
+const environment = isProd ? 'production' : 'development';
 
 // Select the appropriate MongoDB URI based on environment
 // Fallback to generic MONGODB_URI for backward compatibility
-const uri = isProduction
+const uri = isProd
   ? (process.env.MONGODB_URI_PROD || process.env.MONGODB_URI)
-  : (process.env.MONGODB_URI_DEV || process.env.MONGODB_URI);
+  : (process.env.MONGODB_URI_DEV  || process.env.MONGODB_URI);
 
 // Validate that a URI is available
 if (!uri) {
-  const envVar = isProduction ? 'MONGODB_URI_PROD' : 'MONGODB_URI_DEV';
+  const envVar = isProd ? 'MONGODB_URI_PROD' : 'MONGODB_URI_DEV';
   throw new Error(`❌ ${envVar} (or MONGODB_URI) is missing. Check your .env file!`);
 }
 
