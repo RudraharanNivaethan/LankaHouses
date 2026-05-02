@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getPropertyStatuses } from '../services/propertyService'
 import type { PropertyStatus } from '../types/property'
 import { STATUS_LABELS } from '../constants/property'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export interface SelectOption {
   value: string
@@ -29,7 +30,7 @@ export function usePropertyStatuses() {
         setStatuses(result.data.statuses ?? [])
       } catch (e) {
         if (!alive) return
-        setError(e instanceof Error ? e.message : 'Failed to load allowed statuses.')
+        setError(getClientErrorMessage(e))
         setStatuses([])
       } finally {
         if (!alive) return

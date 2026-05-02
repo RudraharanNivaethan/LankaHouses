@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteProperty } from '../services/propertyService'
 import { ROUTES } from '../constants/routes'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useDeleteProperty() {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ export function useDeleteProperty() {
       setShowConfirm(false)
       navigate(ROUTES.ADMIN_HOUSES)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete property.')
+      setError(getClientErrorMessage(err))
     } finally {
       setIsDeleting(false)
     }

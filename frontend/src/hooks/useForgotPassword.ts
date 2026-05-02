@@ -5,17 +5,7 @@ import { sendPasswordResetEmail } from 'firebase/auth'
 import { firebaseAuth } from '../config/firebase'
 import { forgotPasswordSchema } from '../schemas/auth'
 import type { ForgotPasswordSchema } from '../schemas/auth'
-
-function mapFirebaseForgotError(code: string): string {
-  switch (code) {
-    case 'auth/too-many-requests':
-      return 'Too many requests. Please wait a moment before trying again.'
-    case 'auth/network-request-failed':
-      return 'Network error. Please check your connection and try again.'
-    default:
-      return 'Something went wrong. Please try again.'
-  }
-}
+import { getFirebaseErrorMessage } from '../utils/errorMessages'
 
 export function useForgotPassword() {
   const form = useForm<ForgotPasswordSchema>({
@@ -40,7 +30,7 @@ export function useForgotPassword() {
         // Treat silently to avoid email enumeration
         setIsSuccess(true)
       } else if (code.startsWith('auth/')) {
-        setServerError(mapFirebaseForgotError(code))
+        setServerError(getFirebaseErrorMessage(code))
       } else {
         setServerError('Something went wrong. Please try again.')
       }

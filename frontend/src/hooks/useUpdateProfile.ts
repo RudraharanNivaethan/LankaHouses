@@ -5,6 +5,7 @@ import { updateProfileSchema } from '../schemas/auth'
 import { updateProfile } from '../services/userService'
 import { useAuth } from '../context/AuthContext'
 import type { UpdateProfileSchema } from '../schemas/auth'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useUpdateProfile() {
   const { user, refreshUser } = useAuth()
@@ -34,7 +35,7 @@ export function useUpdateProfile() {
       await refreshUser()
       setIsSuccess(true)
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Failed to save. Please try again.')
+      setServerError(getClientErrorMessage(err))
     } finally {
       setIsLoading(false)
     }

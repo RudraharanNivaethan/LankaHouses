@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getPropertyById } from '../services/propertyService'
 import type { PropertyRecord } from '../types/property'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 export function useProperty(id: string | undefined) {
   const [property, setProperty] = useState<PropertyRecord | null>(null)
@@ -14,7 +15,7 @@ export function useProperty(id: string | undefined) {
       const result = await getPropertyById(propertyId)
       setProperty(result.data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load property.')
+      setError(getClientErrorMessage(err))
       setProperty(null)
     } finally {
       setIsLoading(false)

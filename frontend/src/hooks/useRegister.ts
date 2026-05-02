@@ -7,23 +7,7 @@ import { registerSchema } from '../schemas/auth'
 import { firebaseRegister } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
 import type { RegisterFormData } from '../types/auth'
-
-function mapFirebaseRegisterError(code: string): string {
-  switch (code) {
-    case 'auth/email-already-in-use':
-      return 'An account with this email already exists.'
-    case 'auth/weak-password':
-      return 'Password is too weak. Use at least 12 characters with mixed case, numbers and symbols.'
-    case 'auth/invalid-email':
-      return 'Invalid email address.'
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please try again later.'
-    case 'auth/network-request-failed':
-      return 'Network error. Please check your connection and try again.'
-    default:
-      return 'Registration failed. Please try again.'
-  }
-}
+import { getFirebaseErrorMessage, getClientErrorMessage } from '../utils/errorMessages'
 
 export function useRegister() {
   const form = useForm<RegisterFormData>({
@@ -49,12 +33,12 @@ export function useRegister() {
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       if (code.startsWith('auth/')) {
-        setServerError(mapFirebaseRegisterError(code))
+        setServerError(getFirebaseErrorMessage(code))
       } else if (firebaseCreated) {
         // Firebase user was created but backend failed — surface the backend error
-        setServerError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+        setServerError(getClientErrorMessage(err))
       } else {
-        setServerError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+        setServerError(getClientErrorMessage(err))
       }
     } finally {
       setIsLoading(false)

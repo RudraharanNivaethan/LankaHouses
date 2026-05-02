@@ -5,6 +5,7 @@ import { addPropertySchema } from '../schemas/property'
 import type { AddPropertySchema } from '../schemas/property'
 import { updateProperty } from '../services/propertyService'
 import type { PropertyRecord } from '../types/property'
+import { getClientErrorMessage } from '../utils/errorMessages'
 
 function toFormValues(record: PropertyRecord): AddPropertySchema {
   return {
@@ -102,7 +103,7 @@ export function useUpdateProperty(
       setApiError('Could not confirm the database was updated. Please refresh the page.')
       reset(toFormValues(result.data))
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : 'Failed to update property.')
+      setApiError(getClientErrorMessage(err))
     }
   }
 

@@ -1,10 +1,11 @@
 import 'dotenv/config'; // automatically loads .env
 import connect from './config/dbConnection.js';
 import app from './app.js';
+import { isProduction } from './utils/env.js';
+import { logError } from './utils/errorUtils.js';
 
-const isProduction = process.env.NODE_ENV === 'production';
-const HOST = isProduction ? process.env.HOST_PROD : process.env.HOST_DEV;
-const PORT = isProduction ? process.env.PORT_PROD : process.env.PORT_DEV;
+const HOST = isProduction() ? process.env.HOST_PROD : process.env.HOST_DEV;
+const PORT = isProduction() ? process.env.PORT_PROD : process.env.PORT_DEV;
 
 let server;
 
@@ -15,7 +16,7 @@ const startServer = async () => {
       console.log(`🚀 Server running on ${HOST}:${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Server failed to start:', error.message);
+    logError(error, { context: 'Server startup' });
     process.exit(1);
   }
 };
@@ -28,13 +29,13 @@ const SHUTDOWN_TIMEOUT = 10000; // 10 seconds
 
 const gracefulShutdown = (signal) => {
   console.log(`\n[SHUTDOWN] ${signal} received. Shutting down gracefully...`);
-  
+
   if (server) {
     server.close(() => {
       console.log('[SHUTDOWN] HTTP server closed.');
       process.exit(0);
     });
-    
+
     // Force close after timeout if graceful shutdown hangs
     setTimeout(() => {
       console.error('[SHUTDOWN] Forced shutdown after timeout.');
@@ -55,27 +56,23 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions (synchronous errors that escape try/catch)
 process.on('uncaughtException', (error) => {
-  console.error('[FATAL] Uncaught Exception:');
-  console.error(error);
-  
+  logError(error, { level: 'FATAL', event: 'uncaughtException' });
+
   // In production, exit and let process manager (PM2, Docker, etc.) restart
   // In development, keep running for debugging
-  if (isProduction) {
-    console.error('[FATAL] Exiting due to uncaught exception...');
+  if (isProduction()) {
     process.exit(1);
   }
 });
 
 // Handle unhandled promise rejections (async errors without .catch())
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Promise Rejection:');
-  console.error('Promise:', promise);
-  console.error('Reason:', reason);
-  
+  const error = reason instanceof Error ? reason : new Error(String(reason));
+  logError(error, { level: 'FATAL', event: 'unhandledRejection' });
+
   // In production, exit and let process manager restart
   // In development, keep running for debugging
-  if (isProduction) {
-    console.error('[FATAL] Exiting due to unhandled rejection...');
+  if (isProduction()) {
     process.exit(1);
   }
 });
