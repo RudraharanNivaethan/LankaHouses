@@ -16,7 +16,7 @@
 import { isDev } from '../utils/env';
 
 const DEV_DEFAULT  = 'http://localhost:3000/api';
-const PROD_DEFAULT = 'https://backend-production-5de3.up.railway.app/api';
+const PROD_DEFAULT = '/api';
 
 export const API_BASE_URL: string = isDev()
   ? (import.meta.env.VITE_API_BASE_URL_DEV  ?? DEV_DEFAULT)
