@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { seedPrivilegedUser } from './lib/seedPrivilegedUser.js';
+import { isProduction } from '../utils/env.js';
 
-if (process.env.NODE_ENV === 'production') {
+if (isProduction()) {
   console.error('❌ Admin seed must not run in production.');
   process.exit(1);
 }

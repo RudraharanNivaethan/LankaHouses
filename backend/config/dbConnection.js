@@ -10,15 +10,14 @@ const isProd = isProduction();
 const environment = isProd ? 'production' : 'development';
 
 // Select the appropriate MongoDB URI based on environment
-// Fallback to generic MONGODB_URI for backward compatibility
 const uri = isProd
-  ? (process.env.MONGODB_URI_PROD || process.env.MONGODB_URI)
-  : (process.env.MONGODB_URI_DEV  || process.env.MONGODB_URI);
+  ? process.env.MONGODB_URI_PROD
+  : process.env.MONGODB_URI_DEV;
 
 // Validate that a URI is available
 if (!uri) {
   const envVar = isProd ? 'MONGODB_URI_PROD' : 'MONGODB_URI_DEV';
-  throw new Error(`❌ ${envVar} (or MONGODB_URI) is missing. Check your .env file!`);
+  throw new Error(`❌ ${envVar} is missing. Check your .env file!`);
 }
 
 const connect = async () => {

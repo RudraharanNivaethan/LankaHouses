@@ -7,10 +7,11 @@ import { dirname, join } from 'path';
 import Property from '../models/Property.js';
 import connect from '../config/dbConnection.js';
 import { deleteImageByPublicId } from '../utils/cloudinary.js';
+import { isProduction } from '../utils/env.js';
 
 const RESEED = process.argv.includes('--reseed');
 
-if (process.env.NODE_ENV === 'production') {
+if (isProduction()) {
   console.error('❌ Property seed must not run in production.');
   process.exit(1);
 }

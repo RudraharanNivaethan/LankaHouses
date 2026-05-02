@@ -1,11 +1,19 @@
 import 'dotenv/config'; // automatically loads .env
 import connect from './config/dbConnection.js';
 import app from './app.js';
-import { isProduction } from './utils/env.js';
+import { isProduction, getEnvSuffix } from './utils/env.js';
 import { logError } from './utils/errorUtils.js';
 
-const HOST = isProduction() ? process.env.HOST_PROD : process.env.HOST_DEV;
-const PORT = isProduction() ? process.env.PORT_PROD : process.env.PORT_DEV;
+const env = getEnvSuffix();
+const HOST = process.env[`HOST_${env}`];
+const PORT = process.env[`PORT_${env}`];
+
+const missingBind = [];
+if (!HOST) missingBind.push(`HOST_${env}`);
+if (!PORT) missingBind.push(`PORT_${env}`);
+if (missingBind.length) {
+  throw new Error(`Missing server bind config: ${missingBind.join(', ')}. Check your .env file.`);
+}
 
 let server;
 
