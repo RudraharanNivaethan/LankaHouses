@@ -139,3 +139,11 @@ export const closeInquiry = async (inquiryId) => {
   await inquiry.save();
   return inquiry;
 };
+
+export const countInquiryStats = async () => {
+  const [totalInquiries, pendingInquiries] = await Promise.all([
+    Inquiry.countDocuments({}),
+    Inquiry.countDocuments({ status: 'PENDING' }),
+  ]);
+  return { totalInquiries, pendingInquiries };
+};

@@ -1,6 +1,7 @@
 import type {
   InquiryApiResponse,
   InquiriesListApiResponse,
+  InquiryStatsApiResponse,
   InquiryQueryParams,
   MyInquiryQueryParams,
   CreateInquiryPayload,
@@ -106,4 +107,11 @@ export async function closeInquiry(inquiryId: string): Promise<InquiryApiRespons
   const data = (await res.json()) as Record<string, unknown>
   if (!res.ok) throw new Error(extractErrorMessage(data))
   return data as unknown as InquiryApiResponse
+}
+
+export async function getAdminInquiryStats(): Promise<InquiryStatsApiResponse> {
+  const res = await fetch(`${ADMIN_API_BASE}/stats`, { credentials: 'include' })
+  const data = (await res.json()) as Record<string, unknown>
+  if (!res.ok) throw new Error(extractErrorMessage(data))
+  return data as unknown as InquiryStatsApiResponse
 }
