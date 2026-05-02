@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addPropertySchema } from '../schemas/property'
@@ -43,6 +43,15 @@ export function useUpdateProperty(
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null)
 
+  // Memoised to give react-hook-form a stable reference.
+  // A new object is only produced when `existing` itself changes (i.e. a
+  // different property is loaded), preventing unnecessary form resets while
+  // the user is editing.
+  const existingValues = useMemo(
+    () => (existing ? toFormValues(existing) : undefined),
+    [existing],
+  )
+
   const {
     register,
     handleSubmit,
@@ -53,21 +62,14 @@ export function useUpdateProperty(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod coerce input types are `unknown`, safe at runtime
   } = useForm<AddPropertySchema>({
     resolver: zodResolver(addPropertySchema) as any,
+    // `values` synchronously populates the form whenever `existingValues`
+    // changes, replacing the fragile useEffect+reset() pattern that had a
+    // timing gap in production React 18 concurrent mode.
+    values: existingValues,
+    // Do not overwrite fields the user has already edited (e.g. after an image
+    // refetch triggers a new `existing` reference for the same property).
+    resetOptions: { keepDirtyValues: true },
   })
-
-  const lastResetPropertyIdRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    if (!existing?._id) {
-      lastResetPropertyIdRef.current = null
-      return
-    }
-    if (lastResetPropertyIdRef.current === existing._id) {
-      return
-    }
-    lastResetPropertyIdRef.current = existing._id
-    reset(toFormValues(existing))
-  }, [existing, reset])
 
   const onSubmit = async (data: AddPropertySchema) => {
     if (!existing) return
