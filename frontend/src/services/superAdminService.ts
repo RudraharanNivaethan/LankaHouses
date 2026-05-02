@@ -7,8 +7,9 @@ import type {
   User,
   UserRole,
 } from '../types/auth'
+import { API_BASE_URL } from '../config/apiConfig'
 
-const API_BASE = '/api/superadmin'
+const API_BASE = `${API_BASE_URL}/superadmin`
 
 async function get<T>(url: string): Promise<T> {
   const res = await fetch(url, {

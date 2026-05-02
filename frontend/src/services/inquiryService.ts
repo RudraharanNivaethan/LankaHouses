@@ -7,9 +7,10 @@ import type {
   CreateInquiryPayload,
   AdminReplyPayload,
 } from '../types/inquiry'
+import { API_BASE_URL } from '../config/apiConfig'
 
-const USER_API_BASE  = '/api/inquiries'
-const ADMIN_API_BASE = '/api/admin/inquiries'
+const USER_API_BASE  = `${API_BASE_URL}/inquiries`
+const ADMIN_API_BASE = `${API_BASE_URL}/admin/inquiries`
 
 function extractErrorMessage(data: Record<string, unknown>): string {
   const msgs: string[] =

@@ -1,6 +1,7 @@
 import type { AuthApiResponse, MeApiResponse, User } from '../types/auth'
+import { API_BASE_URL } from '../config/apiConfig'
 
-const API_BASE = '/api/auth'
+const API_BASE = `${API_BASE_URL}/auth`
 
 // Backend validation errors shape: { success: false, error: string, errors?: string[] }
 // Backend controller errors shape:  { success: false, error: string }
