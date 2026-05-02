@@ -7,8 +7,9 @@ import type {
   PropertyStatus,
 } from '../types/property'
 import type { AddPropertySchema } from '../schemas/property'
+import { API_BASE_URL } from '../config/apiConfig'
 
-const API_BASE = '/api/property'
+const API_BASE = `${API_BASE_URL}/property`
 
 function extractErrorMessage(data: Record<string, unknown>): string {
   const msgs: string[] =

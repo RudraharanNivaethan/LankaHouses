@@ -1,6 +1,7 @@
 import type { User } from '../types/auth'
+import { API_BASE_URL } from '../config/apiConfig'
 
-const API_BASE = '/api/user'
+const API_BASE = `${API_BASE_URL}/user`
 
 interface UpdateProfilePayload {
   name?: string
