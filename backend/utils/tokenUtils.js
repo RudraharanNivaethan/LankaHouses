@@ -30,21 +30,21 @@ export const setAuthCookies = (res, accessToken, refreshToken) => {
   res.cookie('token', accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'strict',
+    sameSite: isProd ? 'none' : 'strict',
     maxAge: 15 * 60 * 1000 // 15 min
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'strict',
+    sameSite: isProd ? 'none' : 'strict',
     maxAge: 6 * 60 * 60 * 1000 // 6 hours
   });
 };
 
 export const clearAuthCookies = (res) => {
   const isProd = isProduction();
-  const options = { httpOnly: true, secure: isProd, sameSite: 'strict' };
+  const options = { httpOnly: true, secure: isProd, sameSite: isProd ? 'none' : 'strict' };
   res.clearCookie('token', options);
   res.clearCookie('refreshToken', options);
 };
