@@ -4,3 +4,6 @@
  * Unrecognised or missing NODE_ENV defaults to production (fail-safe).
  */
 export const isProduction = () => process.env.NODE_ENV === 'production';
+
+// Returns the suffix used for all environment-specific variable names.
+export const getEnvSuffix = () => isProduction() ? 'PROD' : 'DEV';

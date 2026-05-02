@@ -11,7 +11,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoSanitize from 'mongo-sanitize';
-import { isProduction } from './utils/env.js';
+import { isProduction, getEnvSuffix } from './utils/env.js';
 import {
   AppError,
   NotFoundError,
@@ -31,12 +31,9 @@ const app = express();
 app.use(morgan(isProduction() ? 'combined' : 'dev'));
 
 // CORS — active in both environments
-// Dev: allows FRONTEND_URL from .env with fallback to localhost:5173
-// Prod: requires FRONTEND_URL to be explicitly set, no fallback
+const FRONTEND_URL = process.env[`FRONTEND_URL_${getEnvSuffix()}`];
 const corsOptions = {
-  origin: isProduction()
-    ? process.env.FRONTEND_URL
-    : process.env.FRONTEND_URL,
+  origin: FRONTEND_URL,
   credentials: true,
   optionsSuccessStatus: 200
 };

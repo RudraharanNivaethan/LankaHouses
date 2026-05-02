@@ -1,6 +1,6 @@
-import { isProduction } from '../utils/env.js';
+import { getEnvSuffix } from '../utils/env.js';
 
-const env = isProduction() ? 'PROD' : 'DEV';
+const env = getEnvSuffix();
 
 export const CUSTOMER_JWT_SECRET         = process.env[`CUSTOMER_JWT_SECRET_${env}`];
 export const CUSTOMER_REFRESH_JWT_SECRET = process.env[`CUSTOMER_REFRESH_JWT_SECRET_${env}`];
